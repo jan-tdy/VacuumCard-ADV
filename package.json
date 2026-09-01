@@ -1,0 +1,28 @@
+{
+  "name": "vacuum-card-adv",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A Home Assistant Lovelace card for the TapoVac-ADV integration (Tapo RV30/RV50 series)",
+  "license": "MIT",
+  "author": "jan-tdy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jan-tdy/VacuumCard-ADV"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lit": "^3.2.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.24.0",
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.3"
+  }
+}
