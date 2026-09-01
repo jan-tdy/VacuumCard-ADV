@@ -2,6 +2,7 @@ import { LitElement, html, css, PropertyValues, TemplateResult, nothing } from "
 import { customElement, property, state, query } from "lit/decorators.js";
 import {
   HomeAssistant,
+  HassEntity,
   VacuumCardConfig,
   RoomGeometry,
   RoomGeometryRoom,
@@ -15,8 +16,8 @@ import "./vacuum-card-adv-editor";
 // eslint-disable-next-line no-console
 console.info(
   `%c VACUUM-CARD-ADV %c v${CARD_VERSION} `,
-  "color: white; background: #03a9f4; font-weight: 700;",
-  "color: #03a9f4; background: white; font-weight: 700;"
+  "color: #0b0f14; background: #34e0d6; font-weight: 700;",
+  "color: #34e0d6; background: #0b0f14; font-weight: 700;"
 );
 
 window.customCards = window.customCards || [];
@@ -26,6 +27,15 @@ window.customCards.push({
   description: "A card for the TapoVac-ADV integration (Tapo RV30/RV50 series).",
   preview: true,
 });
+
+interface RowOptions {
+  icon: string;
+  title: string;
+  value: string;
+  percent?: number;
+  gaugeColor?: string;
+  overdue?: boolean;
+}
 
 @customElement("vacuum-card-adv")
 export class VacuumCardAdv extends LitElement {
@@ -103,13 +113,24 @@ export class VacuumCardAdv extends LitElement {
     return geo && geo.rooms ? geo : undefined;
   }
 
+  /** Every entity on this device gets "<Device Name> <Thing>" as its
+   *  friendly_name by Home Assistant convention — fine in the entity list,
+   *  redundant repeated on every single row of a card that's already about
+   *  that one device. Strips it back to just "<Thing>" when present. */
+  private _shortTitle(fullName: string): string {
+    const vacuum = this.hass.states[this._config.vacuum];
+    const deviceName = vacuum?.attributes["friendly_name"] as string | undefined;
+    if (deviceName && fullName.startsWith(`${deviceName} `)) {
+      return fullName.slice(deviceName.length + 1);
+    }
+    return fullName;
+  }
+
   protected render(): TemplateResult | typeof nothing {
     if (!this._config || !this.hass) return nothing;
     const vacuum = this.hass.states[this._config.vacuum];
     if (!vacuum) {
-      return html`<ha-card
-        ><div class="warning">Entity not found: ${this._config.vacuum}</div></ha-card
-      >`;
+      return html`<ha-card><div class="warning">Entity not found: ${this._config.vacuum}</div></ha-card>`;
     }
 
     const name = this._config.name ?? vacuum.attributes["friendly_name"] ?? "Vacuum";
@@ -118,11 +139,14 @@ export class VacuumCardAdv extends LitElement {
     return html`
       <ha-card>
         <div class="header">
-          <div class="name">${name}</div>
-          <div class="status">${status}</div>
+          <ha-icon class="header-icon" icon="mdi:robot-vacuum"></ha-icon>
+          <div class="header-text">
+            <div class="name">${name}</div>
+            <div class="status">${status}</div>
+          </div>
         </div>
+        ${(this._config.show_controls ?? true) ? this._renderControls(vacuum) : nothing}
         ${(this._config.show_map ?? true) ? this._renderMap() : nothing}
-        ${(this._config.show_controls ?? true) ? this._renderControls() : nothing}
         ${(this._config.show_dock_actions ?? true) ? this._renderDockActions() : nothing}
         ${this._renderSelects()}
         ${(this._config.show_battery ?? true) ? this._renderBattery() : nothing}
@@ -132,6 +156,32 @@ export class VacuumCardAdv extends LitElement {
     `;
   }
 
+  // -- Controls --------------------------------------------------------------
+  private _renderControls(vacuum: HassEntity): TemplateResult {
+    const cleaning = vacuum.state === "cleaning";
+    return html`
+      <div class="section controls">
+        <button class="pill" @click=${() => this._callVacuumService(cleaning ? "pause" : "start")}>
+          <ha-icon icon=${cleaning ? "mdi:pause" : "mdi:play"}></ha-icon>
+          <span>${cleaning ? "Pause" : "Start"}</span>
+        </button>
+        <button class="pill" @click=${() => this._callVacuumService("stop")}>
+          <ha-icon icon="mdi:stop"></ha-icon>
+          <span>Stop</span>
+        </button>
+        <button class="pill" @click=${() => this._callVacuumService("clean_spot")}>
+          <ha-icon icon="mdi:target-variant"></ha-icon>
+          <span>Spot</span>
+        </button>
+        <button class="pill accent" @click=${() => this._callVacuumService("return_to_base")}>
+          <ha-icon icon="mdi:home-import-outline"></ha-icon>
+          <span>Dock</span>
+        </button>
+      </div>
+    `;
+  }
+
+  // -- Map ---------------------------------------------------------------
   private _renderMap(): TemplateResult | typeof nothing {
     const cameraId = this._config.camera ?? this._discovered.camera;
     if (!cameraId) return nothing;
@@ -144,17 +194,26 @@ export class VacuumCardAdv extends LitElement {
     const rotStyle = rotation % 360 !== 0 ? `transform: rotate(${rotation}deg);` : "";
 
     return html`
-      <div class="map-wrap">
-        <img
-          class="map-image"
-          src=${picture}
-          style=${rotStyle}
-          @click=${this._onMapClick}
-          @load=${() => this.requestUpdate()}
-        />
-        ${geo ? this._renderMapOverlay(geo, rotStyle) : nothing}
+      <div class="section map-section">
+        <div class="map-wrap">
+          <img
+            class="map-image"
+            src=${picture}
+            style=${rotStyle}
+            @click=${this._onMapClick}
+            @load=${() => this.requestUpdate()}
+          />
+          ${geo ? this._renderMapOverlay(geo, rotStyle) : nothing}
+        </div>
+        ${!geo
+          ? html`<div class="map-hint">
+              Room click-to-select needs TapoVac-ADV v1.12+ (the map camera's
+              <code>room_geometry</code> attribute) — update the integration via HACS, restart Home
+              Assistant, then hard-refresh this browser tab.
+            </div>`
+          : nothing}
+        ${this._selectedRoomIds.size > 0 ? this._renderSelectedRoomsBar(geo) : nothing}
       </div>
-      ${this._selectedRoomIds.size > 0 ? this._renderSelectedRoomsBar(geo) : nothing}
     `;
   }
 
@@ -179,12 +238,7 @@ export class VacuumCardAdv extends LitElement {
     const stroke = selected ? `rgb(${r},${g},${b})` : "transparent";
     if (polygon && polygon.length >= 3) {
       const points = polygon.map(([x, y]) => `${x},${y}`).join(" ");
-      return html`<polygon
-        points=${points}
-        fill=${fill}
-        stroke=${stroke}
-        stroke-width="3"
-      ></polygon>`;
+      return html`<polygon points=${points} fill=${fill} stroke=${stroke} stroke-width="3"></polygon>`;
     }
     const [x0, y0, x1, y1] = room.bbox;
     return html`<rect
@@ -205,21 +259,33 @@ export class VacuumCardAdv extends LitElement {
     return html`
       <div class="selected-rooms-bar">
         <span>${(this._config.show_room_names ?? true) ? names.join(", ") : `${names.length} room(s)`}</span>
-        <mwc-button @click=${this._cleanSelectedRooms} ?disabled=${this._busy}>
-          Clean
-        </mwc-button>
-        <mwc-button @click=${() => (this._selectedRoomIds = new Set())}>Clear</mwc-button>
+        <button class="pill accent small" @click=${this._cleanSelectedRooms} ?disabled=${this._busy}>
+          <ha-icon icon="mdi:broom"></ha-icon><span>Clean</span>
+        </button>
+        <button class="pill small" @click=${() => (this._selectedRoomIds = new Set())}>
+          <ha-icon icon="mdi:close"></ha-icon><span>Clear</span>
+        </button>
       </div>
     `;
   }
 
   private _onMapClick(evt: MouseEvent): void {
     const geo = this._roomGeometry;
-    if (!geo || !this._mapImg) return;
+    if (!geo || !this._mapImg) {
+      // eslint-disable-next-line no-console
+      console.debug(
+        "[vacuum-card-adv] map click ignored: room_geometry not available on the camera entity yet"
+      );
+      return;
+    }
     const rotation = this._config.map_rotation ?? DEFAULT_MAP_ROTATION;
     const point = displayToNatural(evt.clientX, evt.clientY, this._mapImg, rotation);
     const roomId = resolveRoomAtPoint(point, geo, this._config.room_polygons);
-    if (roomId === null) return;
+    if (roomId === null) {
+      // eslint-disable-next-line no-console
+      console.debug("[vacuum-card-adv] map click did not land inside any known room", point);
+      return;
+    }
     const next = new Set(this._selectedRoomIds);
     if (next.has(roomId)) next.delete(roomId);
     else next.add(roomId);
@@ -245,47 +311,24 @@ export class VacuumCardAdv extends LitElement {
     }
   }
 
-  private _renderControls(): TemplateResult {
-    const vacuum = this.hass.states[this._config.vacuum];
-    const cleaning = vacuum.state === "cleaning";
-    return html`
-      <div class="controls">
-        <ha-icon-button
-          .path=${cleaning ? PAUSE_PATH : PLAY_PATH}
-          @click=${() => this._callVacuumService(cleaning ? "pause" : "start")}
-        ></ha-icon-button>
-        <ha-icon-button .path=${STOP_PATH} @click=${() => this._callVacuumService("stop")}></ha-icon-button>
-        <ha-icon-button
-          .path=${SPOT_PATH}
-          @click=${() => this._callVacuumService("clean_spot")}
-        ></ha-icon-button>
-        <ha-icon-button
-          .path=${HOME_PATH}
-          @click=${() => this._callVacuumService("return_to_base")}
-        ></ha-icon-button>
-      </div>
-    `;
-  }
-
+  // -- Dock actions ------------------------------------------------------
   private _renderDockActions(): TemplateResult | typeof nothing {
     if (this._discovered.dockActions.length === 0) return nothing;
     return html`
-      <div class="dock-actions">
+      <div class="section dock-actions">
         ${this._discovered.dockActions.map(
           (action) => html`
-            <mwc-button
-              icon=${action.icon}
-              @click=${() => this._pressButton(action.entityId)}
-              title=${action.name}
-            >
-              ${action.name}
-            </mwc-button>
+            <button class="pill" @click=${() => this._pressButton(action.entityId)}>
+              <ha-icon icon=${action.icon}></ha-icon>
+              <span>${action.name}</span>
+            </button>
           `
         )}
       </div>
     `;
   }
 
+  // -- Selects -------------------------------------------------------------
   private _renderSelects(): TemplateResult | typeof nothing {
     const vacuum = this.hass.states[this._config.vacuum];
     const showFan = this._config.show_fan_speed ?? true;
@@ -295,16 +338,17 @@ export class VacuumCardAdv extends LitElement {
     const waterEntityId = this._config.water_level_entity ?? this._discovered.waterLevel;
     const waterEntity = waterEntityId ? this.hass.states[waterEntityId] : undefined;
 
-    if (!showFan && !showWater) return nothing;
+    if (!(showFan && fanSpeedList.length > 0) && !(showWater && waterEntity)) return nothing;
 
     return html`
-      <div class="selects">
+      <div class="section selects">
         ${showFan && fanSpeedList.length > 0
           ? html`
               <ha-select
                 label="Fan speed"
                 .value=${fanSpeed ?? ""}
-                @selected=${(e: CustomEvent) => this._setFanSpeed((e.target as unknown as { value: string }).value)}
+                @selected=${(e: CustomEvent) =>
+                  this._setFanSpeed((e.target as unknown as { value: string }).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
                 ${fanSpeedList.map((opt) => html`<mwc-list-item .value=${opt}>${opt}</mwc-list-item>`)}
@@ -330,6 +374,25 @@ export class VacuumCardAdv extends LitElement {
     `;
   }
 
+  // -- Battery / sensors — slim inline rows, not boxed tiles -----------------
+  private _renderRow(opts: RowOptions): TemplateResult {
+    const hasGauge = opts.percent !== undefined && !Number.isNaN(opts.percent);
+    return html`
+      <div class="info-row ${opts.overdue ? "overdue" : ""}">
+        <ha-icon icon=${opts.icon}></ha-icon>
+        <span class="info-label">${opts.title}</span>
+        ${hasGauge
+          ? html`<span
+              class="info-bar"
+              style="--pct:${Math.max(0, Math.min(100, opts.percent as number))}%; --color:${opts.gaugeColor ??
+              "var(--primary-color)"}"
+            ></span>`
+          : nothing}
+        <span class="info-value">${opts.value}</span>
+      </div>
+    `;
+  }
+
   private _renderBattery(): TemplateResult | typeof nothing {
     const batteryId = this._config.battery_entity ?? this._discovered.battery;
     if (!batteryId) return nothing;
@@ -337,9 +400,14 @@ export class VacuumCardAdv extends LitElement {
     if (!battery) return nothing;
     const value = Number(battery.state);
     return html`
-      <div class="battery">
-        <ha-icon icon=${this._batteryIcon(value)}></ha-icon>
-        <span>${battery.state}%</span>
+      <div class="section sensors">
+        ${this._renderRow({
+          icon: this._batteryIcon(value),
+          title: this._shortTitle((battery.attributes["friendly_name"] as string) ?? "Battery"),
+          value: `${battery.state}%`,
+          percent: value,
+          gaugeColor: this._batteryColor(value),
+        })}
       </div>
     `;
   }
@@ -352,52 +420,48 @@ export class VacuumCardAdv extends LitElement {
     return `mdi:battery-${step}`;
   }
 
+  private _batteryColor(value: number): string {
+    if (Number.isNaN(value)) return "var(--disabled-text-color)";
+    if (value <= 20) return "var(--error-color)";
+    if (value <= 50) return "var(--warning-color)";
+    return "var(--success-color)";
+  }
+
   private _renderSensors(): TemplateResult | typeof nothing {
     const ids = this._config.sensors ?? this._discovered.sensors;
     if (!ids || ids.length === 0) return nothing;
-    return html`
-      <div class="sensors">
-        ${ids.map((id) => {
-          const s = this.hass.states[id];
-          if (!s) return nothing;
-          const label = s.attributes["friendly_name"] ?? id;
-          return html`
-            <div class="sensor-row">
-              <span class="sensor-label">${label}</span>
-              <span class="sensor-value">${s.state}${s.attributes["unit_of_measurement"] ?? ""}</span>
-            </div>
-          `;
-        })}
-      </div>
-    `;
+    return html`<div class="section sensors">${ids.map((id) => this._renderSensorRow(id))}</div>`;
+  }
+
+  private _renderSensorRow(id: string): TemplateResult | typeof nothing {
+    const s = this.hass.states[id];
+    if (!s) return nothing;
+    const title = this._shortTitle((s.attributes["friendly_name"] as string) ?? s.entity_id);
+    const unit = (s.attributes["unit_of_measurement"] as string) ?? "";
+    const icon = (s.attributes["icon"] as string) ?? "mdi:information-outline";
+    const isPercent = unit === "%";
+    const percent = isPercent ? Number(s.state) : undefined;
+    return this._renderRow({
+      icon,
+      title,
+      value: `${s.state}${unit}`,
+      percent: percent !== undefined && !Number.isNaN(percent) ? percent : undefined,
+      overdue: !!s.attributes["overdue"],
+    });
   }
 
   private _renderMaintenance(): TemplateResult | typeof nothing {
     const ids = this._config.maintenance_sensors ?? this._discovered.maintenanceSensors;
     if (!ids || ids.length === 0) return nothing;
     return html`
-      <div class="maintenance">
+      <div class="section">
         <button class="maintenance-toggle" @click=${() => (this._maintenanceOpen = !this._maintenanceOpen)}>
+          <ha-icon icon="mdi:wrench"></ha-icon>
+          <span>Maintenance</span>
           <ha-icon icon=${this._maintenanceOpen ? "mdi:chevron-up" : "mdi:chevron-down"}></ha-icon>
-          Maintenance
         </button>
         ${this._maintenanceOpen
-          ? html`
-              <div class="sensors">
-                ${ids.map((id) => {
-                  const s = this.hass.states[id];
-                  if (!s) return nothing;
-                  const label = s.attributes["friendly_name"] ?? id;
-                  const overdue = !!s.attributes["overdue"];
-                  return html`
-                    <div class="sensor-row ${overdue ? "overdue" : ""}">
-                      <span class="sensor-label">${label}</span>
-                      <span class="sensor-value">${s.state}${s.attributes["unit_of_measurement"] ?? ""}</span>
-                    </div>
-                  `;
-                })}
-              </div>
-            `
+          ? html`<div class="sensors">${ids.map((id) => this._renderSensorRow(id))}</div>`
           : nothing}
       </div>
     `;
@@ -427,36 +491,99 @@ export class VacuumCardAdv extends LitElement {
   static styles = css`
     :host {
       display: block;
+      --vc-accent: var(--primary-color);
     }
     ha-card {
-      padding: 16px;
+      padding: 14px 16px 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 2px;
     }
     .warning {
       color: var(--error-color);
+      padding: 16px;
+    }
+    .section {
+      padding: 10px 0;
+      border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.2));
+    }
+    .section:first-of-type {
+      border-top: none;
     }
     .header {
       display: flex;
-      justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 8px;
+    }
+    .header-icon {
+      color: var(--vc-accent);
+      --mdc-icon-size: 26px;
+    }
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
     }
     .name {
-      font-size: 1.2em;
-      font-weight: 500;
+      font-size: 1.05em;
+      font-weight: 600;
+      letter-spacing: 0.01em;
       color: var(--primary-text-color);
     }
     .status {
+      font-size: 0.85em;
       color: var(--secondary-text-color);
-      text-transform: capitalize;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
+
+    /* Pill buttons — icon + visible label, so nobody has to guess what a
+       bare icon does. */
+    .controls,
+    .dock-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1 1 auto;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+      background: transparent;
+      color: var(--primary-text-color);
+      font: inherit;
+      font-size: 0.82em;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    .pill:hover {
+      border-color: var(--vc-accent);
+      color: var(--vc-accent);
+    }
+    .pill ha-icon {
+      --mdc-icon-size: 18px;
+    }
+    .pill.accent {
+      border-color: var(--vc-accent);
+      color: var(--vc-accent);
+    }
+    .pill.small {
+      padding: 4px 10px;
+      flex: 0 0 auto;
+    }
+
+    /* Map */
     .map-wrap {
       position: relative;
       width: 100%;
       overflow: hidden;
-      border-radius: var(--ha-card-border-radius, 12px);
-      background: var(--card-background-color);
+      border-radius: 8px;
     }
     .map-image {
       display: block;
@@ -471,72 +598,107 @@ export class VacuumCardAdv extends LitElement {
       height: 100%;
       pointer-events: none;
     }
+    .map-hint {
+      margin-top: 6px;
+      font-size: 0.78em;
+      color: var(--secondary-text-color);
+      line-height: 1.4;
+    }
+    .map-hint code {
+      background: var(--secondary-background-color, rgba(127, 127, 127, 0.15));
+      border-radius: 4px;
+      padding: 0 4px;
+    }
     .selected-rooms-bar {
       display: flex;
       align-items: center;
       gap: 8px;
       justify-content: space-between;
-      font-size: 0.9em;
+      font-size: 0.85em;
       color: var(--secondary-text-color);
+      margin-top: 8px;
     }
-    .controls,
-    .dock-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      justify-content: space-around;
-    }
+
+    /* Selects */
     .selects {
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
     }
     .selects ha-select {
       flex: 1;
-      min-width: 120px;
+      min-width: 100px;
     }
-    .battery {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--secondary-text-color);
-    }
+
+    /* Info rows: icon, label, thin glow gauge, monospace value — flat, not
+       boxed, so a list of sensors reads as one compact panel. */
     .sensors {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
-    .sensor-row {
+    .info-row {
       display: flex;
-      justify-content: space-between;
-      font-size: 0.9em;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85em;
     }
-    .sensor-row.overdue .sensor-value {
+    .info-row ha-icon {
+      --mdc-icon-size: 18px;
+      color: var(--secondary-text-color);
+      flex: 0 0 auto;
+    }
+    .info-label {
+      color: var(--secondary-text-color);
+      flex: 0 1 auto;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .info-bar {
+      flex: 1 1 auto;
+      height: 4px;
+      min-width: 24px;
+      border-radius: 2px;
+      background: var(--secondary-background-color, rgba(127, 127, 127, 0.2));
+      position: relative;
+      overflow: hidden;
+    }
+    .info-bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: var(--pct, 0%);
+      background: var(--color, var(--vc-accent));
+      border-radius: 2px;
+      box-shadow: 0 0 6px 0 var(--color, var(--vc-accent));
+    }
+    .info-value {
+      flex: 0 0 auto;
+      font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--primary-text-color);
+      min-width: 2.5em;
+      text-align: right;
+    }
+    .info-row.overdue .info-value {
       color: var(--error-color);
       font-weight: 600;
     }
-    .sensor-label {
-      color: var(--secondary-text-color);
-    }
+
     .maintenance-toggle {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       background: none;
       border: none;
-      color: var(--primary-text-color);
+      color: var(--secondary-text-color);
       font: inherit;
+      font-size: 0.85em;
       cursor: pointer;
-      padding: 4px 0;
+      padding: 0 0 8px;
+      width: 100%;
+    }
+    .maintenance-toggle ha-icon:last-child {
+      margin-left: auto;
     }
   `;
 }
-
-// mdi path data for the primary control icons — kept local so this card
-// doesn't need to pull in an icon font just for four glyphs.
-const PLAY_PATH = "M8,5.14V19.14L19,12.14L8,5.14Z";
-const PAUSE_PATH = "M14,19H18V5H14M6,19H10V5H6V19Z";
-const STOP_PATH = "M18,18H6V6H18V18Z";
-const HOME_PATH = "M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z";
-const SPOT_PATH =
-  "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z";
