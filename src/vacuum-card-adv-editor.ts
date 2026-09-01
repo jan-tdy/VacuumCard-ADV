@@ -35,6 +35,13 @@ export class VacuumCardAdvEditor extends LitElement {
   }
 
   private _valueChanged(key: keyof VacuumCardConfig, value: unknown): void {
+    // ha-select (and mwc-select under it) can re-fire "selected" when its
+    // .value is set *programmatically* — which is exactly what happens
+    // here on every re-render after config-changed updates this._config.
+    // Without this guard that becomes an infinite loop: selected fires →
+    // config-changed → re-render → .value assigned → selected fires again
+    // → ... — freezing the editor (and the live preview card with it).
+    if (this._config[key] === value) return;
     this._fireConfigChanged({ ...this._config, [key]: value });
   }
 
@@ -184,7 +191,11 @@ export class VacuumCardAdvEditor extends LitElement {
                 .value=${this._calibrationRoomId !== undefined ? String(this._calibrationRoomId) : ""}
                 @selected=${(e: CustomEvent) => {
                   const id = Number((e.target as unknown as { value: string }).value);
-                  this._calibrationRoomId = Number.isNaN(id) ? undefined : id;
+                  const next = Number.isNaN(id) ? undefined : id;
+                  // Same re-fire-on-programmatic-.value risk as elsewhere
+                  // in this editor — see the guard in _valueChanged.
+                  if (next === this._calibrationRoomId) return;
+                  this._calibrationRoomId = next;
                   this._calibrationPoints = [];
                 }}
                 @closed=${(e: Event) => e.stopPropagation()}
@@ -326,6 +337,7 @@ export class VacuumCardAdvEditor extends LitElement {
       gap: 8px;
       flex-wrap: wrap;
     }
+    .map-layout ha-textfield,
     .map-layout ha-select {
       flex: 1;
       min-width: 160px;

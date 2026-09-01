@@ -205,13 +205,7 @@ export class VacuumCardAdv extends LitElement {
     return html`
       <div class="section map-section">
         <div class="map-wrap">
-          <img
-            class="map-image"
-            src=${picture}
-            style=${rotStyle}
-            @click=${this._onMapClick}
-            @load=${() => this.requestUpdate()}
-          />
+          <img class="map-image" src=${picture} style=${rotStyle} @click=${this._onMapClick} />
           ${geo ? this._renderMapOverlay(geo, rotStyle) : nothing}
         </div>
         ${!geo
@@ -356,8 +350,15 @@ export class VacuumCardAdv extends LitElement {
               <ha-select
                 label="Fan speed"
                 .value=${fanSpeed ?? ""}
-                @selected=${(e: CustomEvent) =>
-                  this._setFanSpeed((e.target as unknown as { value: string }).value)}
+                @selected=${(e: CustomEvent) => {
+                  const next = (e.target as unknown as { value: string }).value;
+                  // ha-select can re-fire "selected" when .value is set
+                  // programmatically (e.g. every hass update re-applying
+                  // the current fan_speed) — skip re-issuing the same
+                  // service call when nothing actually changed.
+                  if (next === (fanSpeed ?? "")) return;
+                  this._setFanSpeed(next);
+                }}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
                 ${fanSpeedList.map((opt) => html`<mwc-list-item .value=${opt}>${opt}</mwc-list-item>`)}
@@ -369,8 +370,11 @@ export class VacuumCardAdv extends LitElement {
               <ha-select
                 label="Water level"
                 .value=${waterEntity.state}
-                @selected=${(e: CustomEvent) =>
-                  this._selectOption(waterEntityId as string, (e.target as unknown as { value: string }).value)}
+                @selected=${(e: CustomEvent) => {
+                  const next = (e.target as unknown as { value: string }).value;
+                  if (next === waterEntity.state) return;
+                  this._selectOption(waterEntityId as string, next);
+                }}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
                 ${(waterEntity.attributes["options"] as string[] | undefined ?? []).map(
