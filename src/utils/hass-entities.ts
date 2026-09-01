@@ -13,6 +13,12 @@ interface RegistryEntity {
   original_name?: string | null;
 }
 
+// Sensors that exist on every device but aren't worth a row by default:
+// a raw schedules count isn't actionable at a glance, and status already
+// shows in the card's own header. Still addable via the `sensors` config
+// override.
+const LOW_VALUE_DEFAULT_SENSORS = ["schedules", "status"];
+
 function registry(hass: HomeAssistant): Record<string, RegistryEntity> | undefined {
   return (hass as unknown as { entities?: Record<string, RegistryEntity> }).entities;
 }
@@ -77,6 +83,11 @@ export function discoverEntities(hass: HomeAssistant, vacuumEntityId: string): D
     }
     const name = friendlyName(hass, id).toLowerCase();
     if (name.includes("remaining")) result.maintenanceSensors.push(id);
+    // Left out of the *default* list, not hidden entirely: a raw
+    // schedules count isn't useful at a glance, and status is already
+    // shown in the card's own header — both can still be added back via
+    // the `sensors` config override for anyone who wants them.
+    else if (LOW_VALUE_DEFAULT_SENSORS.some((suffix) => name.endsWith(suffix))) continue;
     else result.sensors.push(id);
   }
 
