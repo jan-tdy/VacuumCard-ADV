@@ -6,6 +6,11 @@ RV30 / RV50 series). UI-editable through Home Assistant's own card
 editor — not YAML-only, though YAML is always available too via the
 editor's own "Show code editor" toggle.
 
+## Screenshot
+
+<img width="324" height="635" alt="image" src="https://github.com/user-attachments/assets/452c94a9-1c86-4197-893f-c92365ccbdcc" />
+
+
 ## Features
 
 - Header with name and status
