@@ -41,7 +41,7 @@ const lt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */const mt=[{name:"Empty Dust Bin",icon:"mdi:delete-empty"},{name:"Wash Mop",icon:"mdi:water-sync"},{name:"Dry Mop",icon:"mdi:tumble-dryer"},{name:"Remove Hair",icon:"mdi:content-cut"}],_t=["schedules","status"];function ft(t){return t.entities}function vt(t,e){const i=ft(t)?.[e];if(i?.name)return i.name;if(i?.original_name)return i.original_name;const s=t.states[e],o=s?.attributes?.friendly_name;return"string"==typeof o?o:e}function gt(t,e){return t.filter(t=>t.startsWith(`${e}.`))}function $t(t,e){const i=function(t,e){const i=ft(t);if(!i)return[];const s=i[e]?.device_id;return s?Object.keys(i).filter(t=>i[t]?.device_id===s):[]}(t,e),s={dockActions:[],sensors:[],maintenanceSensors:[]};if(0===i.length)return s;s.camera=gt(i,"camera")[0];for(const e of gt(i,"select")){const i=vt(t,e);i.includes("Water Level")?s.waterLevel=e:i.includes("Clean Passes")&&(s.cleanPasses=e)}for(const e of gt(i,"sensor")){const i=t.states[e];if("battery"===i?.attributes?.device_class){s.battery=e;continue}const o=vt(t,e).toLowerCase();if(o.includes("remaining"))s.maintenanceSensors.push(e);else{if(_t.some(t=>o.endsWith(t)))continue;s.sensors.push(e)}}for(const e of gt(i,"binary_sensor"))vt(t,e).toLowerCase().includes("mop")&&(s.mopAttached=e);for(const e of gt(i,"button")){const i=vt(t,e),o=mt.find(t=>t.name===i);o&&s.dockActions.push({entityId:e,name:o.name,icon:o.icon})}return s}function yt(t,e,i,s){const o=i.getBoundingClientRect(),n=o.left+o.width/2,r=o.top+o.height/2,a=i.offsetWidth||o.width,c=i.offsetHeight||o.height;let l=t-n,h=e-r;if(s%360!=0){const t=-s*Math.PI/180,e=Math.cos(t),i=Math.sin(t),o=l*i+h*e;l=l*e-h*i,h=o}const d=h+c/2;return{x:(l+a/2)*(i.naturalWidth/a),y:d*(i.naturalHeight/c)}}function bt(t,e){return t.x>=e[0]&&t.x<=e[2]&&t.y>=e[1]&&t.y<=e[3]}function wt(t,e){let i=!1;for(let s=0,o=e.length-1;s<e.length;o=s++){const[n,r]=e[s],[a,c]=e[o];r>t.y!=c>t.y&&t.x<(a-n)*(t.y-r)/(c-r)+n&&(i=!i)}return i}function xt(t,e,i){const s=t.x-e,o=t.y-i;return s*s+o*o}let At=class extends at{constructor(){super(...arguments),this._calibrationPoints=[]}setConfig(t){this._config=t}_fireConfigChanged(t){this._config=t,this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:t},bubbles:!0,composed:!0}))}_valueChanged(t,e){this._fireConfigChanged({...this._config,[t]:e})}get _cameraId(){if(this._config?.vacuum)return this._config.camera??$t(this.hass,this._config.vacuum).camera}get _roomGeometry(){const t=this._cameraId;if(!t)return;const e=this.hass.states[t]?.attributes?.room_geometry;return e&&e.rooms?.length?e:void 0}render(){return this.hass&&this._config?L`
+ */const mt=[{name:"Empty Dust Bin",icon:"mdi:delete-empty"},{name:"Wash Mop",icon:"mdi:water-sync"},{name:"Dry Mop",icon:"mdi:tumble-dryer"},{name:"Remove Hair",icon:"mdi:content-cut"}],_t=["schedules","status"];function ft(t){return t.entities}function vt(t,e){const i=ft(t)?.[e];if(i?.name)return i.name;if(i?.original_name)return i.original_name;const s=t.states[e],o=s?.attributes?.friendly_name;return"string"==typeof o?o:e}function gt(t,e){return t.filter(t=>t.startsWith(`${e}.`))}function $t(t,e){const i=function(t,e){const i=ft(t);if(!i)return[];const s=i[e]?.device_id;return s?Object.keys(i).filter(t=>i[t]?.device_id===s):[]}(t,e),s={dockActions:[],sensors:[],maintenanceSensors:[]};if(0===i.length)return s;s.camera=gt(i,"camera")[0];for(const e of gt(i,"select")){const i=vt(t,e);i.includes("Water Level")?s.waterLevel=e:i.includes("Clean Passes")&&(s.cleanPasses=e)}for(const e of gt(i,"sensor")){const i=t.states[e];if("battery"===i?.attributes?.device_class){s.battery=e;continue}const o=vt(t,e).toLowerCase();if(o.includes("remaining"))s.maintenanceSensors.push(e);else{if(_t.some(t=>o.endsWith(t)))continue;s.sensors.push(e)}}for(const e of gt(i,"binary_sensor"))vt(t,e).toLowerCase().includes("mop")&&(s.mopAttached=e);for(const e of gt(i,"button")){const i=vt(t,e),o=mt.find(t=>t.name===i);o&&s.dockActions.push({entityId:e,name:o.name,icon:o.icon})}return s}function yt(t,e,i,s){const o=i.getBoundingClientRect(),n=o.left+o.width/2,r=o.top+o.height/2,a=i.offsetWidth||o.width,c=i.offsetHeight||o.height;let l=t-n,h=e-r;if(s%360!=0){const t=-s*Math.PI/180,e=Math.cos(t),i=Math.sin(t),o=l*i+h*e;l=l*e-h*i,h=o}const d=h+c/2;return{x:(l+a/2)*(i.naturalWidth/a),y:d*(i.naturalHeight/c)}}function bt(t,e){return t.x>=e[0]&&t.x<=e[2]&&t.y>=e[1]&&t.y<=e[3]}function wt(t,e){let i=!1;for(let s=0,o=e.length-1;s<e.length;o=s++){const[n,r]=e[s],[a,c]=e[o];r>t.y!=c>t.y&&t.x<(a-n)*(t.y-r)/(c-r)+n&&(i=!i)}return i}function xt(t,e,i){const s=t.x-e,o=t.y-i;return s*s+o*o}let At=class extends at{constructor(){super(...arguments),this._calibrationPoints=[]}setConfig(t){this._config=t}_fireConfigChanged(t){this._config=t,this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:t},bubbles:!0,composed:!0}))}_valueChanged(t,e){this._config[t]!==e&&this._fireConfigChanged({...this._config,[t]:e})}get _cameraId(){if(this._config?.vacuum)return this._config.camera??$t(this.hass,this._config.vacuum).camera}get _roomGeometry(){const t=this._cameraId;if(!t)return;const e=this.hass.states[t]?.attributes?.room_geometry;return e&&e.rooms?.length?e:void 0}render(){return this.hass&&this._config?L`
       <div class="section">
         <ha-entity-picker
           .hass=${this.hass}
@@ -129,7 +129,7 @@ const lt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
               <ha-select
                 label="Room to calibrate"
                 .value=${void 0!==this._calibrationRoomId?String(this._calibrationRoomId):""}
-                @selected=${t=>{const e=Number(t.target.value);this._calibrationRoomId=Number.isNaN(e)?void 0:e,this._calibrationPoints=[]}}
+                @selected=${t=>{const e=Number(t.target.value),i=Number.isNaN(e)?void 0:e;i!==this._calibrationRoomId&&(this._calibrationRoomId=i,this._calibrationPoints=[])}}
                 @closed=${t=>t.stopPropagation()}
               >
                 ${t.rooms.map(t=>L`<mwc-list-item .value=${String(t.id)}>${t.name}</mwc-list-item>`)}
@@ -211,6 +211,7 @@ const lt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
       gap: 8px;
       flex-wrap: wrap;
     }
+    .map-layout ha-textfield,
     .map-layout ha-select {
       flex: 1;
       min-width: 160px;
@@ -241,7 +242,7 @@ const lt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
       gap: 8px;
       flex-wrap: wrap;
     }
-  `,t([pt({attribute:!1})],At.prototype,"hass",void 0),t([ut()],At.prototype,"_config",void 0),t([ut()],At.prototype,"_calibrationRoomId",void 0),t([ut()],At.prototype,"_calibrationPoints",void 0),At=t([lt("vacuum-card-adv-editor")],At),console.info("%c VACUUM-CARD-ADV %c v0.4.0 ","color: #0b0f14; background: #34e0d6; font-weight: 700;","color: #34e0d6; background: #0b0f14; font-weight: 700;"),window.customCards=window.customCards||[],window.customCards.push({type:"vacuum-card-adv",name:"TapoVac ADV Vacuum Card",description:"A card for the TapoVac-ADV integration (Tapo RV30/RV50 series).",preview:!0});let St=class extends at{constructor(){super(...arguments),this._discovered={dockActions:[],sensors:[],maintenanceSensors:[]},this._selectedRoomIds=new Set,this._maintenanceOpen=!1,this._busy=!1}static getConfigElement(){return document.createElement("vacuum-card-adv-editor")}static getStubConfig(t){return{type:"custom:vacuum-card-adv",vacuum:Object.keys(t.states).find(t=>t.startsWith("vacuum."))??"",show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_room_names:!0}}setConfig(t){if(!t.vacuum)throw new Error("vacuum entity is required");this._config={show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_room_names:!0,map_rotation:0,...t},this._maintenanceOpen=!1===t.maintenance_collapsed_default}getCardSize(){let t=2;return(this._config?.show_map??!0)&&(t+=6),(this._config?.show_sensors??!0)&&(t+=2),t}willUpdate(t){t.has("hass")&&this.hass&&this._config?.vacuum&&(this._lastDiscoveredFor===this._config.vacuum&&t.has("_discovered")||(this._discovered=$t(this.hass,this._config.vacuum),this._lastDiscoveredFor=this._config.vacuum))}get _roomGeometry(){const t=this._config.camera??this._discovered.camera;if(!t)return;const e=this.hass.states[t],i=e?.attributes?.room_geometry;return i&&i.rooms?i:void 0}_shortTitle(t){const e=this.hass.states[this._config.vacuum],i=e?.attributes.friendly_name;return i&&t.startsWith(`${i} `)?t.slice(i.length+1):t}render(){if(!this._config||!this.hass)return q;const t=this.hass.states[this._config.vacuum];if(!t)return L`<ha-card><div class="warning">Entity not found: ${this._config.vacuum}</div></ha-card>`;const e=this._config.name??t.attributes.friendly_name??"Vacuum",i=this.hass.formatEntityState?.(t)??t.state;return L`
+  `,t([pt({attribute:!1})],At.prototype,"hass",void 0),t([ut()],At.prototype,"_config",void 0),t([ut()],At.prototype,"_calibrationRoomId",void 0),t([ut()],At.prototype,"_calibrationPoints",void 0),At=t([lt("vacuum-card-adv-editor")],At),console.info("%c VACUUM-CARD-ADV %c v1.0.0b3 ","color: #0b0f14; background: #34e0d6; font-weight: 700;","color: #34e0d6; background: #0b0f14; font-weight: 700;"),window.customCards=window.customCards||[],window.customCards.push({type:"vacuum-card-adv",name:"TapoVac ADV Vacuum Card",description:"A card for the TapoVac-ADV integration (Tapo RV30/RV50 series).",preview:!0});let St=class extends at{constructor(){super(...arguments),this._discovered={dockActions:[],sensors:[],maintenanceSensors:[]},this._selectedRoomIds=new Set,this._maintenanceOpen=!1,this._busy=!1}static getConfigElement(){return document.createElement("vacuum-card-adv-editor")}static getStubConfig(t){return{type:"custom:vacuum-card-adv",vacuum:Object.keys(t.states).find(t=>t.startsWith("vacuum."))??"",show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_room_names:!0}}setConfig(t){if(!t.vacuum)throw new Error("vacuum entity is required");this._config={show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_room_names:!0,map_rotation:0,...t},this._maintenanceOpen=!1===t.maintenance_collapsed_default}getCardSize(){let t=2;return(this._config?.show_map??!0)&&(t+=6),(this._config?.show_sensors??!0)&&(t+=2),t}willUpdate(t){t.has("hass")&&this.hass&&this._config?.vacuum&&(this._lastDiscoveredFor===this._config.vacuum&&t.has("_discovered")||(this._discovered=$t(this.hass,this._config.vacuum),this._lastDiscoveredFor=this._config.vacuum))}get _roomGeometry(){const t=this._config.camera??this._discovered.camera;if(!t)return;const e=this.hass.states[t],i=e?.attributes?.room_geometry;return i&&i.rooms?i:void 0}_shortTitle(t){const e=this.hass.states[this._config.vacuum],i=e?.attributes.friendly_name;return i&&t.startsWith(`${i} `)?t.slice(i.length+1):t}render(){if(!this._config||!this.hass)return q;const t=this.hass.states[this._config.vacuum];if(!t)return L`<ha-card><div class="warning">Entity not found: ${this._config.vacuum}</div></ha-card>`;const e=this._config.name??t.attributes.friendly_name??"Vacuum",i=this.hass.formatEntityState?.(t)??t.state;return L`
       <ha-card>
         <div class="header" @click=${()=>this._fireMoreInfo(this._config.vacuum)}>
           <ha-icon class="header-icon" icon="mdi:robot-vacuum"></ha-icon>
@@ -281,13 +282,7 @@ const lt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
     `}_renderMap(){const t=this._config.camera??this._discovered.camera;if(!t)return q;const e=this.hass.states[t],i=e?.attributes?.entity_picture;if(!i)return q;const s=this._config.map_rotation??0,o=this._roomGeometry,n=s%360!=0?`transform: rotate(${s}deg);`:"";return L`
       <div class="section map-section">
         <div class="map-wrap">
-          <img
-            class="map-image"
-            src=${i}
-            style=${n}
-            @click=${this._onMapClick}
-            @load=${()=>this.requestUpdate()}
-          />
+          <img class="map-image" src=${i} style=${n} @click=${this._onMapClick} />
           ${o?this._renderMapOverlay(o,n):q}
         </div>
         ${o?q:L`<div class="map-hint">
@@ -339,7 +334,7 @@ const lt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
               <ha-select
                 label="Fan speed"
                 .value=${o??""}
-                @selected=${t=>this._setFanSpeed(t.target.value)}
+                @selected=${t=>{const e=t.target.value;e!==(o??"")&&this._setFanSpeed(e)}}
                 @closed=${t=>t.stopPropagation()}
               >
                 ${s.map(t=>L`<mwc-list-item .value=${t}>${t}</mwc-list-item>`)}
@@ -349,7 +344,7 @@ const lt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
               <ha-select
                 label="Water level"
                 .value=${r.state}
-                @selected=${t=>this._selectOption(n,t.target.value)}
+                @selected=${t=>{const e=t.target.value;e!==r.state&&this._selectOption(n,e)}}
                 @closed=${t=>t.stopPropagation()}
               >
                 ${(r.attributes.options??[]).map(t=>L`<mwc-list-item .value=${t}>${t}</mwc-list-item>`)}
