@@ -35,6 +35,7 @@ interface RowOptions {
   percent?: number;
   gaugeColor?: string;
   overdue?: boolean;
+  entityId?: string;
 }
 
 @customElement("vacuum-card-adv")
@@ -86,7 +87,10 @@ export class VacuumCardAdv extends LitElement {
       map_rotation: DEFAULT_MAP_ROTATION,
       ...config,
     };
-    this._maintenanceOpen = !!config.maintenance_collapsed_default === false;
+    // Collapsed unless the user explicitly opted out — this was inverted
+    // before (open by default for everyone, contributing to a card that
+    // needed scrolling to see everything on it).
+    this._maintenanceOpen = config.maintenance_collapsed_default === false;
   }
 
   public getCardSize(): number {
@@ -138,7 +142,7 @@ export class VacuumCardAdv extends LitElement {
 
     return html`
       <ha-card>
-        <div class="header">
+        <div class="header" @click=${() => this._fireMoreInfo(this._config.vacuum)}>
           <ha-icon class="header-icon" icon="mdi:robot-vacuum"></ha-icon>
           <div class="header-text">
             <div class="name">${name}</div>
@@ -378,7 +382,10 @@ export class VacuumCardAdv extends LitElement {
   private _renderRow(opts: RowOptions): TemplateResult {
     const hasGauge = opts.percent !== undefined && !Number.isNaN(opts.percent);
     return html`
-      <div class="info-row ${opts.overdue ? "overdue" : ""}">
+      <div
+        class="info-row ${opts.overdue ? "overdue" : ""} ${opts.entityId ? "clickable" : ""}"
+        @click=${opts.entityId ? () => this._fireMoreInfo(opts.entityId as string) : undefined}
+      >
         <ha-icon icon=${opts.icon}></ha-icon>
         <span class="info-label">${opts.title}</span>
         ${hasGauge
@@ -407,6 +414,7 @@ export class VacuumCardAdv extends LitElement {
           value: `${battery.state}%`,
           percent: value,
           gaugeColor: this._batteryColor(value),
+          entityId: batteryId,
         })}
       </div>
     `;
@@ -437,6 +445,10 @@ export class VacuumCardAdv extends LitElement {
     const s = this.hass.states[id];
     if (!s) return nothing;
     const title = this._shortTitle((s.attributes["friendly_name"] as string) ?? s.entity_id);
+    // The Error sensor is only worth a row when there's actually something
+    // wrong — showing "Error: Ok" on every single view just adds a row
+    // that never says anything.
+    if (title.toLowerCase() === "error" && s.state.toLowerCase() === "ok") return nothing;
     const unit = (s.attributes["unit_of_measurement"] as string) ?? "";
     const icon = (s.attributes["icon"] as string) ?? "mdi:information-outline";
     const isPercent = unit === "%";
@@ -447,6 +459,7 @@ export class VacuumCardAdv extends LitElement {
       value: `${s.state}${unit}`,
       percent: percent !== undefined && !Number.isNaN(percent) ? percent : undefined,
       overdue: !!s.attributes["overdue"],
+      entityId: id,
     });
   }
 
@@ -488,6 +501,16 @@ export class VacuumCardAdv extends LitElement {
     this.hass.callService("button", "press", { entity_id: entityId });
   }
 
+  /** Opens Home Assistant's own more-info dialog for an entity — the same
+   *  dialog tapping an entity row in any stock HA card opens. `hass-more-info`
+   *  is HA frontend's standard event for this (bubbles/composed so it
+   *  reaches the dashboard's listener from inside this card's shadow DOM). */
+  private _fireMoreInfo(entityId: string): void {
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true })
+    );
+  }
+
   static styles = css`
     :host {
       display: block;
@@ -515,6 +538,7 @@ export class VacuumCardAdv extends LitElement {
       align-items: center;
       gap: 10px;
       padding-bottom: 8px;
+      cursor: pointer;
     }
     .header-icon {
       color: var(--vc-accent);
@@ -641,6 +665,9 @@ export class VacuumCardAdv extends LitElement {
       align-items: center;
       gap: 8px;
       font-size: 0.85em;
+    }
+    .info-row.clickable {
+      cursor: pointer;
     }
     .info-row ha-icon {
       --mdc-icon-size: 18px;

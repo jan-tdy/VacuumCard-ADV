@@ -1,6 +1,6 @@
 {
   "name": "vacuum-card-adv",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "A Home Assistant Lovelace card for the TapoVac-ADV integration (Tapo RV30/RV50 series)",
   "license": "MIT",
