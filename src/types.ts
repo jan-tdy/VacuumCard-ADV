@@ -46,6 +46,10 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   name?: string;
   show_map?: boolean;
   map_rotation?: number; // degrees, 0/90/180/270 (or arbitrary)
+  // Where the map sits relative to the rest of the card: "top" (default,
+  // right after the controls) or "bottom" (after battery/sensors, before
+  // the collapsible maintenance section).
+  map_position?: "top" | "bottom";
   show_room_names?: boolean;
   show_controls?: boolean;
   show_dock_actions?: boolean;

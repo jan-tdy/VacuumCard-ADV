@@ -150,11 +150,16 @@ export class VacuumCardAdv extends LitElement {
           </div>
         </div>
         ${(this._config.show_controls ?? true) ? this._renderControls(vacuum) : nothing}
-        ${(this._config.show_map ?? true) ? this._renderMap() : nothing}
+        ${(this._config.map_position ?? "top") === "top" && (this._config.show_map ?? true)
+          ? this._renderMap()
+          : nothing}
         ${(this._config.show_dock_actions ?? true) ? this._renderDockActions() : nothing}
         ${this._renderSelects()}
         ${(this._config.show_battery ?? true) ? this._renderBattery() : nothing}
         ${(this._config.show_sensors ?? true) ? this._renderSensors() : nothing}
+        ${(this._config.map_position ?? "top") === "bottom" && (this._config.show_map ?? true)
+          ? this._renderMap()
+          : nothing}
         ${this._renderMaintenance()}
       </ha-card>
     `;
