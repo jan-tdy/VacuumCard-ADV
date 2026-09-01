@@ -86,6 +86,7 @@ export class VacuumCardAdvEditor extends LitElement {
       ["show_fan_speed", "Show fan speed selector"],
       ["show_water_level", "Show water level selector"],
       ["show_battery", "Show battery"],
+      ["show_mop_status", "Show mop attached status"],
       ["show_sensors", "Show sensors"],
     ];
     return html`
@@ -158,6 +159,14 @@ export class VacuumCardAdvEditor extends LitElement {
           label="Battery sensor"
           @value-changed=${(e: CustomEvent) =>
             this._valueChanged("battery_entity", e.detail.value || undefined)}
+        ></ha-entity-picker>
+        <ha-entity-picker
+          .hass=${this.hass}
+          .value=${this._config.mop_attached_entity ?? ""}
+          .includeDomains=${["binary_sensor"]}
+          label="Mop attached sensor"
+          @value-changed=${(e: CustomEvent) =>
+            this._valueChanged("mop_attached_entity", e.detail.value || undefined)}
         ></ha-entity-picker>
         <div class="hint">
           The full list of sensors shown, and which sensors count as "maintenance", can be

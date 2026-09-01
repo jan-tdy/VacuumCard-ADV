@@ -41,6 +41,7 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   fan_speed_entity?: string;
   water_level_entity?: string;
   battery_entity?: string;
+  mop_attached_entity?: string;
   sensors?: string[];
   maintenance_sensors?: string[];
   name?: string;
@@ -57,6 +58,7 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   show_water_level?: boolean;
   show_battery?: boolean;
   show_sensors?: boolean;
+  show_mop_status?: boolean;
   maintenance_collapsed_default?: boolean;
   // Manually-calibrated room outlines, keyed by room id (as a string,
   // since Lovelace/YAML config keys are strings) — takes precedence over

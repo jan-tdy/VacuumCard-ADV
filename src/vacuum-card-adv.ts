@@ -67,6 +67,7 @@ export class VacuumCardAdv extends LitElement {
       show_water_level: true,
       show_battery: true,
       show_sensors: true,
+      show_mop_status: true,
       show_room_names: true,
     };
   }
@@ -83,6 +84,7 @@ export class VacuumCardAdv extends LitElement {
       show_water_level: true,
       show_battery: true,
       show_sensors: true,
+      show_mop_status: true,
       show_room_names: true,
       map_rotation: DEFAULT_MAP_ROTATION,
       ...config,
@@ -144,6 +146,10 @@ export class VacuumCardAdv extends LitElement {
 
     const name = this._config.name ?? vacuum.attributes["friendly_name"] ?? "Vacuum";
     const status = this.hass.formatEntityState?.(vacuum) ?? vacuum.state;
+    // Anything other than the literal "bottom" falls back to "top" — a typo
+    // or stale/invalid config value must never make the map disappear
+    // entirely (it used to: neither branch matched, so nothing rendered).
+    const mapPosition = this._config.map_position === "bottom" ? "bottom" : "top";
 
     return html`
       <ha-card>
@@ -155,16 +161,13 @@ export class VacuumCardAdv extends LitElement {
           </div>
         </div>
         ${(this._config.show_controls ?? true) ? this._renderControls(vacuum) : nothing}
-        ${(this._config.map_position ?? "top") === "top" && (this._config.show_map ?? true)
-          ? this._renderMap()
-          : nothing}
+        ${mapPosition === "top" && (this._config.show_map ?? true) ? this._renderMap() : nothing}
         ${(this._config.show_dock_actions ?? true) ? this._renderDockActions() : nothing}
         ${this._renderSelects()}
         ${(this._config.show_battery ?? true) ? this._renderBattery() : nothing}
+        ${(this._config.show_mop_status ?? true) ? this._renderMopStatus() : nothing}
         ${(this._config.show_sensors ?? true) ? this._renderSensors() : nothing}
-        ${(this._config.map_position ?? "top") === "bottom" && (this._config.show_map ?? true)
-          ? this._renderMap()
-          : nothing}
+        ${mapPosition === "bottom" && (this._config.show_map ?? true) ? this._renderMap() : nothing}
         ${this._renderMaintenance()}
       </ha-card>
     `;
@@ -447,6 +450,28 @@ export class VacuumCardAdv extends LitElement {
     if (value <= 20) return "var(--error-color)";
     if (value <= 50) return "var(--warning-color)";
     return "var(--success-color)";
+  }
+
+  // Discovered but never actually rendered before — TapoVac-ADV's "Mop
+  // Attached" binary_sensor exists on every device but had no row to show
+  // it in. Its own icon attribute already flips between mdi:water /
+  // mdi:water-off with state, so it's reused as-is rather than duplicating
+  // that logic here.
+  private _renderMopStatus(): TemplateResult | typeof nothing {
+    const id = this._config.mop_attached_entity ?? this._discovered.mopAttached;
+    if (!id) return nothing;
+    const s = this.hass.states[id];
+    if (!s) return nothing;
+    return html`
+      <div class="section sensors">
+        ${this._renderRow({
+          icon: (s.attributes["icon"] as string) ?? (s.state === "on" ? "mdi:water" : "mdi:water-off"),
+          title: this._shortTitle((s.attributes["friendly_name"] as string) ?? "Mop Attached"),
+          value: s.state === "on" ? "Attached" : "Not attached",
+          entityId: id,
+        })}
+      </div>
+    `;
   }
 
   private _renderSensors(): TemplateResult | typeof nothing {

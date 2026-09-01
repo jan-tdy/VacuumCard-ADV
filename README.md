@@ -67,7 +67,9 @@ vacuum: vacuum.jedalen_rv30_max
 camera: camera.jedalen_rv30_max_map
 water_level_entity: select.jedalen_rv30_max_water_level
 battery_entity: sensor.jedalen_rv30_max_battery
+mop_attached_entity: binary_sensor.jedalen_rv30_max_mop_attached
 map_rotation: 180
+map_position: top        # "top" (default) or "bottom"
 show_map: true
 show_room_names: true
 show_controls: true
@@ -75,6 +77,7 @@ show_dock_actions: true
 show_fan_speed: true
 show_water_level: true
 show_battery: true
+show_mop_status: true
 show_sensors: true
 sensors: []              # override the auto-detected sensor list
 maintenance_sensors: []  # override which sensors show under "Maintenance"
