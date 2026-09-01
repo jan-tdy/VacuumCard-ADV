@@ -101,8 +101,13 @@ export class VacuumCardAdv extends LitElement {
   }
 
   protected willUpdate(changed: PropertyValues): void {
+    // Only re-run entity discovery when the configured vacuum actually
+    // changes — hass updates on *any* state change system-wide, often
+    // several times a second, and recomputing (and reassigning a brand
+    // new _discovered object reference, forcing an extra render) on every
+    // single one of those was pure waste.
     if (changed.has("hass") && this.hass && this._config?.vacuum) {
-      if (this._lastDiscoveredFor !== this._config.vacuum || !changed.has("_discovered")) {
+      if (this._lastDiscoveredFor !== this._config.vacuum) {
         this._discovered = discoverEntities(this.hass, this._config.vacuum);
         this._lastDiscoveredFor = this._config.vacuum;
       }
