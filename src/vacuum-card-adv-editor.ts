@@ -100,7 +100,7 @@ export class VacuumCardAdvEditor extends LitElement {
 
   private _renderRotation(): TemplateResult {
     return html`
-      <div class="section">
+      <div class="section map-layout">
         <ha-textfield
           label="Map rotation (degrees)"
           type="number"
@@ -108,6 +108,19 @@ export class VacuumCardAdvEditor extends LitElement {
           @change=${(e: Event) =>
             this._valueChanged("map_rotation", Number((e.target as HTMLInputElement).value) || 0)}
         ></ha-textfield>
+        <ha-select
+          label="Map position"
+          .value=${this._config.map_position ?? "top"}
+          @selected=${(e: CustomEvent) =>
+            this._valueChanged(
+              "map_position",
+              (e.target as unknown as { value: string }).value as "top" | "bottom"
+            )}
+          @closed=${(e: Event) => e.stopPropagation()}
+        >
+          <mwc-list-item value="top">Top (after controls)</mwc-list-item>
+          <mwc-list-item value="bottom">Bottom (after battery/sensors)</mwc-list-item>
+        </ha-select>
       </div>
     `;
   }
@@ -307,6 +320,15 @@ export class VacuumCardAdvEditor extends LitElement {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 4px;
+    }
+    .map-layout {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .map-layout ha-select {
+      flex: 1;
+      min-width: 160px;
     }
     .hint {
       font-size: 0.85em;
