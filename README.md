@@ -1,5 +1,7 @@
 # VacuumCard-ADV
 
+**If you found this useful, please give this repo a star! Also check out my other repos!**
+
 A Home Assistant Lovelace card built for the
 [TapoVac-ADV](https://github.com/jan-tdy/TapoVac-ADV) integration (Tapo
 RV30 / RV50 series). UI-editable through Home Assistant's own card
