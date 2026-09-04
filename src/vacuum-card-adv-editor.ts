@@ -486,13 +486,13 @@ export class VacuumCardAdvEditor extends LitElement {
       </div>
       <div class="furniture-fields">
         <ha-textfield
-          label="X"
+          label="X position"
           type="number"
           .value=${String(item.x)}
           @change=${(e: Event) => this._setFurnitureField(item.id, "x", (e.target as HTMLInputElement).value)}
         ></ha-textfield>
         <ha-textfield
-          label="Y"
+          label="Y position"
           type="number"
           .value=${String(item.y)}
           @change=${(e: Event) => this._setFurnitureField(item.id, "y", (e.target as HTMLInputElement).value)}

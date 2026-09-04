@@ -338,13 +338,13 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       </div>
       <div class="furniture-fields">
         <ha-textfield
-          label="X"
+          label="X position"
           type="number"
           .value=${String(t.x)}
           @change=${e=>this._setFurnitureField(t.id,"x",e.target.value)}
         ></ha-textfield>
         <ha-textfield
-          label="Y"
+          label="Y position"
           type="number"
           .value=${String(t.y)}
           @change=${e=>this._setFurnitureField(t.id,"y",e.target.value)}
