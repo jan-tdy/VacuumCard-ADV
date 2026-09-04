@@ -10,6 +10,7 @@ import {
 import { discoverEntities, DiscoveredEntities } from "./utils/hass-entities";
 import { displayToNatural, resolveRoomAtPoint } from "./utils/geometry";
 import { furnitureGlyph } from "./utils/furniture";
+import { renderSelectField } from "./utils/ha-form";
 import { CARD_VERSION, DEFAULT_MAP_ROTATION } from "./const";
 
 import "./vacuum-card-adv-editor";
@@ -457,7 +458,8 @@ export class VacuumCardAdv extends LitElement {
     return html`
       <div class="section selects">
         ${showFan && fanSpeedList.length > 0
-          ? this._renderSelectField(
+          ? renderSelectField(
+              this.hass,
               "Fan speed",
               fanSpeed ?? "",
               fanSpeedList.map((opt) => ({ value: opt, label: opt })),
@@ -472,7 +474,8 @@ export class VacuumCardAdv extends LitElement {
             )
           : nothing}
         ${showWater && waterEntity
-          ? this._renderSelectField(
+          ? renderSelectField(
+              this.hass,
               "Water level",
               waterEntity.state,
               ((waterEntity.attributes["options"] as string[] | undefined) ?? []).map((opt) => ({
@@ -486,33 +489,6 @@ export class VacuumCardAdv extends LitElement {
             )
           : nothing}
       </div>
-    `;
-  }
-
-  /** A single-field dropdown backed by HA's own `ha-form` select selector
-   *  instead of a hand-rolled `ha-select`/`mwc-list-item` pair — the
-   *  latter depends on `mwc-menu`'s own positioning, which can end up
-   *  unopenable depending on the surrounding dashboard layout/stacking
-   *  context on some frontend versions. `ha-form`'s select selector is the
-   *  same widget HA's own built-in cards use, so it doesn't have that
-   *  problem. */
-  private _renderSelectField(
-    label: string,
-    value: string,
-    options: { value: string; label: string }[],
-    onChange: (value: string) => void
-  ): TemplateResult {
-    return html`
-      <ha-form
-        .hass=${this.hass}
-        .data=${{ value }}
-        .schema=${[{ name: "value", selector: { select: { mode: "dropdown", options } } }]}
-        .computeLabel=${() => label}
-        @value-changed=${(e: CustomEvent) => {
-          e.stopPropagation();
-          onChange(e.detail.value.value);
-        }}
-      ></ha-form>
     `;
   }
 
