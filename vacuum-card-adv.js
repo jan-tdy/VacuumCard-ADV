@@ -4,7 +4,7 @@ function t(t,e,i,s){var r,o=arguments.length,n=o<3?e:null===s?s=Object.getOwnPro
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const e=globalThis,i=e.ShadowRoot&&(void 0===e.ShadyCSS||e.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s=Symbol(),r=new WeakMap;let o=class{constructor(t,e,i){if(this._$cssResult$=!0,i!==s)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e}get styleSheet(){let t=this.o;const e=this.t;if(i&&void 0===t){const i=void 0!==e&&1===e.length;i&&(t=r.get(e)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),i&&r.set(e,t))}return t}toString(){return this.cssText}};const n=(t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[s+1],t[0]);return new o(i,t,s)},a=i?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const i of t.cssRules)e+=i.cssText;return(t=>new o("string"==typeof t?t:t+"",void 0,s))(e)})(t):t,{is:c,defineProperty:l,getOwnPropertyDescriptor:h,getOwnPropertyNames:d,getOwnPropertySymbols:u,getPrototypeOf:p}=Object,m=globalThis,_=m.trustedTypes,f=_?_.emptyScript:"",g=m.reactiveElementPolyfillSupport,$=(t,e)=>t,v={toAttribute(t,e){switch(e){case Boolean:t=t?f:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t)}return t},fromAttribute(t,e){let i=t;switch(e){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t)}catch(t){i=null}}return i}},y=(t,e)=>!c(t,e),b={attribute:!0,type:String,converter:v,reflect:!1,useDefault:!1,hasChanged:y};
+const e=globalThis,i=e.ShadowRoot&&(void 0===e.ShadyCSS||e.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s=Symbol(),r=new WeakMap;let o=class{constructor(t,e,i){if(this._$cssResult$=!0,i!==s)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e}get styleSheet(){let t=this.o;const e=this.t;if(i&&void 0===t){const i=void 0!==e&&1===e.length;i&&(t=r.get(e)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),i&&r.set(e,t))}return t}toString(){return this.cssText}};const n=(t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[s+1],t[0]);return new o(i,t,s)},a=i?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const i of t.cssRules)e+=i.cssText;return(t=>new o("string"==typeof t?t:t+"",void 0,s))(e)})(t):t,{is:c,defineProperty:l,getOwnPropertyDescriptor:h,getOwnPropertyNames:d,getOwnPropertySymbols:u,getPrototypeOf:p}=Object,m=globalThis,f=m.trustedTypes,_=f?f.emptyScript:"",g=m.reactiveElementPolyfillSupport,$=(t,e)=>t,v={toAttribute(t,e){switch(e){case Boolean:t=t?_:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t)}return t},fromAttribute(t,e){let i=t;switch(e){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t)}catch(t){i=null}}return i}},y=(t,e)=>!c(t,e),b={attribute:!0,type:String,converter:v,reflect:!1,useDefault:!1,hasChanged:y};
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -15,7 +15,7 @@ const e=globalThis,i=e.ShadowRoot&&(void 0===e.ShadyCSS||e.ShadyCSS.nativeShadow
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const x=globalThis,A=t=>t,S=x.trustedTypes,k=S?S.createPolicy("lit-html",{createHTML:t=>t}):void 0,P="$lit$",M=`lit$${Math.random().toFixed(9).slice(2)}$`,C="?"+M,E=`<${C}>`,R=document,I=()=>R.createComment(""),O=t=>null===t||"object"!=typeof t&&"function"!=typeof t,F=Array.isArray,T="[ \t\n\f\r]",N=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,U=/-->/g,D=/>/g,H=RegExp(`>|${T}(?:([^\\s"'>=/]+)(${T}*=${T}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),z=/'/g,j=/"/g,L=/^(?:script|style|textarea|title)$/i,B=t=>(e,...i)=>({_$litType$:t,strings:e,values:i}),V=B(1),W=B(2),q=Symbol.for("lit-noChange"),G=Symbol.for("lit-nothing"),Y=new WeakMap,X=R.createTreeWalker(R,129);function J(t,e){if(!F(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==k?k.createHTML(e):e}const K=(t,e)=>{const i=t.length-1,s=[];let r,o=2===e?"<svg>":3===e?"<math>":"",n=N;for(let e=0;e<i;e++){const i=t[e];let a,c,l=-1,h=0;for(;h<i.length&&(n.lastIndex=h,c=n.exec(i),null!==c);)h=n.lastIndex,n===N?"!--"===c[1]?n=U:void 0!==c[1]?n=D:void 0!==c[2]?(L.test(c[2])&&(r=RegExp("</"+c[2],"g")),n=H):void 0!==c[3]&&(n=H):n===H?">"===c[0]?(n=r??N,l=-1):void 0===c[1]?l=-2:(l=n.lastIndex-c[2].length,a=c[1],n=void 0===c[3]?H:'"'===c[3]?j:z):n===j||n===z?n=H:n===U||n===D?n=N:(n=H,r=void 0);const d=n===H&&t[e+1].startsWith("/>")?" ":"";o+=n===N?i+E:l>=0?(s.push(a),i.slice(0,l)+P+i.slice(l)+M+d):i+M+(-2===l?e:d)}return[J(t,o+(t[i]||"<?>")+(2===e?"</svg>":3===e?"</math>":"")),s]};class Z{constructor({strings:t,_$litType$:e},i){let s;this.parts=[];let r=0,o=0;const n=t.length-1,a=this.parts,[c,l]=K(t,e);if(this.el=Z.createElement(c,i),X.currentNode=this.el.content,2===e||3===e){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes)}for(;null!==(s=X.nextNode())&&a.length<n;){if(1===s.nodeType){if(s.hasAttributes())for(const t of s.getAttributeNames())if(t.endsWith(P)){const e=l[o++],i=s.getAttribute(t).split(M),n=/([.?@])?(.*)/.exec(e);a.push({type:1,index:r,name:n[2],strings:i,ctor:"."===n[1]?st:"?"===n[1]?rt:"@"===n[1]?ot:it}),s.removeAttribute(t)}else t.startsWith(M)&&(a.push({type:6,index:r}),s.removeAttribute(t));if(L.test(s.tagName)){const t=s.textContent.split(M),e=t.length-1;if(e>0){s.textContent=S?S.emptyScript:"";for(let i=0;i<e;i++)s.append(t[i],I()),X.nextNode(),a.push({type:2,index:++r});s.append(t[e],I())}}}else if(8===s.nodeType)if(s.data===C)a.push({type:2,index:r});else{let t=-1;for(;-1!==(t=s.data.indexOf(M,t+1));)a.push({type:7,index:r}),t+=M.length-1}r++}}static createElement(t,e){const i=R.createElement("template");return i.innerHTML=t,i}}function Q(t,e,i=t,s){if(e===q)return e;let r=void 0!==s?i._$Co?.[s]:i._$Cl;const o=O(e)?void 0:e._$litDirective$;return r?.constructor!==o&&(r?._$AO?.(!1),void 0===o?r=void 0:(r=new o(t),r._$AT(t,i,s)),void 0!==s?(i._$Co??=[])[s]=r:i._$Cl=r),void 0!==r&&(e=Q(t,r._$AS(t,e.values),r,s)),e}class tt{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:e},parts:i}=this._$AD,s=(t?.creationScope??R).importNode(e,!0);X.currentNode=s;let r=X.nextNode(),o=0,n=0,a=i[0];for(;void 0!==a;){if(o===a.index){let e;2===a.type?e=new et(r,r.nextSibling,this,t):1===a.type?e=new a.ctor(r,a.name,a.strings,this,t):6===a.type&&(e=new nt(r,this,t)),this._$AV.push(e),a=i[++n]}o!==a?.index&&(r=X.nextNode(),o++)}return X.currentNode=R,s}p(t){let e=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}}class et{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,e,i,s){this.type=2,this._$AH=G,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=s,this._$Cv=s?.isConnected??!0}get parentNode(){let t=this._$AA.parentNode;const e=this._$AM;return void 0!==e&&11===t?.nodeType&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=Q(this,t,e),O(t)?t===G||null==t||""===t?(this._$AH!==G&&this._$AR(),this._$AH=G):t!==this._$AH&&t!==q&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):(t=>F(t)||"function"==typeof t?.[Symbol.iterator])(t)?this.k(t):this._(t)}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t))}_(t){this._$AH!==G&&O(this._$AH)?this._$AA.nextSibling.data=t:this.T(R.createTextNode(t)),this._$AH=t}$(t){const{values:e,_$litType$:i}=t,s="number"==typeof i?this._$AC(t):(void 0===i.el&&(i.el=Z.createElement(J(i.h,i.h[0]),this.options)),i);if(this._$AH?._$AD===s)this._$AH.p(e);else{const t=new tt(s,this),i=t.u(this.options);t.p(e),this.T(i),this._$AH=t}}_$AC(t){let e=Y.get(t.strings);return void 0===e&&Y.set(t.strings,e=new Z(t)),e}k(t){F(this._$AH)||(this._$AH=[],this._$AR());const e=this._$AH;let i,s=0;for(const r of t)s===e.length?e.push(i=new et(this.O(I()),this.O(I()),this,this.options)):i=e[s],i._$AI(r),s++;s<e.length&&(this._$AR(i&&i._$AB.nextSibling,s),e.length=s)}_$AR(t=this._$AA.nextSibling,e){for(this._$AP?.(!1,!0,e);t!==this._$AB;){const e=A(t).nextSibling;A(t).remove(),t=e}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t))}}class it{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,e,i,s,r){this.type=1,this._$AH=G,this._$AN=void 0,this.element=t,this.name=e,this._$AM=s,this.options=r,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=G}_$AI(t,e=this,i,s){const r=this.strings;let o=!1;if(void 0===r)t=Q(this,t,e,0),o=!O(t)||t!==this._$AH&&t!==q,o&&(this._$AH=t);else{const s=t;let n,a;for(t=r[0],n=0;n<r.length-1;n++)a=Q(this,s[i+n],e,n),a===q&&(a=this._$AH[n]),o||=!O(a)||a!==this._$AH[n],a===G?t=G:t!==G&&(t+=(a??"")+r[n+1]),this._$AH[n]=a}o&&!s&&this.j(t)}j(t){t===G?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"")}}class st extends it{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===G?void 0:t}}class rt extends it{constructor(){super(...arguments),this.type=4}j(t){this.element.toggleAttribute(this.name,!!t&&t!==G)}}class ot extends it{constructor(t,e,i,s,r){super(t,e,i,s,r),this.type=5}_$AI(t,e=this){if((t=Q(this,t,e,0)??G)===q)return;const i=this._$AH,s=t===G&&i!==G||t.capture!==i.capture||t.once!==i.once||t.passive!==i.passive,r=t!==G&&(i===G||s);s&&this.element.removeEventListener(this.name,this,i),r&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t)}}class nt{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){Q(this,t)}}const at=x.litHtmlPolyfillSupport;at?.(Z,et),(x.litHtmlVersions??=[]).push("3.3.3");const ct=globalThis;
+const x=globalThis,A=t=>t,S=x.trustedTypes,k=S?S.createPolicy("lit-html",{createHTML:t=>t}):void 0,C="$lit$",P=`lit$${Math.random().toFixed(9).slice(2)}$`,M="?"+P,E=`<${M}>`,R=document,I=()=>R.createComment(""),F=t=>null===t||"object"!=typeof t&&"function"!=typeof t,O=Array.isArray,T="[ \t\n\f\r]",N=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,U=/-->/g,D=/>/g,H=RegExp(`>|${T}(?:([^\\s"'>=/]+)(${T}*=${T}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),z=/'/g,L=/"/g,j=/^(?:script|style|textarea|title)$/i,B=t=>(e,...i)=>({_$litType$:t,strings:e,values:i}),V=B(1),W=B(2),q=Symbol.for("lit-noChange"),G=Symbol.for("lit-nothing"),Y=new WeakMap,X=R.createTreeWalker(R,129);function J(t,e){if(!O(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==k?k.createHTML(e):e}const K=(t,e)=>{const i=t.length-1,s=[];let r,o=2===e?"<svg>":3===e?"<math>":"",n=N;for(let e=0;e<i;e++){const i=t[e];let a,c,l=-1,h=0;for(;h<i.length&&(n.lastIndex=h,c=n.exec(i),null!==c);)h=n.lastIndex,n===N?"!--"===c[1]?n=U:void 0!==c[1]?n=D:void 0!==c[2]?(j.test(c[2])&&(r=RegExp("</"+c[2],"g")),n=H):void 0!==c[3]&&(n=H):n===H?">"===c[0]?(n=r??N,l=-1):void 0===c[1]?l=-2:(l=n.lastIndex-c[2].length,a=c[1],n=void 0===c[3]?H:'"'===c[3]?L:z):n===L||n===z?n=H:n===U||n===D?n=N:(n=H,r=void 0);const d=n===H&&t[e+1].startsWith("/>")?" ":"";o+=n===N?i+E:l>=0?(s.push(a),i.slice(0,l)+C+i.slice(l)+P+d):i+P+(-2===l?e:d)}return[J(t,o+(t[i]||"<?>")+(2===e?"</svg>":3===e?"</math>":"")),s]};class Z{constructor({strings:t,_$litType$:e},i){let s;this.parts=[];let r=0,o=0;const n=t.length-1,a=this.parts,[c,l]=K(t,e);if(this.el=Z.createElement(c,i),X.currentNode=this.el.content,2===e||3===e){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes)}for(;null!==(s=X.nextNode())&&a.length<n;){if(1===s.nodeType){if(s.hasAttributes())for(const t of s.getAttributeNames())if(t.endsWith(C)){const e=l[o++],i=s.getAttribute(t).split(P),n=/([.?@])?(.*)/.exec(e);a.push({type:1,index:r,name:n[2],strings:i,ctor:"."===n[1]?st:"?"===n[1]?rt:"@"===n[1]?ot:it}),s.removeAttribute(t)}else t.startsWith(P)&&(a.push({type:6,index:r}),s.removeAttribute(t));if(j.test(s.tagName)){const t=s.textContent.split(P),e=t.length-1;if(e>0){s.textContent=S?S.emptyScript:"";for(let i=0;i<e;i++)s.append(t[i],I()),X.nextNode(),a.push({type:2,index:++r});s.append(t[e],I())}}}else if(8===s.nodeType)if(s.data===M)a.push({type:2,index:r});else{let t=-1;for(;-1!==(t=s.data.indexOf(P,t+1));)a.push({type:7,index:r}),t+=P.length-1}r++}}static createElement(t,e){const i=R.createElement("template");return i.innerHTML=t,i}}function Q(t,e,i=t,s){if(e===q)return e;let r=void 0!==s?i._$Co?.[s]:i._$Cl;const o=F(e)?void 0:e._$litDirective$;return r?.constructor!==o&&(r?._$AO?.(!1),void 0===o?r=void 0:(r=new o(t),r._$AT(t,i,s)),void 0!==s?(i._$Co??=[])[s]=r:i._$Cl=r),void 0!==r&&(e=Q(t,r._$AS(t,e.values),r,s)),e}class tt{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:e},parts:i}=this._$AD,s=(t?.creationScope??R).importNode(e,!0);X.currentNode=s;let r=X.nextNode(),o=0,n=0,a=i[0];for(;void 0!==a;){if(o===a.index){let e;2===a.type?e=new et(r,r.nextSibling,this,t):1===a.type?e=new a.ctor(r,a.name,a.strings,this,t):6===a.type&&(e=new nt(r,this,t)),this._$AV.push(e),a=i[++n]}o!==a?.index&&(r=X.nextNode(),o++)}return X.currentNode=R,s}p(t){let e=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}}class et{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,e,i,s){this.type=2,this._$AH=G,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=s,this._$Cv=s?.isConnected??!0}get parentNode(){let t=this._$AA.parentNode;const e=this._$AM;return void 0!==e&&11===t?.nodeType&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=Q(this,t,e),F(t)?t===G||null==t||""===t?(this._$AH!==G&&this._$AR(),this._$AH=G):t!==this._$AH&&t!==q&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):(t=>O(t)||"function"==typeof t?.[Symbol.iterator])(t)?this.k(t):this._(t)}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t))}_(t){this._$AH!==G&&F(this._$AH)?this._$AA.nextSibling.data=t:this.T(R.createTextNode(t)),this._$AH=t}$(t){const{values:e,_$litType$:i}=t,s="number"==typeof i?this._$AC(t):(void 0===i.el&&(i.el=Z.createElement(J(i.h,i.h[0]),this.options)),i);if(this._$AH?._$AD===s)this._$AH.p(e);else{const t=new tt(s,this),i=t.u(this.options);t.p(e),this.T(i),this._$AH=t}}_$AC(t){let e=Y.get(t.strings);return void 0===e&&Y.set(t.strings,e=new Z(t)),e}k(t){O(this._$AH)||(this._$AH=[],this._$AR());const e=this._$AH;let i,s=0;for(const r of t)s===e.length?e.push(i=new et(this.O(I()),this.O(I()),this,this.options)):i=e[s],i._$AI(r),s++;s<e.length&&(this._$AR(i&&i._$AB.nextSibling,s),e.length=s)}_$AR(t=this._$AA.nextSibling,e){for(this._$AP?.(!1,!0,e);t!==this._$AB;){const e=A(t).nextSibling;A(t).remove(),t=e}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t))}}class it{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,e,i,s,r){this.type=1,this._$AH=G,this._$AN=void 0,this.element=t,this.name=e,this._$AM=s,this.options=r,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=G}_$AI(t,e=this,i,s){const r=this.strings;let o=!1;if(void 0===r)t=Q(this,t,e,0),o=!F(t)||t!==this._$AH&&t!==q,o&&(this._$AH=t);else{const s=t;let n,a;for(t=r[0],n=0;n<r.length-1;n++)a=Q(this,s[i+n],e,n),a===q&&(a=this._$AH[n]),o||=!F(a)||a!==this._$AH[n],a===G?t=G:t!==G&&(t+=(a??"")+r[n+1]),this._$AH[n]=a}o&&!s&&this.j(t)}j(t){t===G?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"")}}class st extends it{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===G?void 0:t}}class rt extends it{constructor(){super(...arguments),this.type=4}j(t){this.element.toggleAttribute(this.name,!!t&&t!==G)}}class ot extends it{constructor(t,e,i,s,r){super(t,e,i,s,r),this.type=5}_$AI(t,e=this){if((t=Q(this,t,e,0)??G)===q)return;const i=this._$AH,s=t===G&&i!==G||t.capture!==i.capture||t.once!==i.once||t.passive!==i.passive,r=t!==G&&(i===G||s);s&&this.element.removeEventListener(this.name,this,i),r&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t)}}class nt{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){Q(this,t)}}const at=x.litHtmlPolyfillSupport;at?.(Z,et),(x.litHtmlVersions??=[]).push("3.3.3");const ct=globalThis;
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -36,7 +36,7 @@ const dt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */function _t(t){return mt({...t,state:!0,attribute:!1})}
+ */function ft(t){return mt({...t,state:!0,attribute:!1})}
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -47,7 +47,7 @@ const dt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Reflect.decorate&&"object"!=typeof e&&Object.defineProperty(t,e,i),i))(e,i,{get(){return(e=>e.renderRoot?.querySelector(t)??null)(this)}})}const gt=[{name:"Empty Dust Bin",icon:"mdi:delete-empty"},{name:"Wash Mop",icon:"mdi:water-sync"},{name:"Dry Mop",icon:"mdi:tumble-dryer"},{name:"Remove Hair",icon:"mdi:content-cut"}],$t=["schedules","status"];function vt(t){return t.entities}function yt(t,e){const i=vt(t)?.[e];if(i?.name)return i.name;if(i?.original_name)return i.original_name;const s=t.states[e],r=s?.attributes?.friendly_name;return"string"==typeof r?r:e}function bt(t,e){return t.filter(t=>t.startsWith(`${e}.`))}function wt(t,e){const i=function(t,e){const i=vt(t);if(!i)return[];const s=i[e]?.device_id;return s?Object.keys(i).filter(t=>i[t]?.device_id===s):[]}(t,e),s={dockActions:[],sensors:[],maintenanceSensors:[]};if(0===i.length)return s;s.camera=bt(i,"camera")[0];for(const e of bt(i,"select")){const i=yt(t,e);i.includes("Water Level")?s.waterLevel=e:i.includes("Clean Passes")&&(s.cleanPasses=e)}for(const e of bt(i,"sensor")){const i=t.states[e];if("battery"===i?.attributes?.device_class){s.battery=e;continue}const r=yt(t,e).toLowerCase();if(r.includes("remaining"))s.maintenanceSensors.push(e);else{if($t.some(t=>r.endsWith(t)))continue;s.sensors.push(e)}}for(const e of bt(i,"binary_sensor"))yt(t,e).toLowerCase().includes("mop")&&(s.mopAttached=e);for(const e of bt(i,"button")){const i=yt(t,e),r=gt.find(t=>t.name===i);r&&s.dockActions.push({entityId:e,name:r.name,icon:r.icon})}return s}function xt(t,e,i,s){const r=i.getBoundingClientRect(),o=r.left+r.width/2,n=r.top+r.height/2,a=i.offsetWidth||r.width,c=i.offsetHeight||r.height;let l=t-o,h=e-n;if(s%360!=0){const t=-s*Math.PI/180,e=Math.cos(t),i=Math.sin(t),r=l*i+h*e;l=l*e-h*i,h=r}const d=h+c/2;return{x:(l+a/2)*(i.naturalWidth/a),y:d*(i.naturalHeight/c)}}function At(t,e){return t.x>=e[0]&&t.x<=e[2]&&t.y>=e[1]&&t.y<=e[3]}function St(t,e){let i=!1;for(let s=0,r=e.length-1;s<e.length;r=s++){const[o,n]=e[s],[a,c]=e[r];n>t.y!=c>t.y&&t.x<(a-o)*(t.y-n)/(c-n)+o&&(i=!i)}return i}function kt(t,e,i){const s=t.x-e,r=t.y-i;return s*s+r*r}const Pt=[{type:"bed",label:"Bed",icon:"mdi:bed",widthPct:.16,heightPct:.24},{type:"sofa",label:"Sofa",icon:"mdi:sofa",widthPct:.28,heightPct:.11},{type:"table",label:"Table",icon:"mdi:table-furniture",widthPct:.16,heightPct:.1},{type:"desk",label:"Desk",icon:"mdi:desk",widthPct:.16,heightPct:.08},{type:"chair",label:"Chair",icon:"mdi:chair-rolling",widthPct:.07,heightPct:.07},{type:"wardrobe",label:"Wardrobe",icon:"mdi:wardrobe",widthPct:.14,heightPct:.06},{type:"toilet",label:"Toilet",icon:"mdi:toilet",widthPct:.07,heightPct:.09},{type:"sink",label:"Sink",icon:"mdi:sink",widthPct:.07,heightPct:.055},{type:"bathtub",label:"Bathtub",icon:"mdi:bathtub",widthPct:.11,heightPct:.2},{type:"fridge",label:"Fridge",icon:"mdi:fridge-outline",widthPct:.065,heightPct:.065},{type:"washing_machine",label:"Washing Machine",icon:"mdi:washing-machine",widthPct:.065,heightPct:.065},{type:"tv",label:"TV",icon:"mdi:television",widthPct:.14,heightPct:.025},{type:"stairs",label:"Stairs",icon:"mdi:stairs",widthPct:.12,heightPct:.16},{type:"plant",label:"Plant",icon:"mdi:flower",widthPct:.04,heightPct:.04},{type:"custom",label:"Custom",icon:"mdi:shape-outline",widthPct:.09,heightPct:.09}];function Mt(t){return Pt.find(e=>e.type===t)??Pt[Pt.length-1]}function Ct(t){return(t%360+360)%360}function Et(t,e,i){const s=-e/2,r=-i/2,o=Math.min(e,i);switch(t){case"bed":{const t=.22*i;return W`
+function _t(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Reflect.decorate&&"object"!=typeof e&&Object.defineProperty(t,e,i),i))(e,i,{get(){return(e=>e.renderRoot?.querySelector(t)??null)(this)}})}const gt=[{name:"Empty Dust Bin",icon:"mdi:delete-empty"},{name:"Wash Mop",icon:"mdi:water-sync"},{name:"Dry Mop",icon:"mdi:tumble-dryer"},{name:"Remove Hair",icon:"mdi:content-cut"}],$t=["schedules","status"];function vt(t){return t.entities}function yt(t,e){const i=vt(t)?.[e];if(i?.name)return i.name;if(i?.original_name)return i.original_name;const s=t.states[e],r=s?.attributes?.friendly_name;return"string"==typeof r?r:e}function bt(t,e){return t.filter(t=>t.startsWith(`${e}.`))}function wt(t,e){const i=function(t,e){const i=vt(t);if(!i)return[];const s=i[e]?.device_id;return s?Object.keys(i).filter(t=>i[t]?.device_id===s):[]}(t,e),s={dockActions:[],sensors:[],maintenanceSensors:[]};if(0===i.length)return s;s.camera=bt(i,"camera")[0];for(const e of bt(i,"select")){const i=yt(t,e);i.includes("Water Level")?s.waterLevel=e:i.includes("Clean Passes")&&(s.cleanPasses=e)}for(const e of bt(i,"sensor")){const i=t.states[e];if("battery"===i?.attributes?.device_class){s.battery=e;continue}const r=yt(t,e).toLowerCase();if(r.includes("remaining"))s.maintenanceSensors.push(e);else{if($t.some(t=>r.endsWith(t)))continue;s.sensors.push(e)}}for(const e of bt(i,"binary_sensor"))yt(t,e).toLowerCase().includes("mop")&&(s.mopAttached=e);for(const e of bt(i,"button")){const i=yt(t,e),r=gt.find(t=>t.name===i);r&&s.dockActions.push({entityId:e,name:r.name,icon:r.icon})}return s}function xt(t,e,i,s){const r=i.getBoundingClientRect(),o=r.left+r.width/2,n=r.top+r.height/2,a=i.offsetWidth||r.width,c=i.offsetHeight||r.height;let l=t-o,h=e-n;if(s%360!=0){const t=-s*Math.PI/180,e=Math.cos(t),i=Math.sin(t),r=l*i+h*e;l=l*e-h*i,h=r}const d=h+c/2;return{x:(l+a/2)*(i.naturalWidth/a),y:d*(i.naturalHeight/c)}}function At(t,e){return t.x>=e[0]&&t.x<=e[2]&&t.y>=e[1]&&t.y<=e[3]}function St(t,e){let i=!1;for(let s=0,r=e.length-1;s<e.length;r=s++){const[o,n]=e[s],[a,c]=e[r];n>t.y!=c>t.y&&t.x<(a-o)*(t.y-n)/(c-n)+o&&(i=!i)}return i}function kt(t,e,i){const s=t.x-e,r=t.y-i;return s*s+r*r}const Ct=[{type:"bed",label:"Bed",icon:"mdi:bed",widthPct:.16,heightPct:.24},{type:"sofa",label:"Sofa",icon:"mdi:sofa",widthPct:.28,heightPct:.11},{type:"table",label:"Table",icon:"mdi:table-furniture",widthPct:.16,heightPct:.1},{type:"desk",label:"Desk",icon:"mdi:desk",widthPct:.16,heightPct:.08},{type:"chair",label:"Chair",icon:"mdi:chair-rolling",widthPct:.07,heightPct:.07},{type:"wardrobe",label:"Wardrobe",icon:"mdi:wardrobe",widthPct:.14,heightPct:.06},{type:"toilet",label:"Toilet",icon:"mdi:toilet",widthPct:.07,heightPct:.09},{type:"sink",label:"Sink",icon:"mdi:sink",widthPct:.07,heightPct:.055},{type:"bathtub",label:"Bathtub",icon:"mdi:bathtub",widthPct:.11,heightPct:.2},{type:"fridge",label:"Fridge",icon:"mdi:fridge-outline",widthPct:.065,heightPct:.065},{type:"washing_machine",label:"Washing Machine",icon:"mdi:washing-machine",widthPct:.065,heightPct:.065},{type:"tv",label:"TV",icon:"mdi:television",widthPct:.14,heightPct:.025},{type:"stairs",label:"Stairs",icon:"mdi:stairs",widthPct:.12,heightPct:.16},{type:"plant",label:"Plant",icon:"mdi:flower",widthPct:.04,heightPct:.04},{type:"custom",label:"Custom",icon:"mdi:shape-outline",widthPct:.09,heightPct:.09}];function Pt(t){return Ct.find(e=>e.type===t)??Ct[Ct.length-1]}function Mt(t){return(t%360+360)%360}function Et(t,e,i){const s=-e/2,r=-i/2,o=Math.min(e,i);switch(t){case"bed":{const t=.22*i;return W`
         <rect x=${s} y=${r} width=${e} height=${i} rx=${.08*o} class="furn-body"></rect>
         <rect x=${s+.08*e} y=${r+.06*i} width=${.84*e} height=${t} rx=${.3*t} class="furn-detail"></rect>
         <line x1=${s} y1=${r+.42*i} x2=${s+e} y2=${r+.42*i} class="furn-line"></line>
@@ -118,18 +118,16 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           .value=${String(this._config.map_rotation??0)}
           @change=${t=>this._valueChanged("map_rotation",Number(t.target.value)||0)}
         ></ha-textfield>
-        <ha-select
-          label="Map position"
-          fixedMenuPosition
-          naturalMenuWidth
-          .value=${this._config.map_position??"top"}
-          @selected=${t=>this._valueChanged("map_position",t.target.value)}
-          @closed=${t=>t.stopPropagation()}
-        >
-          <mwc-list-item value="top">Top (after controls)</mwc-list-item>
-          <mwc-list-item value="bottom">Bottom (after battery/sensors)</mwc-list-item>
-        </ha-select>
+        ${this._renderSelectForm("map_position","Map position",this._config.map_position??"top",[{value:"top",label:"Top (after controls)"},{value:"bottom",label:"Bottom (after battery/sensors)"}])}
       </div>
+    `}_renderSelectForm(t,e,i,s){const r=[{name:t,selector:{select:{mode:"dropdown",options:s}}}];return V`
+      <ha-form
+        .hass=${this.hass}
+        .data=${{[t]:i}}
+        .schema=${r}
+        .computeLabel=${()=>e}
+        @value-changed=${e=>{e.stopPropagation(),this._valueChanged(t,e.detail.value[t])}}
+      ></ha-form>
     `}_renderAdvancedEntities(){return V`
       <div class="section advanced">
         <div class="section-title">Entity overrides (optional — auto-detected otherwise)</div>
@@ -178,16 +176,13 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           then finish to save it.
         </div>
         ${t&&i?V`
-              <ha-select
-                label="Room to calibrate"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${void 0!==this._calibrationRoomId?String(this._calibrationRoomId):""}
-                @selected=${t=>{const e=Number(t.target.value),i=Number.isNaN(e)?void 0:e;i!==this._calibrationRoomId&&(this._calibrationRoomId=i,this._calibrationPoints=[])}}
-                @closed=${t=>t.stopPropagation()}
-              >
-                ${t.rooms.map(t=>V`<mwc-list-item .value=${String(t.id)}>${t.name}</mwc-list-item>`)}
-              </ha-select>
+              <ha-form
+                .hass=${this.hass}
+                .data=${{room:void 0!==this._calibrationRoomId?String(this._calibrationRoomId):""}}
+                .schema=${[{name:"room",selector:{select:{mode:"dropdown",options:t.rooms.map(t=>({value:String(t.id),label:t.name}))}}}]}
+                .computeLabel=${()=>"Room to calibrate"}
+                @value-changed=${t=>{t.stopPropagation();const e=Number(t.detail.value.room),i=Number.isNaN(e)?void 0:e;i!==this._calibrationRoomId&&(this._calibrationRoomId=i,this._calibrationPoints=[])}}
+              ></ha-form>
 
               ${void 0!==this._calibrationRoomId?V`
                     <div class="map-wrap">
@@ -249,21 +244,25 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           body to move it, the top handle to rotate, and the corner handle to resize.
         </div>
         <div class="furniture-add-row">
-          <ha-select
-            label="Furniture type"
-            fixedMenuPosition
-            naturalMenuWidth
-            .value=${this._furnitureAddType}
-            @selected=${t=>this._furnitureAddType=t.target.value}
-            @closed=${t=>t.stopPropagation()}
-          >
-            ${Pt.map(t=>V`<mwc-list-item .value=${t.type}><ha-icon icon=${t.icon}></ha-icon> ${t.label}</mwc-list-item>`)}
-          </ha-select>
+          <ha-form
+            .hass=${this.hass}
+            .data=${{type:this._furnitureAddType}}
+            .schema=${[{name:"type",selector:{select:{mode:"dropdown",options:Ct.map(t=>({value:t.type,label:t.label}))}}}]}
+            .computeLabel=${()=>"Furniture type"}
+            @value-changed=${t=>{t.stopPropagation(),this._furnitureAddType=t.detail.value.type}}
+          ></ha-form>
           <mwc-button raised @click=${this._addFurniture} ?disabled=${!t}>
             <ha-icon icon="mdi:plus"></ha-icon>
             Add
           </mwc-button>
         </div>
+        <ha-form
+          .hass=${this.hass}
+          .data=${{furniture_opacity:this._config.furniture_opacity??100}}
+          .schema=${[{name:"furniture_opacity",selector:{number:{min:0,max:100,step:5,mode:"slider",unit_of_measurement:"%"}}}]}
+          .computeLabel=${()=>"Furniture opacity"}
+          @value-changed=${t=>{t.stopPropagation(),this._valueChanged("furniture_opacity",t.detail.value.furniture_opacity)}}
+        ></ha-form>
 
         ${t&&i?V`
               <div class="map-wrap">
@@ -323,8 +322,8 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       </g>
     `}_renderFurnitureToolbar(t){return V`
       <div class="furniture-toolbar">
-        <ha-icon icon=${Mt(t.type).icon}></ha-icon>
-        <span>${Mt(t.type).label}</span>
+        <ha-icon icon=${Pt(t.type).icon}></ha-icon>
+        <span>${Pt(t.type).label}</span>
         <mwc-icon-button @click=${()=>this._rotateFurniture(t.id,-15)} title="Rotate left 15°">
           <ha-icon icon="mdi:rotate-left"></ha-icon>
         </mwc-icon-button>
@@ -364,7 +363,7 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       </div>
     `}_renderFurnitureList(){return V`
       <div class="furniture-list">
-        ${this._furniture.map(t=>{const e=Mt(t.type);return V`
+        ${this._furniture.map(t=>{const e=Pt(t.type);return V`
             <div
               class="furniture-list-row ${this._selectedFurnitureId===t.id?"selected":""}"
               @click=${()=>this._selectedFurnitureId=t.id}
@@ -380,7 +379,7 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
             </div>
           `})}
       </div>
-    `}_addFurniture(){const t=this._roomGeometry;if(!t)return;const e=function(t,e,i){const s=Mt(t),r=Math.min(e.image_width,e.image_height),o=Math.max(12,Math.round(s.widthPct*r)),n=Math.max(12,Math.round(s.heightPct*r)),a=i.length%6*r*.03;return{id:`furn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`,type:t,x:Math.round(e.image_width/2+a),y:Math.round(e.image_height/2+a),width:o,height:n,rotation:0}}(this._furnitureAddType,t,this._furniture);this._furniture=[...this._furniture,e],this._selectedFurnitureId=e.id,this._commitFurniture()}_removeFurniture(t){this._furniture=this._furniture.filter(e=>e.id!==t),this._selectedFurnitureId===t&&(this._selectedFurnitureId=void 0),this._commitFurniture()}_rotateFurniture(t,e){this._furniture=this._furniture.map(i=>i.id===t?{...i,rotation:Ct(i.rotation+e)}:i),this._commitFurniture()}_setFurnitureField(t,e,i){const s=Number(i);if(Number.isNaN(s))return;const r="width"===e||"height"===e?Math.max(12,Math.round(s)):Math.round(s);this._furniture=this._furniture.map(i=>i.id===t?{...i,[e]:r}:i),this._commitFurniture()}_commitFurniture(){this._valueChanged("furniture",this._furniture)}_startFurnitureDrag(t,e,i){t.stopPropagation(),t.preventDefault();const s=this._furnitureImg,r=this._furniture.find(t=>t.id===e);if(!s||!r)return;this._selectedFurnitureId=e;const o=t.currentTarget;o.setPointerCapture(t.pointerId);const n=xt(t.clientX,t.clientY,s,0),a=t=>{const o=xt(t.clientX,t.clientY,s,0);this._applyFurnitureDrag(e,i,r,n,o)},c=()=>{o.removeEventListener("pointermove",a),o.removeEventListener("pointerup",c),o.removeEventListener("pointercancel",c),this._commitFurniture()};o.addEventListener("pointermove",a),o.addEventListener("pointerup",c),o.addEventListener("pointercancel",c)}_applyFurnitureDrag(t,e,i,s,r){this._furniture=this._furniture.map(o=>{if(o.id!==t)return o;if("move"===e)return{...o,x:i.x+(r.x-s.x),y:i.y+(r.y-s.y)};if("rotate"===e){const t=180*Math.atan2(r.y-i.y,r.x-i.x)/Math.PI+90;return{...o,rotation:Math.round(Ct(t))}}const n=-i.rotation*Math.PI/180,a=r.x-i.x,c=r.y-i.y,l=a*Math.cos(n)-c*Math.sin(n),h=a*Math.sin(n)+c*Math.cos(n);return{...o,width:Math.max(12,Math.round(2*Math.abs(l))),height:Math.max(12,Math.round(2*Math.abs(h)))}})}};Rt.styles=n`
+    `}_addFurniture(){const t=this._roomGeometry;if(!t)return;const e=function(t,e,i){const s=Pt(t),r=Math.min(e.image_width,e.image_height),o=Math.max(12,Math.round(s.widthPct*r)),n=Math.max(12,Math.round(s.heightPct*r)),a=i.length%6*r*.03;return{id:`furn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`,type:t,x:Math.round(e.image_width/2+a),y:Math.round(e.image_height/2+a),width:o,height:n,rotation:0}}(this._furnitureAddType,t,this._furniture);this._furniture=[...this._furniture,e],this._selectedFurnitureId=e.id,this._commitFurniture()}_removeFurniture(t){this._furniture=this._furniture.filter(e=>e.id!==t),this._selectedFurnitureId===t&&(this._selectedFurnitureId=void 0),this._commitFurniture()}_rotateFurniture(t,e){this._furniture=this._furniture.map(i=>i.id===t?{...i,rotation:Mt(i.rotation+e)}:i),this._commitFurniture()}_setFurnitureField(t,e,i){const s=Number(i);if(Number.isNaN(s))return;const r="width"===e||"height"===e?Math.max(12,Math.round(s)):Math.round(s);this._furniture=this._furniture.map(i=>i.id===t?{...i,[e]:r}:i),this._commitFurniture()}_commitFurniture(){this._valueChanged("furniture",this._furniture)}_startFurnitureDrag(t,e,i){t.stopPropagation(),t.preventDefault();const s=this._furnitureImg,r=this._furniture.find(t=>t.id===e);if(!s||!r)return;this._selectedFurnitureId=e;const o=t.currentTarget;o.setPointerCapture(t.pointerId);const n=xt(t.clientX,t.clientY,s,0),a=t=>{const o=xt(t.clientX,t.clientY,s,0);this._applyFurnitureDrag(e,i,r,n,o)},c=()=>{o.removeEventListener("pointermove",a),o.removeEventListener("pointerup",c),o.removeEventListener("pointercancel",c),this._commitFurniture()};o.addEventListener("pointermove",a),o.addEventListener("pointerup",c),o.addEventListener("pointercancel",c)}_applyFurnitureDrag(t,e,i,s,r){this._furniture=this._furniture.map(o=>{if(o.id!==t)return o;if("move"===e)return{...o,x:i.x+(r.x-s.x),y:i.y+(r.y-s.y)};if("rotate"===e){const t=180*Math.atan2(r.y-i.y,r.x-i.x)/Math.PI+90;return{...o,rotation:Math.round(Mt(t))}}const n=-i.rotation*Math.PI/180,a=r.x-i.x,c=r.y-i.y,l=a*Math.cos(n)-c*Math.sin(n),h=a*Math.sin(n)+c*Math.cos(n);return{...o,width:Math.max(12,Math.round(2*Math.abs(l))),height:Math.max(12,Math.round(2*Math.abs(h)))}})}};Rt.styles=n`
     .section {
       display: flex;
       flex-direction: column;
@@ -406,7 +405,7 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       flex-wrap: wrap;
     }
     .map-layout ha-textfield,
-    .map-layout ha-select {
+    .map-layout ha-form {
       flex: 1;
       min-width: 160px;
     }
@@ -443,7 +442,7 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       gap: 8px;
       align-items: center;
     }
-    .furniture-add-row ha-select {
+    .furniture-add-row ha-form {
       flex: 1;
       min-width: 160px;
     }
@@ -544,7 +543,7 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
     .furniture-list-row.selected {
       background: var(--secondary-background-color, rgba(127, 127, 127, 0.15));
     }
-  `,t([mt({attribute:!1})],Rt.prototype,"hass",void 0),t([_t()],Rt.prototype,"_config",void 0),t([_t()],Rt.prototype,"_calibrationRoomId",void 0),t([_t()],Rt.prototype,"_calibrationPoints",void 0),t([_t()],Rt.prototype,"_furniture",void 0),t([_t()],Rt.prototype,"_selectedFurnitureId",void 0),t([_t()],Rt.prototype,"_furnitureAddType",void 0),t([ft("img.furniture-image")],Rt.prototype,"_furnitureImg",void 0),Rt=t([dt("vacuum-card-adv-editor")],Rt),console.info("%c VACUUM-CARD-ADV %c v2.0.0b0 ","color: #0b0f14; background: #34e0d6; font-weight: 700;","color: #34e0d6; background: #0b0f14; font-weight: 700;"),window.customCards=window.customCards||[],window.customCards.push({type:"vacuum-card-adv",name:"TapoVac ADV Vacuum Card",description:"A card for the TapoVac-ADV integration (Tapo RV30/RV50 series).",preview:!0});let It=class extends lt{constructor(){super(...arguments),this._discovered={dockActions:[],sensors:[],maintenanceSensors:[]},this._selectedRoomIds=new Set,this._maintenanceOpen=!1,this._busy=!1}static getConfigElement(){return document.createElement("vacuum-card-adv-editor")}static getStubConfig(t){return{type:"custom:vacuum-card-adv",vacuum:Object.keys(t.states).find(t=>t.startsWith("vacuum."))??"",show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_mop_status:!0,show_room_names:!0,show_last_updated:!0,show_furniture:!0}}setConfig(t){if(!t.vacuum)throw new Error("vacuum entity is required");this._config={show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_mop_status:!0,show_room_names:!0,show_last_updated:!0,show_furniture:!0,map_rotation:0,...t},this._maintenanceOpen=!1===t.maintenance_collapsed_default}getCardSize(){let t=2;return(this._config?.show_map??!0)&&(t+=6),(this._config?.show_sensors??!0)&&(t+=2),t}willUpdate(t){t.has("hass")&&this.hass&&this._config?.vacuum&&this._lastDiscoveredFor!==this._config.vacuum&&(this._discovered=wt(this.hass,this._config.vacuum),this._lastDiscoveredFor=this._config.vacuum)}get _roomGeometry(){const t=this._config.camera??this._discovered.camera;if(!t)return;const e=this.hass.states[t],i=e?.attributes?.room_geometry;return i&&i.rooms?i:void 0}_shortTitle(t){const e=this.hass.states[this._config.vacuum],i=e?.attributes.friendly_name;return i&&t.startsWith(`${i} `)?t.slice(i.length+1):t}_lastUpdated(){const t=[this._config.vacuum,this._config.battery_entity??this._discovered.battery,this._config.mop_attached_entity??this._discovered.mopAttached,...this._config.sensors??this._discovered.sensors].filter(t=>!!t);let e;for(const i of t){const t=this.hass.states[i]?.last_changed;if(!t)continue;const s=new Date(t);(!e||s>e)&&(e=s)}return e}_relativeTime(t){const e=Math.round((Date.now()-t.getTime())/1e3);if(e<5)return"just now";if(e<60)return`${e}s ago`;const i=Math.round(e/60);if(i<60)return`${i}m ago`;const s=Math.round(i/60);if(s<24)return`${s}h ago`;return`${Math.round(s/24)}d ago`}render(){if(!this._config||!this.hass)return G;const t=this.hass.states[this._config.vacuum];if(!t)return V`<ha-card><div class="warning">Entity not found: ${this._config.vacuum}</div></ha-card>`;const e=this._config.name??t.attributes.friendly_name??"Vacuum",i=this.hass.formatEntityState?.(t)??t.state,s="bottom"===this._config.map_position?"bottom":"top",r=this._config.show_last_updated??!0?this._lastUpdated():void 0;return V`
+  `,t([mt({attribute:!1})],Rt.prototype,"hass",void 0),t([ft()],Rt.prototype,"_config",void 0),t([ft()],Rt.prototype,"_calibrationRoomId",void 0),t([ft()],Rt.prototype,"_calibrationPoints",void 0),t([ft()],Rt.prototype,"_furniture",void 0),t([ft()],Rt.prototype,"_selectedFurnitureId",void 0),t([ft()],Rt.prototype,"_furnitureAddType",void 0),t([_t("img.furniture-image")],Rt.prototype,"_furnitureImg",void 0),Rt=t([dt("vacuum-card-adv-editor")],Rt),console.info("%c VACUUM-CARD-ADV %c v2.0.0b0 ","color: #0b0f14; background: #34e0d6; font-weight: 700;","color: #34e0d6; background: #0b0f14; font-weight: 700;"),window.customCards=window.customCards||[],window.customCards.push({type:"vacuum-card-adv",name:"TapoVac ADV Vacuum Card",description:"A card for the TapoVac-ADV integration (Tapo RV30/RV50 series).",preview:!0});let It=class extends lt{constructor(){super(...arguments),this._discovered={dockActions:[],sensors:[],maintenanceSensors:[]},this._selectedRoomIds=new Set,this._maintenanceOpen=!1,this._busy=!1}static getConfigElement(){return document.createElement("vacuum-card-adv-editor")}static getStubConfig(t){return{type:"custom:vacuum-card-adv",vacuum:Object.keys(t.states).find(t=>t.startsWith("vacuum."))??"",show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_mop_status:!0,show_room_names:!0,show_last_updated:!0,show_furniture:!0,furniture_opacity:100}}setConfig(t){if(!t.vacuum)throw new Error("vacuum entity is required");this._config={show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_mop_status:!0,show_room_names:!0,show_last_updated:!0,show_furniture:!0,furniture_opacity:100,map_rotation:0,...t},this._maintenanceOpen=!1===t.maintenance_collapsed_default}getCardSize(){let t=2;return(this._config?.show_map??!0)&&(t+=6),(this._config?.show_sensors??!0)&&(t+=2),t}willUpdate(t){t.has("hass")&&this.hass&&this._config?.vacuum&&this._lastDiscoveredFor!==this._config.vacuum&&(this._discovered=wt(this.hass,this._config.vacuum),this._lastDiscoveredFor=this._config.vacuum)}get _roomGeometry(){const t=this._config.camera??this._discovered.camera;if(!t)return;const e=this.hass.states[t],i=e?.attributes?.room_geometry;return i&&i.rooms?i:void 0}_shortTitle(t){const e=this.hass.states[this._config.vacuum],i=e?.attributes.friendly_name;return i&&t.startsWith(`${i} `)?t.slice(i.length+1):t}_lastUpdated(){const t=[this._config.vacuum,this._config.battery_entity??this._discovered.battery,this._config.mop_attached_entity??this._discovered.mopAttached,...this._config.sensors??this._discovered.sensors].filter(t=>!!t);let e;for(const i of t){const t=this.hass.states[i]?.last_changed;if(!t)continue;const s=new Date(t);(!e||s>e)&&(e=s)}return e}_relativeTime(t){const e=Math.round((Date.now()-t.getTime())/1e3);if(e<5)return"just now";if(e<60)return`${e}s ago`;const i=Math.round(e/60);if(i<60)return`${i}m ago`;const s=Math.round(i/60);if(s<24)return`${s}h ago`;return`${Math.round(s/24)}d ago`}render(){if(!this._config||!this.hass)return G;const t=this.hass.states[this._config.vacuum];if(!t)return V`<ha-card><div class="warning">Entity not found: ${this._config.vacuum}</div></ha-card>`;const e=this._config.name??t.attributes.friendly_name??"Vacuum",i=this.hass.formatEntityState?.(t)??t.state,s="bottom"===this._config.map_position?"bottom":"top",r=this._config.show_last_updated??!0?this._lastUpdated():void 0;return V`
       <ha-card>
         <div class="header" @click=${()=>this._fireMoreInfo(this._config.vacuum)}>
           <ha-icon class="header-icon" icon="mdi:robot-vacuum"></ha-icon>
@@ -627,15 +626,15 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
         <circle cx=${t.cx} cy=${t.cy} r="15" class="badge-circle"></circle>
         <text x=${t.cx} y=${t.cy} dy="0.35em" text-anchor="middle" class="badge-text">${e+1}</text>
       </g>
-    `}_renderFurniture(){const t=this._config.furniture;return t&&0!==t.length?W`
-      <g class="furniture-layer">
+    `}_renderFurniture(){const t=this._config.furniture;if(!t||0===t.length)return G;const e=Math.max(0,Math.min(100,this._config.furniture_opacity??100))/100;return W`
+      <g class="furniture-layer" opacity=${e}>
         ${t.map(t=>W`
             <g transform="translate(${t.x} ${t.y}) rotate(${t.rotation})" class="furniture-item">
               ${Et(t.type,t.width,t.height)}
             </g>
           `)}
       </g>
-    `:G}_renderSelectedRoomsBar(t){const e=[...this._selectedRoomIds].map((e,i)=>{const s=t?.rooms.find(t=>t.id===e)?.name;return s?`${i+1}. ${s}`:void 0}).filter(t=>!!t);return V`
+    `}_renderSelectedRoomsBar(t){const e=[...this._selectedRoomIds].map((e,i)=>{const s=t?.rooms.find(t=>t.id===e)?.name;return s?`${i+1}. ${s}`:void 0}).filter(t=>!!t);return V`
       <div class="selected-rooms-bar">
         <span>${this._config.show_room_names??!0?e.join(", "):`${e.length} room(s)`}</span>
         <button class="pill accent small" @click=${this._cleanSelectedRooms} ?disabled=${this._busy}>
@@ -656,32 +655,18 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       </div>
     `}_renderSelects(){const t=this.hass.states[this._config.vacuum],e=this._config.show_fan_speed??!0,i=this._config.show_water_level??!0,s=t.attributes.fan_speed_list??[],r=t.attributes.fan_speed,o=this._config.water_level_entity??this._discovered.waterLevel,n=o?this.hass.states[o]:void 0;return e&&s.length>0||i&&n?V`
       <div class="section selects">
-        ${e&&s.length>0?V`
-              <ha-select
-                label="Fan speed"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${r??""}
-                @selected=${t=>{const e=t.target.value;e!==(r??"")&&this._setFanSpeed(e)}}
-                @closed=${t=>t.stopPropagation()}
-              >
-                ${s.map(t=>V`<mwc-list-item .value=${t}>${t}</mwc-list-item>`)}
-              </ha-select>
-            `:G}
-        ${i&&n?V`
-              <ha-select
-                label="Water level"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${n.state}
-                @selected=${t=>{const e=t.target.value;e!==n.state&&this._selectOption(o,e)}}
-                @closed=${t=>t.stopPropagation()}
-              >
-                ${(n.attributes.options??[]).map(t=>V`<mwc-list-item .value=${t}>${t}</mwc-list-item>`)}
-              </ha-select>
-            `:G}
+        ${e&&s.length>0?this._renderSelectField("Fan speed",r??"",s.map(t=>({value:t,label:t})),t=>{t!==(r??"")&&this._setFanSpeed(t)}):G}
+        ${i&&n?this._renderSelectField("Water level",n.state,(n.attributes.options??[]).map(t=>({value:t,label:t})),t=>{t!==n.state&&this._selectOption(o,t)}):G}
       </div>
-    `:G}_renderRow(t){const e=void 0!==t.percent&&!Number.isNaN(t.percent);return V`
+    `:G}_renderSelectField(t,e,i,s){return V`
+      <ha-form
+        .hass=${this.hass}
+        .data=${{value:e}}
+        .schema=${[{name:"value",selector:{select:{mode:"dropdown",options:i}}}]}
+        .computeLabel=${()=>t}
+        @value-changed=${t=>{t.stopPropagation(),s(t.detail.value.value)}}
+      ></ha-form>
+    `}_renderRow(t){const e=void 0!==t.percent&&!Number.isNaN(t.percent);return V`
       <div
         class="info-row ${t.overdue?"overdue":""} ${t.entityId?"clickable":""}"
         @click=${t.entityId?()=>this._fireMoreInfo(t.entityId):void 0}
@@ -887,7 +872,7 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       display: flex;
       gap: 8px;
     }
-    .selects ha-select {
+    .selects ha-form {
       flex: 1;
       min-width: 100px;
     }
@@ -966,4 +951,4 @@ function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
     .maintenance-toggle ha-icon:last-child {
       margin-left: auto;
     }
-  `,t([mt({attribute:!1})],It.prototype,"hass",void 0),t([_t()],It.prototype,"_config",void 0),t([_t()],It.prototype,"_discovered",void 0),t([_t()],It.prototype,"_selectedRoomIds",void 0),t([_t()],It.prototype,"_maintenanceOpen",void 0),t([_t()],It.prototype,"_busy",void 0),t([ft("img.map-image")],It.prototype,"_mapImg",void 0),It=t([dt("vacuum-card-adv")],It);export{It as VacuumCardAdv};
+  `,t([mt({attribute:!1})],It.prototype,"hass",void 0),t([ft()],It.prototype,"_config",void 0),t([ft()],It.prototype,"_discovered",void 0),t([ft()],It.prototype,"_selectedRoomIds",void 0),t([ft()],It.prototype,"_maintenanceOpen",void 0),t([ft()],It.prototype,"_busy",void 0),t([_t("img.map-image")],It.prototype,"_mapImg",void 0),It=t([dt("vacuum-card-adv")],It);export{It as VacuumCardAdv};

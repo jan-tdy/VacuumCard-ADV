@@ -140,22 +140,44 @@ export class VacuumCardAdvEditor extends LitElement {
           @change=${(e: Event) =>
             this._valueChanged("map_rotation", Number((e.target as HTMLInputElement).value) || 0)}
         ></ha-textfield>
-        <ha-select
-          label="Map position"
-          fixedMenuPosition
-          naturalMenuWidth
-          .value=${this._config.map_position ?? "top"}
-          @selected=${(e: CustomEvent) =>
-            this._valueChanged(
-              "map_position",
-              (e.target as unknown as { value: string }).value as "top" | "bottom"
-            )}
-          @closed=${(e: Event) => e.stopPropagation()}
-        >
-          <mwc-list-item value="top">Top (after controls)</mwc-list-item>
-          <mwc-list-item value="bottom">Bottom (after battery/sensors)</mwc-list-item>
-        </ha-select>
+        ${this._renderSelectForm(
+          "map_position",
+          "Map position",
+          this._config.map_position ?? "top",
+          [
+            { value: "top", label: "Top (after controls)" },
+            { value: "bottom", label: "Bottom (after battery/sensors)" },
+          ]
+        )}
       </div>
+    `;
+  }
+
+  /** A single-field dropdown backed by HA's own `ha-form` select selector
+   *  instead of a hand-rolled `ha-select`/`mwc-list-item` pair. The latter
+   *  depends on `mwc-menu`'s own positioning, which can end up unopenable
+   *  inside the card editor dialog's stacking context on some frontend
+   *  versions even with fixedMenuPosition/naturalMenuWidth set — ha-form's
+   *  select selector is the same widget HA's own built-in card editors use
+   *  there, so it doesn't have that problem. */
+  private _renderSelectForm(
+    key: keyof VacuumCardConfig,
+    label: string,
+    value: string,
+    options: { value: string; label: string }[]
+  ): TemplateResult {
+    const schema = [{ name: key, selector: { select: { mode: "dropdown", options } } }];
+    return html`
+      <ha-form
+        .hass=${this.hass}
+        .data=${{ [key]: value }}
+        .schema=${schema}
+        .computeLabel=${() => label}
+        @value-changed=${(e: CustomEvent) => {
+          e.stopPropagation();
+          this._valueChanged(key, e.detail.value[key]);
+        }}
+      ></ha-form>
     `;
   }
 
@@ -221,26 +243,34 @@ export class VacuumCardAdvEditor extends LitElement {
         ${!geo || !picture
           ? html`<div class="hint">Map not available yet — open a dashboard with this vacuum first.</div>`
           : html`
-              <ha-select
-                label="Room to calibrate"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${this._calibrationRoomId !== undefined ? String(this._calibrationRoomId) : ""}
-                @selected=${(e: CustomEvent) => {
-                  const id = Number((e.target as unknown as { value: string }).value);
+              <ha-form
+                .hass=${this.hass}
+                .data=${{
+                  room: this._calibrationRoomId !== undefined ? String(this._calibrationRoomId) : "",
+                }}
+                .schema=${[
+                  {
+                    name: "room",
+                    selector: {
+                      select: {
+                        mode: "dropdown",
+                        options: geo.rooms.map((r) => ({ value: String(r.id), label: r.name })),
+                      },
+                    },
+                  },
+                ]}
+                .computeLabel=${() => "Room to calibrate"}
+                @value-changed=${(e: CustomEvent) => {
+                  e.stopPropagation();
+                  const id = Number(e.detail.value.room);
                   const next = Number.isNaN(id) ? undefined : id;
-                  // Same re-fire-on-programmatic-.value risk as elsewhere
-                  // in this editor — see the guard in _valueChanged.
+                  // Same re-fire-on-programmatic-value risk as elsewhere in
+                  // this editor — see the guard in _valueChanged.
                   if (next === this._calibrationRoomId) return;
                   this._calibrationRoomId = next;
                   this._calibrationPoints = [];
                 }}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                ${geo.rooms.map(
-                  (r) => html`<mwc-list-item .value=${String(r.id)}>${r.name}</mwc-list-item>`
-                )}
-              </ha-select>
+              ></ha-form>
 
               ${this._calibrationRoomId !== undefined
                 ? html`
@@ -371,24 +401,46 @@ export class VacuumCardAdvEditor extends LitElement {
           body to move it, the top handle to rotate, and the corner handle to resize.
         </div>
         <div class="furniture-add-row">
-          <ha-select
-            label="Furniture type"
-            fixedMenuPosition
-            naturalMenuWidth
-            .value=${this._furnitureAddType}
-            @selected=${(e: CustomEvent) =>
-              (this._furnitureAddType = (e.target as unknown as { value: string }).value as FurnitureType)}
-            @closed=${(e: Event) => e.stopPropagation()}
-          >
-            ${FURNITURE_CATALOG.map(
-              (f) => html`<mwc-list-item .value=${f.type}><ha-icon icon=${f.icon}></ha-icon> ${f.label}</mwc-list-item>`
-            )}
-          </ha-select>
+          <ha-form
+            .hass=${this.hass}
+            .data=${{ type: this._furnitureAddType }}
+            .schema=${[
+              {
+                name: "type",
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    options: FURNITURE_CATALOG.map((f) => ({ value: f.type, label: f.label })),
+                  },
+                },
+              },
+            ]}
+            .computeLabel=${() => "Furniture type"}
+            @value-changed=${(e: CustomEvent) => {
+              e.stopPropagation();
+              this._furnitureAddType = e.detail.value.type as FurnitureType;
+            }}
+          ></ha-form>
           <mwc-button raised @click=${this._addFurniture} ?disabled=${!geo}>
             <ha-icon icon="mdi:plus"></ha-icon>
             Add
           </mwc-button>
         </div>
+        <ha-form
+          .hass=${this.hass}
+          .data=${{ furniture_opacity: this._config.furniture_opacity ?? 100 }}
+          .schema=${[
+            {
+              name: "furniture_opacity",
+              selector: { number: { min: 0, max: 100, step: 5, mode: "slider", unit_of_measurement: "%" } },
+            },
+          ]}
+          .computeLabel=${() => "Furniture opacity"}
+          @value-changed=${(e: CustomEvent) => {
+            e.stopPropagation();
+            this._valueChanged("furniture_opacity", e.detail.value.furniture_opacity);
+          }}
+        ></ha-form>
 
         ${!geo || !picture
           ? html`<div class="hint">Map not available yet — open a dashboard with this vacuum first.</div>`
@@ -675,7 +727,7 @@ export class VacuumCardAdvEditor extends LitElement {
       flex-wrap: wrap;
     }
     .map-layout ha-textfield,
-    .map-layout ha-select {
+    .map-layout ha-form {
       flex: 1;
       min-width: 160px;
     }
@@ -712,7 +764,7 @@ export class VacuumCardAdvEditor extends LitElement {
       gap: 8px;
       align-items: center;
     }
-    .furniture-add-row ha-select {
+    .furniture-add-row ha-form {
       flex: 1;
       min-width: 160px;
     }

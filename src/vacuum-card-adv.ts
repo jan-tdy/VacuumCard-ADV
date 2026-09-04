@@ -72,6 +72,7 @@ export class VacuumCardAdv extends LitElement {
       show_room_names: true,
       show_last_updated: true,
       show_furniture: true,
+      furniture_opacity: 100,
     };
   }
 
@@ -91,6 +92,7 @@ export class VacuumCardAdv extends LitElement {
       show_room_names: true,
       show_last_updated: true,
       show_furniture: true,
+      furniture_opacity: 100,
       map_rotation: DEFAULT_MAP_ROTATION,
       ...config,
     };
@@ -347,8 +349,9 @@ export class VacuumCardAdv extends LitElement {
   private _renderFurniture(): SVGTemplateResult | typeof nothing {
     const items = this._config.furniture;
     if (!items || items.length === 0) return nothing;
+    const opacity = Math.max(0, Math.min(100, this._config.furniture_opacity ?? 100)) / 100;
     return svg`
-      <g class="furniture-layer">
+      <g class="furniture-layer" opacity=${opacity}>
         ${items.map(
           (item) => svg`
             <g transform="translate(${item.x} ${item.y}) rotate(${item.rotation})" class="furniture-item">
@@ -454,48 +457,62 @@ export class VacuumCardAdv extends LitElement {
     return html`
       <div class="section selects">
         ${showFan && fanSpeedList.length > 0
-          ? html`
-              <ha-select
-                label="Fan speed"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${fanSpeed ?? ""}
-                @selected=${(e: CustomEvent) => {
-                  const next = (e.target as unknown as { value: string }).value;
-                  // ha-select can re-fire "selected" when .value is set
-                  // programmatically (e.g. every hass update re-applying
-                  // the current fan_speed) — skip re-issuing the same
-                  // service call when nothing actually changed.
-                  if (next === (fanSpeed ?? "")) return;
-                  this._setFanSpeed(next);
-                }}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                ${fanSpeedList.map((opt) => html`<mwc-list-item .value=${opt}>${opt}</mwc-list-item>`)}
-              </ha-select>
-            `
+          ? this._renderSelectField(
+              "Fan speed",
+              fanSpeed ?? "",
+              fanSpeedList.map((opt) => ({ value: opt, label: opt })),
+              (next) => {
+                // ha-form can re-fire value-changed when .data is set
+                // programmatically (e.g. every hass update re-applying the
+                // current fan_speed) — skip re-issuing the same service
+                // call when nothing actually changed.
+                if (next === (fanSpeed ?? "")) return;
+                this._setFanSpeed(next);
+              }
+            )
           : nothing}
         ${showWater && waterEntity
-          ? html`
-              <ha-select
-                label="Water level"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${waterEntity.state}
-                @selected=${(e: CustomEvent) => {
-                  const next = (e.target as unknown as { value: string }).value;
-                  if (next === waterEntity.state) return;
-                  this._selectOption(waterEntityId as string, next);
-                }}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                ${(waterEntity.attributes["options"] as string[] | undefined ?? []).map(
-                  (opt) => html`<mwc-list-item .value=${opt}>${opt}</mwc-list-item>`
-                )}
-              </ha-select>
-            `
+          ? this._renderSelectField(
+              "Water level",
+              waterEntity.state,
+              ((waterEntity.attributes["options"] as string[] | undefined) ?? []).map((opt) => ({
+                value: opt,
+                label: opt,
+              })),
+              (next) => {
+                if (next === waterEntity.state) return;
+                this._selectOption(waterEntityId as string, next);
+              }
+            )
           : nothing}
       </div>
+    `;
+  }
+
+  /** A single-field dropdown backed by HA's own `ha-form` select selector
+   *  instead of a hand-rolled `ha-select`/`mwc-list-item` pair — the
+   *  latter depends on `mwc-menu`'s own positioning, which can end up
+   *  unopenable depending on the surrounding dashboard layout/stacking
+   *  context on some frontend versions. `ha-form`'s select selector is the
+   *  same widget HA's own built-in cards use, so it doesn't have that
+   *  problem. */
+  private _renderSelectField(
+    label: string,
+    value: string,
+    options: { value: string; label: string }[],
+    onChange: (value: string) => void
+  ): TemplateResult {
+    return html`
+      <ha-form
+        .hass=${this.hass}
+        .data=${{ value }}
+        .schema=${[{ name: "value", selector: { select: { mode: "dropdown", options } } }]}
+        .computeLabel=${() => label}
+        @value-changed=${(e: CustomEvent) => {
+          e.stopPropagation();
+          onChange(e.detail.value.value);
+        }}
+      ></ha-form>
     `;
   }
 
@@ -830,7 +847,7 @@ export class VacuumCardAdv extends LitElement {
       display: flex;
       gap: 8px;
     }
-    .selects ha-select {
+    .selects ha-form {
       flex: 1;
       min-width: 100px;
     }

@@ -92,6 +92,7 @@ show_mop_status: true
 show_sensors: true
 show_last_updated: true
 show_furniture: true
+furniture_opacity: 100   # 0-100, how solid furniture looks on the live card's map
 sensors: []              # override the auto-detected sensor list
 maintenance_sensors: []  # override which sensors show under "Maintenance"
 room_polygons: {}        # written by the editor's calibration tool
@@ -118,7 +119,9 @@ drop it in the middle of the map, then:
 
 Furniture is stored in the same pixel space as calibrated room polygons, so
 it holds its position and size across map refreshes. Toggle `show_furniture`
-off to hide it on the live card without deleting it.
+off to hide it on the live card without deleting it, or use the **Furniture
+opacity** slider in the editor (`furniture_opacity`, 0-100) to make it more
+or less prominent against the map instead of hiding it outright.
 
 ## Room calibration
 

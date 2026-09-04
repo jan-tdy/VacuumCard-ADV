@@ -104,6 +104,9 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   // FurnitureItem above.
   furniture?: FurnitureItem[];
   show_furniture?: boolean;
+  // 0-100, applied to the whole furniture layer on the live card (not the
+  // editor's own map, where full opacity makes items easier to select).
+  furniture_opacity?: number;
 }
 
 // -- room_geometry, as exposed by TapoVac-ADV's map camera entity --------
