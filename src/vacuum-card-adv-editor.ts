@@ -11,6 +11,7 @@ import {
   getFurnitureMeta,
   normalizeAngle,
 } from "./utils/furniture";
+import { renderSelectField } from "./utils/ha-form";
 
 type FurnitureDragMode = "move" | "resize" | "rotate";
 
@@ -140,21 +141,16 @@ export class VacuumCardAdvEditor extends LitElement {
           @change=${(e: Event) =>
             this._valueChanged("map_rotation", Number((e.target as HTMLInputElement).value) || 0)}
         ></ha-textfield>
-        <ha-select
-          label="Map position"
-          fixedMenuPosition
-          naturalMenuWidth
-          .value=${this._config.map_position ?? "top"}
-          @selected=${(e: CustomEvent) =>
-            this._valueChanged(
-              "map_position",
-              (e.target as unknown as { value: string }).value as "top" | "bottom"
-            )}
-          @closed=${(e: Event) => e.stopPropagation()}
-        >
-          <mwc-list-item value="top">Top (after controls)</mwc-list-item>
-          <mwc-list-item value="bottom">Bottom (after battery/sensors)</mwc-list-item>
-        </ha-select>
+        ${renderSelectField(
+          this.hass,
+          "Map position",
+          this._config.map_position ?? "top",
+          [
+            { value: "top", label: "Top (after controls)" },
+            { value: "bottom", label: "Bottom (after battery/sensors)" },
+          ],
+          (value) => this._valueChanged("map_position", value)
+        )}
       </div>
     `;
   }
@@ -221,26 +217,21 @@ export class VacuumCardAdvEditor extends LitElement {
         ${!geo || !picture
           ? html`<div class="hint">Map not available yet — open a dashboard with this vacuum first.</div>`
           : html`
-              <ha-select
-                label="Room to calibrate"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${this._calibrationRoomId !== undefined ? String(this._calibrationRoomId) : ""}
-                @selected=${(e: CustomEvent) => {
-                  const id = Number((e.target as unknown as { value: string }).value);
+              ${renderSelectField(
+                this.hass,
+                "Room to calibrate",
+                this._calibrationRoomId !== undefined ? String(this._calibrationRoomId) : "",
+                geo.rooms.map((r) => ({ value: String(r.id), label: r.name })),
+                (value) => {
+                  const id = Number(value);
                   const next = Number.isNaN(id) ? undefined : id;
-                  // Same re-fire-on-programmatic-.value risk as elsewhere
-                  // in this editor — see the guard in _valueChanged.
+                  // Same re-fire-on-programmatic-value risk as elsewhere in
+                  // this editor — see the guard in _valueChanged.
                   if (next === this._calibrationRoomId) return;
                   this._calibrationRoomId = next;
                   this._calibrationPoints = [];
-                }}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                ${geo.rooms.map(
-                  (r) => html`<mwc-list-item .value=${String(r.id)}>${r.name}</mwc-list-item>`
-                )}
-              </ha-select>
+                }
+              )}
 
               ${this._calibrationRoomId !== undefined
                 ? html`
@@ -371,24 +362,33 @@ export class VacuumCardAdvEditor extends LitElement {
           body to move it, the top handle to rotate, and the corner handle to resize.
         </div>
         <div class="furniture-add-row">
-          <ha-select
-            label="Furniture type"
-            fixedMenuPosition
-            naturalMenuWidth
-            .value=${this._furnitureAddType}
-            @selected=${(e: CustomEvent) =>
-              (this._furnitureAddType = (e.target as unknown as { value: string }).value as FurnitureType)}
-            @closed=${(e: Event) => e.stopPropagation()}
-          >
-            ${FURNITURE_CATALOG.map(
-              (f) => html`<mwc-list-item .value=${f.type}><ha-icon icon=${f.icon}></ha-icon> ${f.label}</mwc-list-item>`
-            )}
-          </ha-select>
+          ${renderSelectField(
+            this.hass,
+            "Furniture type",
+            this._furnitureAddType,
+            FURNITURE_CATALOG.map((f) => ({ value: f.type, label: f.label })),
+            (value) => (this._furnitureAddType = value as FurnitureType)
+          )}
           <mwc-button raised @click=${this._addFurniture} ?disabled=${!geo}>
             <ha-icon icon="mdi:plus"></ha-icon>
             Add
           </mwc-button>
         </div>
+        <ha-form
+          .hass=${this.hass}
+          .data=${{ furniture_opacity: this._config.furniture_opacity ?? 100 }}
+          .schema=${[
+            {
+              name: "furniture_opacity",
+              selector: { number: { min: 0, max: 100, step: 5, mode: "slider", unit_of_measurement: "%" } },
+            },
+          ]}
+          .computeLabel=${() => "Furniture opacity"}
+          @value-changed=${(e: CustomEvent) => {
+            e.stopPropagation();
+            this._valueChanged("furniture_opacity", e.detail.value.furniture_opacity);
+          }}
+        ></ha-form>
 
         ${!geo || !picture
           ? html`<div class="hint">Map not available yet — open a dashboard with this vacuum first.</div>`
@@ -675,7 +675,7 @@ export class VacuumCardAdvEditor extends LitElement {
       flex-wrap: wrap;
     }
     .map-layout ha-textfield,
-    .map-layout ha-select {
+    .map-layout ha-form {
       flex: 1;
       min-width: 160px;
     }
@@ -712,7 +712,7 @@ export class VacuumCardAdvEditor extends LitElement {
       gap: 8px;
       align-items: center;
     }
-    .furniture-add-row ha-select {
+    .furniture-add-row ha-form {
       flex: 1;
       min-width: 160px;
     }

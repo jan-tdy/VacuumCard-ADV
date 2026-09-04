@@ -10,6 +10,7 @@ import {
 import { discoverEntities, DiscoveredEntities } from "./utils/hass-entities";
 import { displayToNatural, resolveRoomAtPoint } from "./utils/geometry";
 import { furnitureGlyph } from "./utils/furniture";
+import { renderSelectField } from "./utils/ha-form";
 import { CARD_VERSION, DEFAULT_MAP_ROTATION } from "./const";
 
 import "./vacuum-card-adv-editor";
@@ -72,6 +73,7 @@ export class VacuumCardAdv extends LitElement {
       show_room_names: true,
       show_last_updated: true,
       show_furniture: true,
+      furniture_opacity: 100,
     };
   }
 
@@ -91,6 +93,7 @@ export class VacuumCardAdv extends LitElement {
       show_room_names: true,
       show_last_updated: true,
       show_furniture: true,
+      furniture_opacity: 100,
       map_rotation: DEFAULT_MAP_ROTATION,
       ...config,
     };
@@ -347,8 +350,9 @@ export class VacuumCardAdv extends LitElement {
   private _renderFurniture(): SVGTemplateResult | typeof nothing {
     const items = this._config.furniture;
     if (!items || items.length === 0) return nothing;
+    const opacity = Math.max(0, Math.min(100, this._config.furniture_opacity ?? 100)) / 100;
     return svg`
-      <g class="furniture-layer">
+      <g class="furniture-layer" opacity=${opacity}>
         ${items.map(
           (item) => svg`
             <g transform="translate(${item.x} ${item.y}) rotate(${item.rotation})" class="furniture-item">
@@ -454,46 +458,35 @@ export class VacuumCardAdv extends LitElement {
     return html`
       <div class="section selects">
         ${showFan && fanSpeedList.length > 0
-          ? html`
-              <ha-select
-                label="Fan speed"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${fanSpeed ?? ""}
-                @selected=${(e: CustomEvent) => {
-                  const next = (e.target as unknown as { value: string }).value;
-                  // ha-select can re-fire "selected" when .value is set
-                  // programmatically (e.g. every hass update re-applying
-                  // the current fan_speed) — skip re-issuing the same
-                  // service call when nothing actually changed.
-                  if (next === (fanSpeed ?? "")) return;
-                  this._setFanSpeed(next);
-                }}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                ${fanSpeedList.map((opt) => html`<mwc-list-item .value=${opt}>${opt}</mwc-list-item>`)}
-              </ha-select>
-            `
+          ? renderSelectField(
+              this.hass,
+              "Fan speed",
+              fanSpeed ?? "",
+              fanSpeedList.map((opt) => ({ value: opt, label: opt })),
+              (next) => {
+                // ha-form can re-fire value-changed when .data is set
+                // programmatically (e.g. every hass update re-applying the
+                // current fan_speed) — skip re-issuing the same service
+                // call when nothing actually changed.
+                if (next === (fanSpeed ?? "")) return;
+                this._setFanSpeed(next);
+              }
+            )
           : nothing}
         ${showWater && waterEntity
-          ? html`
-              <ha-select
-                label="Water level"
-                fixedMenuPosition
-                naturalMenuWidth
-                .value=${waterEntity.state}
-                @selected=${(e: CustomEvent) => {
-                  const next = (e.target as unknown as { value: string }).value;
-                  if (next === waterEntity.state) return;
-                  this._selectOption(waterEntityId as string, next);
-                }}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                ${(waterEntity.attributes["options"] as string[] | undefined ?? []).map(
-                  (opt) => html`<mwc-list-item .value=${opt}>${opt}</mwc-list-item>`
-                )}
-              </ha-select>
-            `
+          ? renderSelectField(
+              this.hass,
+              "Water level",
+              waterEntity.state,
+              ((waterEntity.attributes["options"] as string[] | undefined) ?? []).map((opt) => ({
+                value: opt,
+                label: opt,
+              })),
+              (next) => {
+                if (next === waterEntity.state) return;
+                this._selectOption(waterEntityId as string, next);
+              }
+            )
           : nothing}
       </div>
     `;
@@ -830,7 +823,7 @@ export class VacuumCardAdv extends LitElement {
       display: flex;
       gap: 8px;
     }
-    .selects ha-select {
+    .selects ha-form {
       flex: 1;
       min-width: 100px;
     }
