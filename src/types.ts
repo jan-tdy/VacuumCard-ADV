@@ -59,6 +59,7 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   show_battery?: boolean;
   show_sensors?: boolean;
   show_mop_status?: boolean;
+  show_last_updated?: boolean;
   maintenance_collapsed_default?: boolean;
   // Manually-calibrated room outlines, keyed by room id (as a string,
   // since Lovelace/YAML config keys are strings) — takes precedence over

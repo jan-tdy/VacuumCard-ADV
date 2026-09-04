@@ -69,6 +69,7 @@ export class VacuumCardAdv extends LitElement {
       show_sensors: true,
       show_mop_status: true,
       show_room_names: true,
+      show_last_updated: true,
     };
   }
 
@@ -86,6 +87,7 @@ export class VacuumCardAdv extends LitElement {
       show_sensors: true,
       show_mop_status: true,
       show_room_names: true,
+      show_last_updated: true,
       map_rotation: DEFAULT_MAP_ROTATION,
       ...config,
     };
@@ -137,6 +139,41 @@ export class VacuumCardAdv extends LitElement {
     return fullName;
   }
 
+  /** Most recent last_changed across every entity the card actually
+   *  displays (vacuum state, battery, mop status, sensors) — a per-entity
+   *  poll timestamp (e.g. just the vacuum entity's) can look fresh while
+   *  the battery or progress data it's showing is actually stale, so this
+   *  takes the max across all of them instead. */
+  private _lastUpdated(): Date | undefined {
+    const ids = [
+      this._config.vacuum,
+      this._config.battery_entity ?? this._discovered.battery,
+      this._config.mop_attached_entity ?? this._discovered.mopAttached,
+      ...(this._config.sensors ?? this._discovered.sensors),
+    ].filter((id): id is string => !!id);
+
+    let latest: Date | undefined;
+    for (const id of ids) {
+      const changed = this.hass.states[id]?.last_changed;
+      if (!changed) continue;
+      const t = new Date(changed);
+      if (!latest || t > latest) latest = t;
+    }
+    return latest;
+  }
+
+  private _relativeTime(date: Date): string {
+    const diffSec = Math.round((Date.now() - date.getTime()) / 1000);
+    if (diffSec < 5) return "just now";
+    if (diffSec < 60) return `${diffSec}s ago`;
+    const diffMin = Math.round(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHour = Math.round(diffMin / 60);
+    if (diffHour < 24) return `${diffHour}h ago`;
+    const diffDay = Math.round(diffHour / 24);
+    return `${diffDay}d ago`;
+  }
+
   protected render(): TemplateResult | typeof nothing {
     if (!this._config || !this.hass) return nothing;
     const vacuum = this.hass.states[this._config.vacuum];
@@ -150,6 +187,7 @@ export class VacuumCardAdv extends LitElement {
     // or stale/invalid config value must never make the map disappear
     // entirely (it used to: neither branch matched, so nothing rendered).
     const mapPosition = this._config.map_position === "bottom" ? "bottom" : "top";
+    const lastUpdated = (this._config.show_last_updated ?? true) ? this._lastUpdated() : undefined;
 
     return html`
       <ha-card>
@@ -158,6 +196,9 @@ export class VacuumCardAdv extends LitElement {
           <div class="header-text">
             <div class="name">${name}</div>
             <div class="status">${status}</div>
+            ${lastUpdated
+              ? html`<div class="last-updated">Updated ${this._relativeTime(lastUpdated)}</div>`
+              : nothing}
           </div>
         </div>
         ${(this._config.show_controls ?? true) ? this._renderControls(vacuum) : nothing}
@@ -599,6 +640,11 @@ export class VacuumCardAdv extends LitElement {
       color: var(--secondary-text-color);
       text-transform: uppercase;
       letter-spacing: 0.06em;
+    }
+    .last-updated {
+      font-size: 0.75em;
+      color: var(--secondary-text-color);
+      opacity: 0.7;
     }
 
     /* Pill buttons — icon + visible label, so nobody has to guess what a
