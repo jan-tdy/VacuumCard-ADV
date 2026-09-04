@@ -791,22 +791,27 @@ export class VacuumCardAdv extends LitElement {
       font-weight: 700;
       font-family: inherit;
     }
+    /* Solid (fully opaque) fills — the furniture_opacity config option
+       already controls transparency via the whole .furniture-layer group's
+       own opacity attribute (see _renderFurniture()), so a baked-in alpha
+       here as well would cap furniture out at that alpha even with
+       furniture_opacity at 100 and make "fully opaque" unreachable. */
     .furniture-item .furn-body {
-      fill: rgba(141, 110, 99, 0.55);
-      stroke: #8d6e63;
+      fill: #bcaaa4;
+      stroke: #6d4c41;
       stroke-width: 2;
     }
     .furniture-item .furn-detail {
-      fill: rgba(93, 64, 55, 0.65);
+      fill: #8d6e63;
       stroke: none;
     }
     .furniture-item .furn-line {
-      stroke: #5d4037;
+      stroke: #4e342e;
       stroke-width: 1.5;
     }
     .furniture-item .furn-plant {
-      fill: rgba(76, 175, 80, 0.55);
-      stroke: #4caf50;
+      fill: #81c784;
+      stroke: #2e7d32;
     }
     .selected-rooms-bar {
       display: flex;
