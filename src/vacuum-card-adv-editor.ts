@@ -1,9 +1,16 @@
-import { LitElement, html, css, TemplateResult, nothing } from "lit";
+import { LitElement, html, svg, css, TemplateResult, SVGTemplateResult, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators.js";
 import { HomeAssistant, VacuumCardConfig, RoomGeometry, RoomPolygon, FurnitureItem, FurnitureType } from "./types";
 import { discoverEntities } from "./utils/hass-entities";
 import { displayToNatural, Point } from "./utils/geometry";
-import { FURNITURE_CATALOG, createFurnitureItem, furnitureGlyph, getFurnitureMeta, normalizeAngle } from "./utils/furniture";
+import {
+  FURNITURE_CATALOG,
+  MIN_FURNITURE_SIZE,
+  createFurnitureItem,
+  furnitureGlyph,
+  getFurnitureMeta,
+  normalizeAngle,
+} from "./utils/furniture";
 
 type FurnitureDragMode = "move" | "resize" | "rotate";
 
@@ -417,10 +424,12 @@ export class VacuumCardAdvEditor extends LitElement {
     `;
   }
 
-  private _renderEditableFurnitureItem(item: FurnitureItem): TemplateResult {
+  // Own template, no literal <svg> ancestor of its own — must be `svg`,
+  // not `html` (see the comment on the card's _renderRoomOverlay for why).
+  private _renderEditableFurnitureItem(item: FurnitureItem): SVGTemplateResult {
     const selected = this._selectedFurnitureId === item.id;
     const handleR = Math.max(8, Math.min(item.width, item.height) * 0.12);
-    return html`
+    return svg`
       <g
         class="furniture-item ${selected ? "selected" : ""}"
         transform="translate(${item.x} ${item.y}) rotate(${item.rotation})"
@@ -428,7 +437,7 @@ export class VacuumCardAdvEditor extends LitElement {
       >
         ${furnitureGlyph(item.type, item.width, item.height)}
         ${selected
-          ? html`
+          ? svg`
               <line
                 x1="0"
                 y1=${-item.height / 2}
@@ -456,6 +465,9 @@ export class VacuumCardAdvEditor extends LitElement {
     `;
   }
 
+  /** Dragging the map handles is pointer-only — these fields are the
+   *  keyboard/screen-reader-operable equivalent, so moving, resizing, and
+   *  rotating a placed item doesn't require a mouse/touch pointer. */
   private _renderFurnitureToolbar(item: FurnitureItem): TemplateResult {
     return html`
       <div class="furniture-toolbar">
@@ -471,6 +483,32 @@ export class VacuumCardAdvEditor extends LitElement {
         <mwc-icon-button @click=${() => this._removeFurniture(item.id)} title="Delete">
           <ha-icon icon="mdi:delete"></ha-icon>
         </mwc-icon-button>
+      </div>
+      <div class="furniture-fields">
+        <ha-textfield
+          label="X position"
+          type="number"
+          .value=${String(item.x)}
+          @change=${(e: Event) => this._setFurnitureField(item.id, "x", (e.target as HTMLInputElement).value)}
+        ></ha-textfield>
+        <ha-textfield
+          label="Y position"
+          type="number"
+          .value=${String(item.y)}
+          @change=${(e: Event) => this._setFurnitureField(item.id, "y", (e.target as HTMLInputElement).value)}
+        ></ha-textfield>
+        <ha-textfield
+          label="Width"
+          type="number"
+          .value=${String(item.width)}
+          @change=${(e: Event) => this._setFurnitureField(item.id, "width", (e.target as HTMLInputElement).value)}
+        ></ha-textfield>
+        <ha-textfield
+          label="Height"
+          type="number"
+          .value=${String(item.height)}
+          @change=${(e: Event) => this._setFurnitureField(item.id, "height", (e.target as HTMLInputElement).value)}
+        ></ha-textfield>
       </div>
     `;
   }
@@ -522,6 +560,15 @@ export class VacuumCardAdvEditor extends LitElement {
     this._furniture = this._furniture.map((f) =>
       f.id === id ? { ...f, rotation: normalizeAngle(f.rotation + delta) } : f
     );
+    this._commitFurniture();
+  }
+
+  private _setFurnitureField(id: string, field: "x" | "y" | "width" | "height", rawValue: string): void {
+    const value = Number(rawValue);
+    if (Number.isNaN(value)) return;
+    const rounded =
+      field === "width" || field === "height" ? Math.max(MIN_FURNITURE_SIZE, Math.round(value)) : Math.round(value);
+    this._furniture = this._furniture.map((f) => (f.id === id ? { ...f, [field]: rounded } : f));
     this._commitFurniture();
   }
 
@@ -737,6 +784,15 @@ export class VacuumCardAdvEditor extends LitElement {
       min-width: 2.5em;
       text-align: center;
       font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .furniture-fields {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .furniture-fields ha-textfield {
+      flex: 1;
+      min-width: 70px;
     }
     .furniture-list {
       display: flex;
