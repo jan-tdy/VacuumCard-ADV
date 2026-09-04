@@ -19,7 +19,12 @@ editor's own "Show code editor" toggle.
 - Live map (from the integration's map camera entity) with **configurable
   rotation** — no card-mod needed
 - **Click rooms directly on the map** to select them, then clean just
-  those rooms
+  those rooms — selected rooms are clearly highlighted against unselected
+  ones, each with a numbered badge showing the order they were picked in
+- **Furniture on the map** — place beds, sofas, tables, chairs, desks,
+  toilets, and more directly on the map from the card's own editor: drag
+  to move, a top handle to rotate, a corner handle to resize (see
+  [Furniture placement](#furniture-placement) below)
 - A **room calibration tool** in the visual editor: click points on the
   map to trace a room's actual outline when the automatic rectangle
   doesn't fit an irregular/L-shaped room
@@ -36,10 +41,11 @@ editor's own "Show code editor" toggle.
   works right away, every section can still be toggled off, and key
   entities can be overridden individually
 
-Planned for a future version: furniture placement on the map, and a
-custom vacuum icon/picture (see
+Planned for a future version: a custom vacuum icon/picture. See
 [TapoVac-ADV's README](https://github.com/jan-tdy/TapoVac-ADV#-map-limitations--tips)
-for the current furniture-on-map limitation this picks up from).
+for why furniture placed in the Tapo app itself can't be read into Home
+Assistant — this card's own furniture placement (below) is what picks that
+up.
 
 ## Requirements
 
@@ -85,10 +91,34 @@ show_battery: true
 show_mop_status: true
 show_sensors: true
 show_last_updated: true
+show_furniture: true
 sensors: []              # override the auto-detected sensor list
 maintenance_sensors: []  # override which sensors show under "Maintenance"
 room_polygons: {}        # written by the editor's calibration tool
+furniture: []            # written by the editor's furniture placement tool
 ```
+
+## Furniture placement
+
+Furniture placed in the official Tapo app is stored in TP-Link's cloud and
+isn't readable from Home Assistant (see
+[TapoVac-ADV's README](https://github.com/jan-tdy/TapoVac-ADV#-map-limitations--tips)
+for why) — so this card places it independently, on top of the same map.
+
+Open the card's editor and use **Furniture**: pick a type (bed, sofa,
+table, desk, chair, wardrobe, toilet, sink, bathtub, fridge, washing
+machine, TV, stairs, plant, or a generic custom shape) and click **Add** to
+drop it in the middle of the map, then:
+
+- **Drag the shape itself** to move it
+- **Drag the top handle** to rotate it
+- **Drag the corner handle** to resize it
+- Use the rotate-left/rotate-right buttons under the map for precise
+  15°-step rotation, or the list below it to reselect or delete a piece
+
+Furniture is stored in the same pixel space as calibrated room polygons, so
+it holds its position and size across map refreshes. Toggle `show_furniture`
+off to hide it on the live card without deleting it.
 
 ## Room calibration
 

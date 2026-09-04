@@ -9,6 +9,7 @@ import {
 } from "./types";
 import { discoverEntities, DiscoveredEntities } from "./utils/hass-entities";
 import { displayToNatural, resolveRoomAtPoint } from "./utils/geometry";
+import { furnitureGlyph } from "./utils/furniture";
 import { CARD_VERSION, DEFAULT_MAP_ROTATION } from "./const";
 
 import "./vacuum-card-adv-editor";
@@ -70,6 +71,7 @@ export class VacuumCardAdv extends LitElement {
       show_mop_status: true,
       show_room_names: true,
       show_last_updated: true,
+      show_furniture: true,
     };
   }
 
@@ -88,6 +90,7 @@ export class VacuumCardAdv extends LitElement {
       show_mop_status: true,
       show_room_names: true,
       show_last_updated: true,
+      show_furniture: true,
       map_rotation: DEFAULT_MAP_ROTATION,
       ...config,
     };
@@ -278,6 +281,10 @@ export class VacuumCardAdv extends LitElement {
         preserveAspectRatio="none"
       >
         ${geo.rooms.map((room) => this._renderRoomOverlay(room))}
+        ${geo.rooms
+          .filter((room) => this._selectedRoomIds.has(room.id))
+          .map((room) => this._renderRoomOrderBadge(room))}
+        ${(this._config.show_furniture ?? true) ? this._renderFurniture() : nothing}
       </svg>
     `;
   }
@@ -286,11 +293,23 @@ export class VacuumCardAdv extends LitElement {
     const selected = this._selectedRoomIds.has(room.id);
     const polygon = this._config.room_polygons?.[String(room.id)];
     const [r, g, b] = room.color;
-    const fill = selected ? `rgba(${r},${g},${b},0.55)` : "transparent";
-    const stroke = selected ? `rgb(${r},${g},${b})` : "transparent";
+    // Selected rooms stand out with a strong fill/stroke; unselected rooms
+    // still get a faint fill/outline (rather than fully transparent) so
+    // room boundaries stay visible for contrast instead of the selected
+    // ones being the only thing drawn at all.
+    const fill = selected ? `rgba(${r},${g},${b},0.55)` : `rgba(${r},${g},${b},0.12)`;
+    const stroke = selected ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},0.4)`;
+    const strokeWidth = selected ? 4 : 1.5;
+    const cls = selected ? "room-shape selected" : "room-shape";
     if (polygon && polygon.length >= 3) {
       const points = polygon.map(([x, y]) => `${x},${y}`).join(" ");
-      return html`<polygon points=${points} fill=${fill} stroke=${stroke} stroke-width="3"></polygon>`;
+      return html`<polygon
+        points=${points}
+        fill=${fill}
+        stroke=${stroke}
+        stroke-width=${strokeWidth}
+        class=${cls}
+      ></polygon>`;
     }
     const [x0, y0, x1, y1] = room.bbox;
     return html`<rect
@@ -300,13 +319,48 @@ export class VacuumCardAdv extends LitElement {
       height=${y1 - y0}
       fill=${fill}
       stroke=${stroke}
-      stroke-width="3"
+      stroke-width=${strokeWidth}
+      class=${cls}
     ></rect>`;
+  }
+
+  /** Numbered badge at a selected room's centroid showing the order it was
+   *  clicked in (1, 2, 3, …) — Set iteration order is insertion order, so
+   *  _selectedRoomIds already carries this for free. */
+  private _renderRoomOrderBadge(room: RoomGeometryRoom): TemplateResult {
+    const order = [...this._selectedRoomIds].indexOf(room.id);
+    return html`
+      <g class="room-order-badge">
+        <circle cx=${room.cx} cy=${room.cy} r="15" class="badge-circle"></circle>
+        <text x=${room.cx} y=${room.cy} dy="0.35em" text-anchor="middle" class="badge-text">${order + 1}</text>
+      </g>
+    `;
+  }
+
+  // -- Furniture (read-only overlay — placed/edited in the card's own
+  // editor, see vacuum-card-adv-editor.ts) --------------------------------
+  private _renderFurniture(): TemplateResult | typeof nothing {
+    const items = this._config.furniture;
+    if (!items || items.length === 0) return nothing;
+    return html`
+      <g class="furniture-layer">
+        ${items.map(
+          (item) => html`
+            <g transform="translate(${item.x} ${item.y}) rotate(${item.rotation})" class="furniture-item">
+              ${furnitureGlyph(item.type, item.width, item.height)}
+            </g>
+          `
+        )}
+      </g>
+    `;
   }
 
   private _renderSelectedRoomsBar(geo?: RoomGeometry): TemplateResult {
     const names = [...this._selectedRoomIds]
-      .map((id) => geo?.rooms.find((r) => r.id === id)?.name)
+      .map((id, i) => {
+        const name = geo?.rooms.find((r) => r.id === id)?.name;
+        return name ? `${i + 1}. ${name}` : undefined;
+      })
       .filter((n): n is string => !!n);
     return html`
       <div class="selected-rooms-bar">
@@ -398,6 +452,8 @@ export class VacuumCardAdv extends LitElement {
           ? html`
               <ha-select
                 label="Fan speed"
+                fixedMenuPosition
+                naturalMenuWidth
                 .value=${fanSpeed ?? ""}
                 @selected=${(e: CustomEvent) => {
                   const next = (e.target as unknown as { value: string }).value;
@@ -418,6 +474,8 @@ export class VacuumCardAdv extends LitElement {
           ? html`
               <ha-select
                 label="Water level"
+                fixedMenuPosition
+                naturalMenuWidth
                 .value=${waterEntity.state}
                 @selected=${(e: CustomEvent) => {
                   const next = (e.target as unknown as { value: string }).value;
@@ -717,6 +775,40 @@ export class VacuumCardAdv extends LitElement {
       background: var(--secondary-background-color, rgba(127, 127, 127, 0.15));
       border-radius: 4px;
       padding: 0 4px;
+    }
+    .room-shape {
+      transition: fill 0.15s ease, stroke 0.15s ease, stroke-width 0.15s ease;
+    }
+    .room-shape.selected {
+      filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.45));
+    }
+    .badge-circle {
+      fill: var(--vc-accent);
+      stroke: var(--card-background-color, #fff);
+      stroke-width: 2;
+    }
+    .badge-text {
+      fill: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+    }
+    .furniture-item .furn-body {
+      fill: rgba(141, 110, 99, 0.55);
+      stroke: #8d6e63;
+      stroke-width: 2;
+    }
+    .furniture-item .furn-detail {
+      fill: rgba(93, 64, 55, 0.65);
+      stroke: none;
+    }
+    .furniture-item .furn-line {
+      stroke: #5d4037;
+      stroke-width: 1.5;
+    }
+    .furniture-item .furn-plant {
+      fill: rgba(76, 175, 80, 0.55);
+      stroke: #4caf50;
     }
     .selected-rooms-bar {
       display: flex;
