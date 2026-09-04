@@ -1,8 +1,11 @@
 import { LitElement, html, css, TemplateResult, nothing } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import { HomeAssistant, VacuumCardConfig, RoomGeometry, RoomPolygon } from "./types";
+import { customElement, property, state, query } from "lit/decorators.js";
+import { HomeAssistant, VacuumCardConfig, RoomGeometry, RoomPolygon, FurnitureItem, FurnitureType } from "./types";
 import { discoverEntities } from "./utils/hass-entities";
-import { displayToNatural } from "./utils/geometry";
+import { displayToNatural, Point } from "./utils/geometry";
+import { FURNITURE_CATALOG, createFurnitureItem, furnitureGlyph, getFurnitureMeta, normalizeAngle } from "./utils/furniture";
+
+type FurnitureDragMode = "move" | "resize" | "rotate";
 
 /** The card's own visual editor — this is what makes the card
  *  UI-configurable rather than YAML-only. In addition to the usual
@@ -23,8 +26,19 @@ export class VacuumCardAdvEditor extends LitElement {
   @state() private _calibrationRoomId?: number;
   @state() private _calibrationPoints: RoomPolygon = [];
 
+  // -- Furniture placement — mirrors this._config.furniture locally so a
+  // drag in progress can re-render live without round-tripping through
+  // config-changed on every pointermove (only committed at the end of a
+  // drag, and immediately for add/remove/rotate-buttons). See
+  // _renderFurniture() below.
+  @state() private _furniture: FurnitureItem[] = [];
+  @state() private _selectedFurnitureId?: string;
+  @state() private _furnitureAddType: FurnitureType = "bed";
+  @query("img.furniture-image") private _furnitureImg?: HTMLImageElement;
+
   public setConfig(config: VacuumCardConfig): void {
     this._config = config;
+    this._furniture = config.furniture ?? [];
   }
 
   private _fireConfigChanged(config: VacuumCardConfig): void {
@@ -74,6 +88,7 @@ export class VacuumCardAdvEditor extends LitElement {
       ${this._config.vacuum && (this._config.show_map ?? true) ? this._renderRotation() : nothing}
       ${this._config.vacuum ? this._renderAdvancedEntities() : nothing}
       ${this._config.vacuum && (this._config.show_map ?? true) ? this._renderCalibration() : nothing}
+      ${this._config.vacuum && (this._config.show_map ?? true) ? this._renderFurniture() : nothing}
     `;
   }
 
@@ -89,6 +104,7 @@ export class VacuumCardAdvEditor extends LitElement {
       ["show_mop_status", "Show mop attached status"],
       ["show_sensors", "Show sensors"],
       ["show_last_updated", "Show last updated time"],
+      ["show_furniture", "Show furniture on map"],
     ];
     return html`
       <div class="section toggles">
@@ -119,6 +135,8 @@ export class VacuumCardAdvEditor extends LitElement {
         ></ha-textfield>
         <ha-select
           label="Map position"
+          fixedMenuPosition
+          naturalMenuWidth
           .value=${this._config.map_position ?? "top"}
           @selected=${(e: CustomEvent) =>
             this._valueChanged(
@@ -198,6 +216,8 @@ export class VacuumCardAdvEditor extends LitElement {
           : html`
               <ha-select
                 label="Room to calibrate"
+                fixedMenuPosition
+                naturalMenuWidth
                 .value=${this._calibrationRoomId !== undefined ? String(this._calibrationRoomId) : ""}
                 @selected=${(e: CustomEvent) => {
                   const id = Number((e.target as unknown as { value: string }).value);
@@ -322,6 +342,266 @@ export class VacuumCardAdvEditor extends LitElement {
     this._valueChanged("room_polygons", roomPolygons);
   }
 
+  // -- Furniture ---------------------------------------------------------
+  // Place furniture (bed, sofa, table, chair, toilet, desk, …) directly on
+  // the map: pick a type and click "Add", then drag its body to move it,
+  // the top handle to rotate, and the corner handle to resize. Positions
+  // are stored in the same natural-image pixel space as room_geometry and
+  // calibrated room polygons, so furniture holds still across map
+  // refreshes the same way those do.
+  private _renderFurniture(): TemplateResult {
+    const geo = this._roomGeometry;
+    const cameraId = this._cameraId;
+    const picture = cameraId ? (this.hass.states[cameraId]?.attributes?.["entity_picture"] as string) : undefined;
+    const selected = this._furniture.find((f) => f.id === this._selectedFurnitureId);
+
+    return html`
+      <div class="section">
+        <div class="section-title">Furniture</div>
+        <div class="hint">
+          Furniture placed in the official Tapo app can't be read into Home Assistant (see the
+          TapoVac-ADV README) — place it here instead: pick a type, click "Add", then drag its
+          body to move it, the top handle to rotate, and the corner handle to resize.
+        </div>
+        <div class="furniture-add-row">
+          <ha-select
+            label="Furniture type"
+            fixedMenuPosition
+            naturalMenuWidth
+            .value=${this._furnitureAddType}
+            @selected=${(e: CustomEvent) =>
+              (this._furnitureAddType = (e.target as unknown as { value: string }).value as FurnitureType)}
+            @closed=${(e: Event) => e.stopPropagation()}
+          >
+            ${FURNITURE_CATALOG.map(
+              (f) => html`<mwc-list-item .value=${f.type}><ha-icon icon=${f.icon}></ha-icon> ${f.label}</mwc-list-item>`
+            )}
+          </ha-select>
+          <mwc-button raised @click=${this._addFurniture} ?disabled=${!geo}>
+            <ha-icon icon="mdi:plus"></ha-icon>
+            Add
+          </mwc-button>
+        </div>
+
+        ${!geo || !picture
+          ? html`<div class="hint">Map not available yet — open a dashboard with this vacuum first.</div>`
+          : html`
+              <div class="map-wrap">
+                <img class="furniture-image" src=${picture} />
+                ${this._renderFurnitureOverlay(geo)}
+              </div>
+            `}
+        ${selected ? this._renderFurnitureToolbar(selected) : nothing}
+        ${this._furniture.length > 0 ? this._renderFurnitureList() : nothing}
+      </div>
+    `;
+  }
+
+  private _renderFurnitureOverlay(geo: RoomGeometry): TemplateResult {
+    return html`
+      <svg
+        class="map-overlay furniture-overlay"
+        viewBox="0 0 ${geo.image_width} ${geo.image_height}"
+        preserveAspectRatio="none"
+      >
+        <rect
+          x="0"
+          y="0"
+          width=${geo.image_width}
+          height=${geo.image_height}
+          class="furniture-bg-catcher"
+          @pointerdown=${() => (this._selectedFurnitureId = undefined)}
+        ></rect>
+        ${this._furniture.map((item) => this._renderEditableFurnitureItem(item))}
+      </svg>
+    `;
+  }
+
+  private _renderEditableFurnitureItem(item: FurnitureItem): TemplateResult {
+    const selected = this._selectedFurnitureId === item.id;
+    const handleR = Math.max(8, Math.min(item.width, item.height) * 0.12);
+    return html`
+      <g
+        class="furniture-item ${selected ? "selected" : ""}"
+        transform="translate(${item.x} ${item.y}) rotate(${item.rotation})"
+        @pointerdown=${(e: PointerEvent) => this._startFurnitureDrag(e, item.id, "move")}
+      >
+        ${furnitureGlyph(item.type, item.width, item.height)}
+        ${selected
+          ? html`
+              <line
+                x1="0"
+                y1=${-item.height / 2}
+                x2="0"
+                y2=${-item.height / 2 - 22}
+                class="handle-line"
+              ></line>
+              <circle
+                cx="0"
+                cy=${-item.height / 2 - 22}
+                r=${handleR}
+                class="handle rotate-handle"
+                @pointerdown=${(e: PointerEvent) => this._startFurnitureDrag(e, item.id, "rotate")}
+              ></circle>
+              <circle
+                cx=${item.width / 2}
+                cy=${item.height / 2}
+                r=${handleR}
+                class="handle resize-handle"
+                @pointerdown=${(e: PointerEvent) => this._startFurnitureDrag(e, item.id, "resize")}
+              ></circle>
+            `
+          : nothing}
+      </g>
+    `;
+  }
+
+  private _renderFurnitureToolbar(item: FurnitureItem): TemplateResult {
+    return html`
+      <div class="furniture-toolbar">
+        <ha-icon icon=${getFurnitureMeta(item.type).icon}></ha-icon>
+        <span>${getFurnitureMeta(item.type).label}</span>
+        <mwc-icon-button @click=${() => this._rotateFurniture(item.id, -15)} title="Rotate left 15°">
+          <ha-icon icon="mdi:rotate-left"></ha-icon>
+        </mwc-icon-button>
+        <span class="rotation-value">${Math.round(item.rotation)}°</span>
+        <mwc-icon-button @click=${() => this._rotateFurniture(item.id, 15)} title="Rotate right 15°">
+          <ha-icon icon="mdi:rotate-right"></ha-icon>
+        </mwc-icon-button>
+        <mwc-icon-button @click=${() => this._removeFurniture(item.id)} title="Delete">
+          <ha-icon icon="mdi:delete"></ha-icon>
+        </mwc-icon-button>
+      </div>
+    `;
+  }
+
+  private _renderFurnitureList(): TemplateResult {
+    return html`
+      <div class="furniture-list">
+        ${this._furniture.map((item) => {
+          const meta = getFurnitureMeta(item.type);
+          return html`
+            <div
+              class="furniture-list-row ${this._selectedFurnitureId === item.id ? "selected" : ""}"
+              @click=${() => (this._selectedFurnitureId = item.id)}
+            >
+              <ha-icon icon=${meta.icon}></ha-icon>
+              <span>${meta.label}</span>
+              <mwc-icon-button
+                @click=${(e: Event) => {
+                  e.stopPropagation();
+                  this._removeFurniture(item.id);
+                }}
+                title="Delete"
+              >
+                <ha-icon icon="mdi:delete"></ha-icon>
+              </mwc-icon-button>
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
+  private _addFurniture(): void {
+    const geo = this._roomGeometry;
+    if (!geo) return;
+    const item = createFurnitureItem(this._furnitureAddType, geo, this._furniture);
+    this._furniture = [...this._furniture, item];
+    this._selectedFurnitureId = item.id;
+    this._commitFurniture();
+  }
+
+  private _removeFurniture(id: string): void {
+    this._furniture = this._furniture.filter((f) => f.id !== id);
+    if (this._selectedFurnitureId === id) this._selectedFurnitureId = undefined;
+    this._commitFurniture();
+  }
+
+  private _rotateFurniture(id: string, delta: number): void {
+    this._furniture = this._furniture.map((f) =>
+      f.id === id ? { ...f, rotation: normalizeAngle(f.rotation + delta) } : f
+    );
+    this._commitFurniture();
+  }
+
+  private _commitFurniture(): void {
+    this._valueChanged("furniture", this._furniture);
+  }
+
+  /** Starts a drag on a furniture item's body (move), rotate handle, or
+   *  resize handle — all three share the same pointer-capture lifecycle,
+   *  only the per-move math in _applyFurnitureDrag differs. Coordinates
+   *  are computed the same way calibration does: unrotated natural-image
+   *  pixel space (furniture placement doesn't need to account for the
+   *  live card's display-only map_rotation, same reasoning as
+   *  calibration). */
+  private _startFurnitureDrag(evt: PointerEvent, id: string, mode: FurnitureDragMode): void {
+    evt.stopPropagation();
+    evt.preventDefault();
+    const img = this._furnitureImg;
+    const itemStart = this._furniture.find((f) => f.id === id);
+    if (!img || !itemStart) return;
+
+    this._selectedFurnitureId = id;
+    const target = evt.currentTarget as SVGElement;
+    target.setPointerCapture(evt.pointerId);
+    const startPoint = displayToNatural(evt.clientX, evt.clientY, img, 0);
+
+    const onMove = (moveEvt: PointerEvent) => {
+      const point = displayToNatural(moveEvt.clientX, moveEvt.clientY, img, 0);
+      this._applyFurnitureDrag(id, mode, itemStart, startPoint, point);
+    };
+    const onUp = () => {
+      target.removeEventListener("pointermove", onMove);
+      target.removeEventListener("pointerup", onUp);
+      target.removeEventListener("pointercancel", onUp);
+      this._commitFurniture();
+    };
+    target.addEventListener("pointermove", onMove);
+    target.addEventListener("pointerup", onUp);
+    target.addEventListener("pointercancel", onUp);
+  }
+
+  private _applyFurnitureDrag(
+    id: string,
+    mode: FurnitureDragMode,
+    start: FurnitureItem,
+    startPoint: Point,
+    current: Point
+  ): void {
+    this._furniture = this._furniture.map((f) => {
+      if (f.id !== id) return f;
+
+      if (mode === "move") {
+        return { ...f, x: start.x + (current.x - startPoint.x), y: start.y + (current.y - startPoint.y) };
+      }
+
+      if (mode === "rotate") {
+        // The rotate handle sits due "north" of the item's center at
+        // rotation 0, so the angle from center to pointer is offset by
+        // +90° from atan2's own zero (pointing "east").
+        const angle = (Math.atan2(current.y - start.y, current.x - start.x) * 180) / Math.PI + 90;
+        return { ...f, rotation: Math.round(normalizeAngle(angle)) };
+      }
+
+      // resize: project the pointer into the item's own unrotated local
+      // frame (undo start.rotation around its center), then the corner
+      // handle's distance from center in that frame is exactly half the
+      // new width/height.
+      const rad = (-start.rotation * Math.PI) / 180;
+      const dx = current.x - start.x;
+      const dy = current.y - start.y;
+      const localX = dx * Math.cos(rad) - dy * Math.sin(rad);
+      const localY = dx * Math.sin(rad) + dy * Math.cos(rad);
+      return {
+        ...f,
+        width: Math.max(12, Math.round(Math.abs(localX) * 2)),
+        height: Math.max(12, Math.round(Math.abs(localY) * 2)),
+      };
+    });
+  }
+
   static styles = css`
     .section {
       display: flex;
@@ -377,6 +657,105 @@ export class VacuumCardAdvEditor extends LitElement {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    /* Furniture */
+    .furniture-add-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .furniture-add-row ha-select {
+      flex: 1;
+      min-width: 160px;
+    }
+    .furniture-image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .furniture-overlay {
+      pointer-events: auto;
+    }
+    .furniture-bg-catcher {
+      fill: transparent;
+      pointer-events: all;
+    }
+    .furniture-item {
+      cursor: move;
+      touch-action: none;
+    }
+    .furniture-item .furn-body {
+      fill: rgba(141, 110, 99, 0.55);
+      stroke: #8d6e63;
+      stroke-width: 2;
+    }
+    .furniture-item .furn-detail {
+      fill: rgba(93, 64, 55, 0.65);
+      stroke: none;
+    }
+    .furniture-item .furn-line {
+      stroke: #5d4037;
+      stroke-width: 1.5;
+    }
+    .furniture-item .furn-plant {
+      fill: rgba(76, 175, 80, 0.55);
+      stroke: #4caf50;
+    }
+    .furniture-item.selected .furn-body {
+      stroke: var(--primary-color);
+      stroke-width: 3;
+    }
+    .handle-line {
+      stroke: var(--primary-color);
+      stroke-width: 1.5;
+      stroke-dasharray: 3, 3;
+    }
+    .handle {
+      fill: var(--primary-color);
+      stroke: var(--card-background-color, #fff);
+      stroke-width: 2;
+      touch-action: none;
+    }
+    .rotate-handle {
+      cursor: grab;
+    }
+    .resize-handle {
+      cursor: nwse-resize;
+    }
+    .furniture-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.9em;
+      color: var(--primary-text-color);
+    }
+    .furniture-toolbar span {
+      margin-right: 4px;
+    }
+    .furniture-toolbar .rotation-value {
+      min-width: 2.5em;
+      text-align: center;
+      font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .furniture-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .furniture-list-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .furniture-list-row span {
+      flex: 1;
+    }
+    .furniture-list-row.selected {
+      background: var(--secondary-background-color, rgba(127, 127, 127, 0.15));
     }
   `;
 }

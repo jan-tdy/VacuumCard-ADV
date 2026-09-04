@@ -34,6 +34,40 @@ export interface LovelaceCardConfig {
 // _render_map_image() for why that space was chosen.
 export type RoomPolygon = [number, number][];
 
+// -- Furniture placed on the map (this card's own overlay — see
+// TapoVac-ADV's README "Missing Furniture" section for why furniture
+// placed in the Tapo app itself can't be read back into Home Assistant) --
+export type FurnitureType =
+  | "bed"
+  | "sofa"
+  | "table"
+  | "desk"
+  | "chair"
+  | "wardrobe"
+  | "toilet"
+  | "sink"
+  | "bathtub"
+  | "fridge"
+  | "washing_machine"
+  | "tv"
+  | "stairs"
+  | "plant"
+  | "custom";
+
+export interface FurnitureItem {
+  id: string;
+  type: FurnitureType;
+  // Center point, width/height and rotation — all in the same natural
+  // image pixel space as RoomPolygon/room_geometry above, so furniture
+  // holds its position and scale across map refreshes the same way
+  // calibrated room polygons do.
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number; // degrees, clockwise, 0-360
+}
+
 export interface VacuumCardConfig extends LovelaceCardConfig {
   type: "custom:vacuum-card-adv";
   vacuum: string;
@@ -66,6 +100,10 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   // the automatic bbox from room_geometry for that room. See the editor's
   // calibration tool.
   room_polygons?: Record<string, RoomPolygon>;
+  // Furniture placed on the map via this card's own editor — see
+  // FurnitureItem above.
+  furniture?: FurnitureItem[];
+  show_furniture?: boolean;
 }
 
 // -- room_geometry, as exposed by TapoVac-ADV's map camera entity --------
