@@ -1,4 +1,4 @@
-import { LitElement, html, css, PropertyValues, TemplateResult, nothing } from "lit";
+import { LitElement, html, svg, css, PropertyValues, TemplateResult, SVGTemplateResult, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators.js";
 import {
   HomeAssistant,
@@ -289,7 +289,12 @@ export class VacuumCardAdv extends LitElement {
     `;
   }
 
-  private _renderRoomOverlay(room: RoomGeometryRoom): TemplateResult {
+  // These SVG fragments have no literal <svg> ancestor of their own — each
+  // is a separate template returned from its own function and interpolated
+  // into the parent <svg> in _renderMapOverlay(), so they must use the
+  // `svg` tagged template (not `html`) or their elements end up created in
+  // the HTML namespace instead of the SVG one and fail to render.
+  private _renderRoomOverlay(room: RoomGeometryRoom): SVGTemplateResult {
     const selected = this._selectedRoomIds.has(room.id);
     const polygon = this._config.room_polygons?.[String(room.id)];
     const [r, g, b] = room.color;
@@ -303,7 +308,7 @@ export class VacuumCardAdv extends LitElement {
     const cls = selected ? "room-shape selected" : "room-shape";
     if (polygon && polygon.length >= 3) {
       const points = polygon.map(([x, y]) => `${x},${y}`).join(" ");
-      return html`<polygon
+      return svg`<polygon
         points=${points}
         fill=${fill}
         stroke=${stroke}
@@ -312,7 +317,7 @@ export class VacuumCardAdv extends LitElement {
       ></polygon>`;
     }
     const [x0, y0, x1, y1] = room.bbox;
-    return html`<rect
+    return svg`<rect
       x=${x0}
       y=${y0}
       width=${x1 - x0}
@@ -327,9 +332,9 @@ export class VacuumCardAdv extends LitElement {
   /** Numbered badge at a selected room's centroid showing the order it was
    *  clicked in (1, 2, 3, …) — Set iteration order is insertion order, so
    *  _selectedRoomIds already carries this for free. */
-  private _renderRoomOrderBadge(room: RoomGeometryRoom): TemplateResult {
+  private _renderRoomOrderBadge(room: RoomGeometryRoom): SVGTemplateResult {
     const order = [...this._selectedRoomIds].indexOf(room.id);
-    return html`
+    return svg`
       <g class="room-order-badge">
         <circle cx=${room.cx} cy=${room.cy} r="15" class="badge-circle"></circle>
         <text x=${room.cx} y=${room.cy} dy="0.35em" text-anchor="middle" class="badge-text">${order + 1}</text>
@@ -339,13 +344,13 @@ export class VacuumCardAdv extends LitElement {
 
   // -- Furniture (read-only overlay — placed/edited in the card's own
   // editor, see vacuum-card-adv-editor.ts) --------------------------------
-  private _renderFurniture(): TemplateResult | typeof nothing {
+  private _renderFurniture(): SVGTemplateResult | typeof nothing {
     const items = this._config.furniture;
     if (!items || items.length === 0) return nothing;
-    return html`
+    return svg`
       <g class="furniture-layer">
         ${items.map(
-          (item) => html`
+          (item) => svg`
             <g transform="translate(${item.x} ${item.y}) rotate(${item.rotation})" class="furniture-item">
               ${furnitureGlyph(item.type, item.width, item.height)}
             </g>
