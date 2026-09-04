@@ -88,6 +88,7 @@ export class VacuumCardAdvEditor extends LitElement {
       ["show_battery", "Show battery"],
       ["show_mop_status", "Show mop attached status"],
       ["show_sensors", "Show sensors"],
+      ["show_last_updated", "Show last updated time"],
     ];
     return html`
       <div class="section toggles">

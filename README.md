@@ -29,6 +29,9 @@ editor's own "Show code editor" toggle.
 - Fan speed and water level selectors
 - Battery
 - Sensors, with a collapsible maintenance section (brush/filter/etc. wear)
+- "Last updated" time in the header — the freshest of the battery,
+  mop-status and sensor entities' own update times, so you can spot a
+  vacuum whose data has gone stale (e.g. Wi-Fi dropped)
 - Auto-detects every entity above from just the vacuum entity you pick —
   works right away, every section can still be toggled off, and key
   entities can be overridden individually
@@ -81,6 +84,7 @@ show_water_level: true
 show_battery: true
 show_mop_status: true
 show_sensors: true
+show_last_updated: true
 sensors: []              # override the auto-detected sensor list
 maintenance_sensors: []  # override which sensors show under "Maintenance"
 room_polygons: {}        # written by the editor's calibration tool
