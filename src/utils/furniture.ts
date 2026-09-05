@@ -1,5 +1,24 @@
 import { svg, SVGTemplateResult } from "lit";
-import { FurnitureItem, FurnitureType, RoomGeometry } from "../types";
+import { FurnitureColorScheme, FurnitureItem, FurnitureType, RoomGeometry } from "../types";
+
+export interface FurniturePalette {
+  fill: string;
+  stroke: string;
+  detail: string;
+  line: string;
+}
+
+// Applied as CSS custom properties on the .furniture-layer group (see
+// _renderFurniture() in vacuum-card-adv.ts and the editor's furniture
+// overlay), so every furn-* shape picks it up without per-shape wiring.
+export const FURNITURE_PALETTES: Record<FurnitureColorScheme, FurniturePalette> = {
+  brown: { fill: "#bcaaa4", stroke: "#6d4c41", detail: "#8d6e63", line: "#4e342e" },
+  white: { fill: "#fafafa", stroke: "#9e9e9e", detail: "#e0e0e0", line: "#757575" },
+};
+
+export function getFurniturePalette(scheme: FurnitureColorScheme | undefined): FurniturePalette {
+  return FURNITURE_PALETTES[scheme ?? "brown"];
+}
 
 export interface FurnitureCatalogEntry {
   type: FurnitureType;

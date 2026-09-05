@@ -9,7 +9,7 @@ import {
 } from "./types";
 import { discoverEntities, DiscoveredEntities } from "./utils/hass-entities";
 import { displayToNatural, resolveRoomAtPoint } from "./utils/geometry";
-import { furnitureGlyph } from "./utils/furniture";
+import { furnitureGlyph, getFurniturePalette } from "./utils/furniture";
 import { renderSelectField } from "./utils/ha-form";
 import { CARD_VERSION, DEFAULT_MAP_ROTATION } from "./const";
 
@@ -74,6 +74,7 @@ export class VacuumCardAdv extends LitElement {
       show_last_updated: true,
       show_furniture: true,
       furniture_opacity: 100,
+      furniture_color: "brown",
     };
   }
 
@@ -94,6 +95,7 @@ export class VacuumCardAdv extends LitElement {
       show_last_updated: true,
       show_furniture: true,
       furniture_opacity: 100,
+      furniture_color: "brown",
       map_rotation: DEFAULT_MAP_ROTATION,
       ...config,
     };
@@ -351,8 +353,10 @@ export class VacuumCardAdv extends LitElement {
     const items = this._config.furniture;
     if (!items || items.length === 0) return nothing;
     const opacity = Math.max(0, Math.min(100, this._config.furniture_opacity ?? 100)) / 100;
+    const palette = getFurniturePalette(this._config.furniture_color);
+    const paletteStyle = `--furn-fill:${palette.fill};--furn-stroke:${palette.stroke};--furn-detail:${palette.detail};--furn-line:${palette.line};`;
     return svg`
-      <g class="furniture-layer" opacity=${opacity}>
+      <g class="furniture-layer" opacity=${opacity} style=${paletteStyle}>
         ${items.map(
           (item) => svg`
             <g transform="translate(${item.x} ${item.y}) rotate(${item.rotation})" class="furniture-item">
@@ -795,18 +799,22 @@ export class VacuumCardAdv extends LitElement {
        already controls transparency via the whole .furniture-layer group's
        own opacity attribute (see _renderFurniture()), so a baked-in alpha
        here as well would cap furniture out at that alpha even with
-       furniture_opacity at 100 and make "fully opaque" unreachable. */
+       furniture_opacity at 100 and make "fully opaque" unreachable. Colors
+       come from CSS custom properties set on .furniture-layer itself (see
+       _renderFurniture()) so furniture_color can pick a whole palette
+       without touching these rules — the hex values here are just the
+       brown-palette fallback for older configs with no style attribute. */
     .furniture-item .furn-body {
-      fill: #bcaaa4;
-      stroke: #6d4c41;
+      fill: var(--furn-fill, #bcaaa4);
+      stroke: var(--furn-stroke, #6d4c41);
       stroke-width: 2;
     }
     .furniture-item .furn-detail {
-      fill: #8d6e63;
+      fill: var(--furn-detail, #8d6e63);
       stroke: none;
     }
     .furniture-item .furn-line {
-      stroke: #4e342e;
+      stroke: var(--furn-line, #4e342e);
       stroke-width: 1.5;
     }
     .furniture-item .furn-plant {
