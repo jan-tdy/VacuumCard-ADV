@@ -93,6 +93,7 @@ show_sensors: true
 show_last_updated: true
 show_furniture: true
 furniture_opacity: 100   # 0-100, how solid furniture looks on the live card's map
+furniture_color: brown   # "brown" (default) or "white"
 sensors: []              # override the auto-detected sensor list
 maintenance_sensors: []  # override which sensors show under "Maintenance"
 room_polygons: {}        # written by the editor's calibration tool
@@ -121,7 +122,9 @@ Furniture is stored in the same pixel space as calibrated room polygons, so
 it holds its position and size across map refreshes. Toggle `show_furniture`
 off to hide it on the live card without deleting it, or use the **Furniture
 opacity** slider in the editor (`furniture_opacity`, 0-100) to make it more
-or less prominent against the map instead of hiding it outright.
+or less prominent against the map instead of hiding it outright. **Furniture
+color** (`furniture_color`) picks between a brown/wood-toned palette
+(default) and a white/light-gray one.
 
 ## Room calibration
 
@@ -134,6 +137,12 @@ outline (each click adds a point, points connect with a line as you go),
 then **Finish polygon**. That room's clicks now use your traced outline
 instead of the rectangle. **Delete saved calibration** reverts to the
 automatic rectangle.
+
+**Snap corners to 90°** (on by default) constrains each new point to a
+straight horizontal or vertical line from the last one, so the traced
+outline comes out as clean right-angle walls instead of a rough hand-drawn
+shape — matching how most rooms are actually built. Turn it off for a
+genuinely angled/non-rectilinear room.
 
 ## Development
 

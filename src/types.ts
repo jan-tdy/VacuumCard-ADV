@@ -54,6 +54,10 @@ export type FurnitureType =
   | "plant"
   | "custom";
 
+// Color scheme applied to every placed furniture item — see
+// utils/furniture.ts's FURNITURE_PALETTES for the actual color values.
+export type FurnitureColorScheme = "brown" | "white";
+
 export interface FurnitureItem {
   id: string;
   type: FurnitureType;
@@ -107,6 +111,7 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   // 0-100, applied to the whole furniture layer on the live card (not the
   // editor's own map, where full opacity makes items easier to select).
   furniture_opacity?: number;
+  furniture_color?: FurnitureColorScheme;
 }
 
 // -- room_geometry, as exposed by TapoVac-ADV's map camera entity --------

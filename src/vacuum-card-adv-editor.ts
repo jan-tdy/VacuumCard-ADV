@@ -9,6 +9,7 @@ import {
   createFurnitureItem,
   furnitureGlyph,
   getFurnitureMeta,
+  getFurniturePalette,
   normalizeAngle,
 } from "./utils/furniture";
 import { renderSelectField } from "./utils/ha-form";
@@ -33,6 +34,7 @@ export class VacuumCardAdvEditor extends LitElement {
 
   @state() private _calibrationRoomId?: number;
   @state() private _calibrationPoints: RoomPolygon = [];
+  @state() private _calibrationSnap90 = true;
 
   // -- Furniture placement — mirrors this._config.furniture locally so a
   // drag in progress can re-render live without round-tripping through
@@ -235,6 +237,18 @@ export class VacuumCardAdvEditor extends LitElement {
 
               ${this._calibrationRoomId !== undefined
                 ? html`
+                    <ha-formfield label="Snap corners to 90°">
+                      <ha-switch
+                        .checked=${this._calibrationSnap90}
+                        @change=${(e: Event) =>
+                          (this._calibrationSnap90 = (e.target as HTMLInputElement).checked)}
+                      ></ha-switch>
+                    </ha-formfield>
+                    <div class="hint">
+                      Each new point snaps to a straight horizontal/vertical line from the last one,
+                      so the outline comes out as clean right-angle walls instead of a hand-drawn
+                      shape. Turn off for a genuinely angled/non-rectilinear room.
+                    </div>
                     <div class="map-wrap">
                       <img
                         class="calib-image"
@@ -267,14 +281,19 @@ export class VacuumCardAdvEditor extends LitElement {
     `;
   }
 
-  private _renderCalibrationOverlay(geo: RoomGeometry): TemplateResult {
+  // Same SVG-namespace pitfall as the card's room/furniture overlays (see
+  // the comment on VacuumCardAdv._renderRoomOverlay in vacuum-card-adv.ts):
+  // this fragment has no literal <svg> ancestor of its own, so it must use
+  // the `svg` tagged template, not `html`, or the calibration preview
+  // (bbox, saved polygon, live click trace) silently fails to render.
+  private _renderCalibrationOverlay(geo: RoomGeometry): SVGTemplateResult {
     const roomId = this._calibrationRoomId;
     const room = geo.rooms.find((r) => r.id === roomId);
     const saved = roomId !== undefined ? this._config.room_polygons?.[String(roomId)] : undefined;
 
     const savedEl =
       saved && saved.length >= 3
-        ? html`<polygon
+        ? svg`<polygon
             points=${saved.map(([x, y]) => `${x},${y}`).join(" ")}
             fill="rgba(3,169,244,0.25)"
             stroke="rgb(3,169,244)"
@@ -283,7 +302,7 @@ export class VacuumCardAdvEditor extends LitElement {
         : nothing;
 
     const bboxEl = room
-      ? html`<rect
+      ? svg`<rect
           x=${room.bbox[0]}
           y=${room.bbox[1]}
           width=${room.bbox[2] - room.bbox[0]}
@@ -297,7 +316,7 @@ export class VacuumCardAdvEditor extends LitElement {
 
     const liveEl =
       this._calibrationPoints.length > 0
-        ? html`
+        ? svg`
             <polyline
               points=${this._calibrationPoints.map(([x, y]) => `${x},${y}`).join(" ")}
               fill="none"
@@ -305,12 +324,12 @@ export class VacuumCardAdvEditor extends LitElement {
               stroke-width="3"
             ></polyline>
             ${this._calibrationPoints.map(
-              ([x, y]) => html`<circle cx=${x} cy=${y} r="5" fill="rgb(255,152,0)"></circle>`
+              ([x, y]) => svg`<circle cx=${x} cy=${y} r="5" fill="rgb(255,152,0)"></circle>`
             )}
           `
         : nothing;
 
-    return html`${bboxEl}${savedEl}${liveEl}`;
+    return svg`${bboxEl}${savedEl}${liveEl}`;
   }
 
   private _onCalibrationClick(evt: MouseEvent): void {
@@ -321,7 +340,23 @@ export class VacuumCardAdvEditor extends LitElement {
     // stored in the same unrotated natural-image space room_geometry
     // uses.
     const point = displayToNatural(evt.clientX, evt.clientY, img, 0);
-    this._calibrationPoints = [...this._calibrationPoints, [Math.round(point.x), Math.round(point.y)]];
+    let x = Math.round(point.x);
+    let y = Math.round(point.y);
+
+    // Snap-to-90°: constrain the segment from the previous point to
+    // exactly horizontal or vertical (whichever the click is closer to),
+    // so tracing an irregular room comes out as clean right-angle walls
+    // instead of a rough hand-drawn polygon.
+    if (this._calibrationSnap90 && this._calibrationPoints.length > 0) {
+      const [prevX, prevY] = this._calibrationPoints[this._calibrationPoints.length - 1];
+      if (Math.abs(x - prevX) > Math.abs(y - prevY)) {
+        y = prevY;
+      } else {
+        x = prevX;
+      }
+    }
+
+    this._calibrationPoints = [...this._calibrationPoints, [x, y]];
   }
 
   private _finishCalibration(): void {
@@ -389,6 +424,16 @@ export class VacuumCardAdvEditor extends LitElement {
             this._valueChanged("furniture_opacity", e.detail.value.furniture_opacity);
           }}
         ></ha-form>
+        ${renderSelectField(
+          this.hass,
+          "Furniture color",
+          this._config.furniture_color ?? "brown",
+          [
+            { value: "brown", label: "Brown (wood-toned)" },
+            { value: "white", label: "White (light gray)" },
+          ],
+          (value) => this._valueChanged("furniture_color", value)
+        )}
 
         ${!geo || !picture
           ? html`<div class="hint">Map not available yet — open a dashboard with this vacuum first.</div>`
@@ -405,6 +450,8 @@ export class VacuumCardAdvEditor extends LitElement {
   }
 
   private _renderFurnitureOverlay(geo: RoomGeometry): TemplateResult {
+    const palette = getFurniturePalette(this._config.furniture_color);
+    const paletteStyle = `--furn-fill:${palette.fill};--furn-stroke:${palette.stroke};--furn-detail:${palette.detail};--furn-line:${palette.line};`;
     return html`
       <svg
         class="map-overlay furniture-overlay"
@@ -419,7 +466,9 @@ export class VacuumCardAdvEditor extends LitElement {
           class="furniture-bg-catcher"
           @pointerdown=${() => (this._selectedFurnitureId = undefined)}
         ></rect>
-        ${this._furniture.map((item) => this._renderEditableFurnitureItem(item))}
+        <g class="furniture-layer" style=${paletteStyle}>
+          ${this._furniture.map((item) => this._renderEditableFurnitureItem(item))}
+        </g>
       </svg>
     `;
   }
@@ -733,16 +782,16 @@ export class VacuumCardAdvEditor extends LitElement {
       touch-action: none;
     }
     .furniture-item .furn-body {
-      fill: #bcaaa4;
-      stroke: #6d4c41;
+      fill: var(--furn-fill, #bcaaa4);
+      stroke: var(--furn-stroke, #6d4c41);
       stroke-width: 2;
     }
     .furniture-item .furn-detail {
-      fill: #8d6e63;
+      fill: var(--furn-detail, #8d6e63);
       stroke: none;
     }
     .furniture-item .furn-line {
-      stroke: #4e342e;
+      stroke: var(--furn-line, #4e342e);
       stroke-width: 1.5;
     }
     .furniture-item .furn-plant {
