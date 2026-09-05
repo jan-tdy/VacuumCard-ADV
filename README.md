@@ -10,7 +10,7 @@ editor's own "Show code editor" toggle.
 
 ## Screenshot
 
-<img width="324" height="635" alt="image" src="https://github.com/user-attachments/assets/452c94a9-1c86-4197-893f-c92365ccbdcc" />
+<img width="375" height="803" alt="image" src="https://github.com/user-attachments/assets/44029738-e177-4345-814c-694a8aa0d3fd" />
 
 
 ## Features
