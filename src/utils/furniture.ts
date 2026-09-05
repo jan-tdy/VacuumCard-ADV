@@ -17,7 +17,11 @@ export const FURNITURE_PALETTES: Record<FurnitureColorScheme, FurniturePalette> 
 };
 
 export function getFurniturePalette(scheme: FurnitureColorScheme | undefined): FurniturePalette {
-  return FURNITURE_PALETTES[scheme ?? "brown"];
+  // Lovelace YAML isn't runtime-validated against VacuumCardConfig, so
+  // furniture_color can hold any string a user typed by hand — fall back
+  // to brown rather than letting an unrecognized value dereference to
+  // undefined and break the whole card's render().
+  return FURNITURE_PALETTES[scheme ?? "brown"] ?? FURNITURE_PALETTES.brown;
 }
 
 export interface FurnitureCatalogEntry {
