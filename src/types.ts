@@ -70,6 +70,13 @@ export interface FurnitureItem {
   width: number;
   height: number;
   rotation: number; // degrees, clockwise, 0-360
+  // Which floor/map (see geometry.ts's currentMapKey()) this item was
+  // placed on — a multi-map vacuum reuses the same pixel space per floor,
+  // so without this an item placed on one floor would show up overlaid on
+  // every other floor's map too. Undefined on items saved before this
+  // field existed; those stay visible on every floor (unchanged legacy
+  // behavior) until re-placed, which stamps them to a specific floor.
+  map?: string;
 }
 
 export interface VacuumCardConfig extends LovelaceCardConfig {
@@ -89,6 +96,12 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   // right after the controls) or "bottom" (after battery/sensors, before
   // the collapsible maintenance section).
   map_position?: "top" | "bottom";
+  // Experimental: draws a live trail behind the vacuum's position
+  // (room_geometry.vacuum_point) while it's actively cleaning — resets at
+  // the start of each new cleaning run. Off by default: sample rate
+  // follows however often the integration refreshes the map (currently
+  // every 60s while cleaning), so the trail is coarse, not a precise path.
+  show_trace?: boolean;
   show_room_names?: boolean;
   show_controls?: boolean;
   show_dock_actions?: boolean;
@@ -99,10 +112,17 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   show_mop_status?: boolean;
   show_last_updated?: boolean;
   maintenance_collapsed_default?: boolean;
-  // Manually-calibrated room outlines, keyed by room id (as a string,
-  // since Lovelace/YAML config keys are strings) — takes precedence over
-  // the automatic bbox from room_geometry for that room. See the editor's
+  // Manually-calibrated room outlines — takes precedence over the
+  // automatic bbox from room_geometry for that room. See the editor's
   // calibration tool.
+  //
+  // Keyed by room id (as a string, since Lovelace/YAML config keys are
+  // strings) for a single-floor vacuum. A multi-map/multi-floor vacuum
+  // reuses room ids per floor, so the editor instead saves (and looks up)
+  // an entry as "<currentMapKey>:<roomId>" (see geometry.ts's
+  // currentMapKey()/scopedRoomPolygons()) — the plain "<roomId>" form is
+  // still read as a fallback so calibration saved before floors were
+  // distinguished keeps working.
   room_polygons?: Record<string, RoomPolygon>;
   // Furniture placed on the map via this card's own editor — see
   // FurnitureItem above.
@@ -130,6 +150,13 @@ export interface RoomGeometry {
   rooms: RoomGeometryRoom[];
   charge_point: [number, number] | null;
   vacuum_point: [number, number] | null;
+  // Which saved map this geometry came from, if the integration exposes
+  // it (not yet as of TapoVac-ADV v1.13 — this reads as undefined there,
+  // and geometry.ts's currentMapKey() falls back to fingerprinting the
+  // room layout instead). Optional and additive, so older integration
+  // versions keep working unchanged.
+  map_id?: number | string;
+  map_name?: string;
 }
 
 // -- Card picker registration (window.customCards) -----------------------

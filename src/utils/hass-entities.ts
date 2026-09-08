@@ -23,6 +23,29 @@ function registry(hass: HomeAssistant): Record<string, RegistryEntity> | undefin
   return (hass as unknown as { entities?: Record<string, RegistryEntity> }).entities;
 }
 
+/** A camera entity's entity_picture, with a cache-busting query param so
+ *  an <img> bound to it actually refetches as the underlying map image is
+ *  periodically re-rendered server-side.
+ *
+ *  entity_picture's own query string (HA's own `?token=...`) doesn't
+ *  change between refreshes, so binding it to `<img src>` as-is means the
+ *  browser fetches it once and then never again — the map looks frozen
+ *  until a full page reload, since nothing about the attribute value ever
+ *  changes to make Lit touch the DOM attribute (and even a same-string
+ *  `src` re-assignment wouldn't trigger a browser refetch on its own).
+ *  Appending the entity's own last_updated (rewritten by the coordinator
+ *  on every poll, well before the map itself needs to change) as an extra
+ *  param makes the URL change often enough for the browser to refetch,
+ *  without waiting on a slower per-render signal from the integration. */
+export function cacheBustedPicture(hass: HomeAssistant, entityId: string): string | undefined {
+  const state = hass.states[entityId];
+  const picture = state?.attributes?.["entity_picture"] as string | undefined;
+  if (!picture) return undefined;
+  if (!state.last_updated) return picture;
+  const separator = picture.includes("?") ? "&" : "?";
+  return `${picture}${separator}_hactl=${encodeURIComponent(state.last_updated)}`;
+}
+
 function friendlyName(hass: HomeAssistant, entityId: string): string {
   const reg = registry(hass)?.[entityId];
   if (reg?.name) return reg.name;

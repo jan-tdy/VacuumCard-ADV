@@ -6,12 +6,13 @@ import {
   VacuumCardConfig,
   RoomGeometry,
   RoomGeometryRoom,
+  RoomPolygon,
 } from "./types";
-import { discoverEntities, DiscoveredEntities } from "./utils/hass-entities";
-import { displayToNatural, resolveRoomAtPoint } from "./utils/geometry";
+import { cacheBustedPicture, discoverEntities, DiscoveredEntities } from "./utils/hass-entities";
+import { currentMapKey, displayToNatural, resolveRoomAtPoint, scopedRoomPolygons } from "./utils/geometry";
 import { furnitureGlyph, getFurniturePalette } from "./utils/furniture";
 import { renderSelectField } from "./utils/ha-form";
-import { CARD_VERSION, DEFAULT_MAP_ROTATION } from "./const";
+import { CARD_VERSION, CLEANING_STATES, DEFAULT_MAP_ROTATION, TRACE_MAX_POINTS } from "./const";
 
 import "./vacuum-card-adv-editor";
 
@@ -48,10 +49,15 @@ export class VacuumCardAdv extends LitElement {
   @state() private _selectedRoomIds: Set<number> = new Set();
   @state() private _maintenanceOpen = false;
   @state() private _busy = false;
+  // Experimental trace trail (see VacuumCardConfig.show_trace) — kept as
+  // in-memory-only render state, never persisted into config: it's a live
+  // view of the current/last cleaning run, not something to save/restore.
+  @state() private _trace: [number, number][] = [];
 
   @query("img.map-image") private _mapImg?: HTMLImageElement;
 
   private _lastDiscoveredFor?: string;
+  private _lastVacuumStateForTrace?: string;
 
   public static getConfigElement(): HTMLElement {
     return document.createElement("vacuum-card-adv-editor");
@@ -123,7 +129,33 @@ export class VacuumCardAdv extends LitElement {
         this._discovered = discoverEntities(this.hass, this._config.vacuum);
         this._lastDiscoveredFor = this._config.vacuum;
       }
+      if (this._config.show_trace) this._updateTrace();
     }
+  }
+
+  /** Experimental (see VacuumCardConfig.show_trace): appends the vacuum's
+   *  current position to the trail while it's actively cleaning, and
+   *  starts a fresh trail at the beginning of each new cleaning run so it
+   *  doesn't stitch onto a previous, unrelated run. Only samples as often
+   *  as room_geometry.vacuum_point itself updates (the integration's own
+   *  map refresh interval), so the trail is coarse by nature. */
+  private _updateTrace(): void {
+    const state = this.hass.states[this._config.vacuum]?.state;
+    const isCleaning = (s: string | undefined): boolean => s !== undefined && CLEANING_STATES.includes(s);
+    const cleaning = isCleaning(state);
+    if (state !== this._lastVacuumStateForTrace) {
+      if (cleaning && !isCleaning(this._lastVacuumStateForTrace)) this._trace = [];
+      this._lastVacuumStateForTrace = state;
+    }
+    if (!cleaning) return;
+
+    const point = this._roomGeometry?.vacuum_point;
+    if (!point) return;
+    const last = this._trace[this._trace.length - 1];
+    if (last && last[0] === point[0] && last[1] === point[1]) return;
+
+    const next: [number, number][] = [...this._trace, point];
+    this._trace = next.length > TRACE_MAX_POINTS ? next.slice(next.length - TRACE_MAX_POINTS) : next;
   }
 
   private get _roomGeometry(): RoomGeometry | undefined {
@@ -251,8 +283,7 @@ export class VacuumCardAdv extends LitElement {
   private _renderMap(): TemplateResult | typeof nothing {
     const cameraId = this._config.camera ?? this._discovered.camera;
     if (!cameraId) return nothing;
-    const camera = this.hass.states[cameraId];
-    const picture = camera?.attributes?.["entity_picture"] as string | undefined;
+    const picture = cacheBustedPicture(this.hass, cameraId);
     if (!picture) return nothing;
 
     const rotation = this._config.map_rotation ?? DEFAULT_MAP_ROTATION;
@@ -278,6 +309,7 @@ export class VacuumCardAdv extends LitElement {
   }
 
   private _renderMapOverlay(geo: RoomGeometry, rotStyle: string): TemplateResult {
+    const roomPolygons = scopedRoomPolygons(this._config.room_polygons, geo);
     return html`
       <svg
         class="map-overlay"
@@ -285,12 +317,27 @@ export class VacuumCardAdv extends LitElement {
         viewBox="0 0 ${geo.image_width} ${geo.image_height}"
         preserveAspectRatio="none"
       >
-        ${geo.rooms.map((room) => this._renderRoomOverlay(room))}
+        ${geo.rooms.map((room) => this._renderRoomOverlay(room, roomPolygons))}
         ${geo.rooms
           .filter((room) => this._selectedRoomIds.has(room.id))
           .map((room) => this._renderRoomOrderBadge(room))}
-        ${(this._config.show_furniture ?? true) ? this._renderFurniture() : nothing}
+        ${this._config.show_trace ? this._renderTrace() : nothing}
+        ${(this._config.show_furniture ?? true) ? this._renderFurniture(geo) : nothing}
       </svg>
+    `;
+  }
+
+  // Experimental (see VacuumCardConfig.show_trace) — same no-literal-<svg>-
+  // ancestor situation as the other overlay fragments, hence `svg` not `html`.
+  private _renderTrace(): SVGTemplateResult | typeof nothing {
+    if (this._trace.length < 2) return nothing;
+    const points = this._trace.map(([x, y]) => `${x},${y}`).join(" ");
+    return svg`
+      <polyline
+        points=${points}
+        fill="none"
+        class="vacuum-trace"
+      ></polyline>
     `;
   }
 
@@ -299,9 +346,9 @@ export class VacuumCardAdv extends LitElement {
   // into the parent <svg> in _renderMapOverlay(), so they must use the
   // `svg` tagged template (not `html`) or their elements end up created in
   // the HTML namespace instead of the SVG one and fail to render.
-  private _renderRoomOverlay(room: RoomGeometryRoom): SVGTemplateResult {
+  private _renderRoomOverlay(room: RoomGeometryRoom, roomPolygons: Record<string, RoomPolygon>): SVGTemplateResult {
     const selected = this._selectedRoomIds.has(room.id);
-    const polygon = this._config.room_polygons?.[String(room.id)];
+    const polygon = roomPolygons[String(room.id)];
     const [r, g, b] = room.color;
     // Selected rooms stand out with a strong fill/stroke; unselected rooms
     // still get a faint fill/outline (rather than fully transparent) so
@@ -349,9 +396,16 @@ export class VacuumCardAdv extends LitElement {
 
   // -- Furniture (read-only overlay — placed/edited in the card's own
   // editor, see vacuum-card-adv-editor.ts) --------------------------------
-  private _renderFurniture(): SVGTemplateResult | typeof nothing {
-    const items = this._config.furniture;
-    if (!items || items.length === 0) return nothing;
+  private _renderFurniture(geo: RoomGeometry): SVGTemplateResult | typeof nothing {
+    const all = this._config.furniture;
+    if (!all || all.length === 0) return nothing;
+    // An item without a stored `map` predates per-floor scoping and stays
+    // visible everywhere (unchanged legacy behavior) until re-placed; a
+    // scoped item only shows on the floor it was placed on — see
+    // FurnitureItem.map and geometry.ts's currentMapKey().
+    const mapKey = currentMapKey(geo);
+    const items = all.filter((item) => !item.map || item.map === mapKey);
+    if (items.length === 0) return nothing;
     const opacity = Math.max(0, Math.min(100, this._config.furniture_opacity ?? 100)) / 100;
     const palette = getFurniturePalette(this._config.furniture_color);
     const paletteStyle = `--furn-fill:${palette.fill};--furn-stroke:${palette.stroke};--furn-detail:${palette.detail};--furn-line:${palette.line};`;
@@ -399,7 +453,7 @@ export class VacuumCardAdv extends LitElement {
     }
     const rotation = this._config.map_rotation ?? DEFAULT_MAP_ROTATION;
     const point = displayToNatural(evt.clientX, evt.clientY, this._mapImg, rotation);
-    const roomId = resolveRoomAtPoint(point, geo, this._config.room_polygons);
+    const roomId = resolveRoomAtPoint(point, geo, scopedRoomPolygons(this._config.room_polygons, geo));
     if (roomId === null) {
       // eslint-disable-next-line no-console
       console.debug("[vacuum-card-adv] map click did not land inside any known room", point);
@@ -794,6 +848,15 @@ export class VacuumCardAdv extends LitElement {
       font-size: 15px;
       font-weight: 700;
       font-family: inherit;
+    }
+    /* Experimental (see VacuumCardConfig.show_trace). */
+    .vacuum-trace {
+      stroke: var(--vc-accent);
+      stroke-opacity: 0.85;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
     }
     /* Solid (fully opaque) fills — the furniture_opacity config option
        already controls transparency via the whole .furniture-layer group's

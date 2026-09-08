@@ -1,8 +1,8 @@
 import { LitElement, html, svg, css, TemplateResult, SVGTemplateResult, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators.js";
 import { HomeAssistant, VacuumCardConfig, RoomGeometry, RoomPolygon, FurnitureItem, FurnitureType } from "./types";
-import { discoverEntities } from "./utils/hass-entities";
-import { displayToNatural, Point } from "./utils/geometry";
+import { cacheBustedPicture, discoverEntities } from "./utils/hass-entities";
+import { currentMapKey, displayToNatural, Point, scopedRoomPolygons } from "./utils/geometry";
 import {
   FURNITURE_CATALOG,
   MIN_FURNITURE_SIZE,
@@ -153,6 +153,18 @@ export class VacuumCardAdvEditor extends LitElement {
           ],
           (value) => this._valueChanged("map_position", value)
         )}
+        <ha-formfield label="Show cleaning trace (experimental)">
+          <ha-switch
+            .checked=${this._config.show_trace ?? false}
+            @change=${(e: Event) => this._valueChanged("show_trace", (e.target as HTMLInputElement).checked)}
+          ></ha-switch>
+        </ha-formfield>
+        <div class="hint">
+          Draws a trail behind the vacuum while it's actively cleaning, resetting at the start of
+          each new run. Experimental: it only samples as often as the map image itself refreshes
+          (currently every 60s while cleaning), so the trail is a coarse approximation of the
+          actual path, not a precise one.
+        </div>
       </div>
     `;
   }
@@ -205,7 +217,7 @@ export class VacuumCardAdvEditor extends LitElement {
   private _renderCalibration(): TemplateResult {
     const geo = this._roomGeometry;
     const cameraId = this._cameraId;
-    const picture = cameraId ? (this.hass.states[cameraId]?.attributes?.["entity_picture"] as string) : undefined;
+    const picture = cameraId ? cacheBustedPicture(this.hass, cameraId) : undefined;
 
     return html`
       <div class="section">
@@ -289,7 +301,8 @@ export class VacuumCardAdvEditor extends LitElement {
   private _renderCalibrationOverlay(geo: RoomGeometry): SVGTemplateResult {
     const roomId = this._calibrationRoomId;
     const room = geo.rooms.find((r) => r.id === roomId);
-    const saved = roomId !== undefined ? this._config.room_polygons?.[String(roomId)] : undefined;
+    const saved =
+      roomId !== undefined ? scopedRoomPolygons(this._config.room_polygons, geo)[String(roomId)] : undefined;
 
     const savedEl =
       saved && saved.length >= 3
@@ -360,16 +373,25 @@ export class VacuumCardAdvEditor extends LitElement {
   }
 
   private _finishCalibration(): void {
-    if (this._calibrationRoomId === undefined || this._calibrationPoints.length < 3) return;
+    const geo = this._roomGeometry;
+    if (this._calibrationRoomId === undefined || this._calibrationPoints.length < 3 || !geo) return;
     const roomPolygons = { ...(this._config.room_polygons ?? {}) };
-    roomPolygons[String(this._calibrationRoomId)] = this._calibrationPoints;
+    // Saved under a per-floor key (see currentMapKey()/scopedRoomPolygons in
+    // geometry.ts) so calibrating this room on one floor never bleeds into
+    // another floor that happens to reuse the same room id.
+    roomPolygons[`${currentMapKey(geo)}:${this._calibrationRoomId}`] = this._calibrationPoints;
     this._calibrationPoints = [];
     this._valueChanged("room_polygons", roomPolygons);
   }
 
   private _deleteCalibration(): void {
-    if (this._calibrationRoomId === undefined || !this._config.room_polygons) return;
+    const geo = this._roomGeometry;
+    if (this._calibrationRoomId === undefined || !this._config.room_polygons || !geo) return;
     const roomPolygons = { ...this._config.room_polygons };
+    // Clears both the current floor's scoped entry and any legacy
+    // (pre-floor-scoping) plain-id entry for this room, so a stray legacy
+    // entry can't keep leaking onto other floors after this.
+    delete roomPolygons[`${currentMapKey(geo)}:${this._calibrationRoomId}`];
     delete roomPolygons[String(this._calibrationRoomId)];
     this._calibrationPoints = [];
     this._valueChanged("room_polygons", roomPolygons);
@@ -382,11 +404,22 @@ export class VacuumCardAdvEditor extends LitElement {
   // are stored in the same natural-image pixel space as room_geometry and
   // calibrated room polygons, so furniture holds still across map
   // refreshes the same way those do.
+  /** Items to actually show/edit right now: everything when the current
+   *  floor is unknown (map not loaded yet — better to show something than
+   *  hide it), otherwise only items belonging to this floor or predating
+   *  per-floor scoping — see FurnitureItem.map. */
+  private _visibleFurniture(geo: RoomGeometry | undefined): FurnitureItem[] {
+    if (!geo) return this._furniture;
+    const mapKey = currentMapKey(geo);
+    return this._furniture.filter((item) => !item.map || item.map === mapKey);
+  }
+
   private _renderFurniture(): TemplateResult {
     const geo = this._roomGeometry;
     const cameraId = this._cameraId;
-    const picture = cameraId ? (this.hass.states[cameraId]?.attributes?.["entity_picture"] as string) : undefined;
-    const selected = this._furniture.find((f) => f.id === this._selectedFurnitureId);
+    const picture = cameraId ? cacheBustedPicture(this.hass, cameraId) : undefined;
+    const visibleFurniture = this._visibleFurniture(geo);
+    const selected = visibleFurniture.find((f) => f.id === this._selectedFurnitureId);
 
     return html`
       <div class="section">
@@ -440,16 +473,16 @@ export class VacuumCardAdvEditor extends LitElement {
           : html`
               <div class="map-wrap">
                 <img class="furniture-image" src=${picture} />
-                ${this._renderFurnitureOverlay(geo)}
+                ${this._renderFurnitureOverlay(geo, visibleFurniture)}
               </div>
             `}
         ${selected ? this._renderFurnitureToolbar(selected) : nothing}
-        ${this._furniture.length > 0 ? this._renderFurnitureList() : nothing}
+        ${visibleFurniture.length > 0 ? this._renderFurnitureList(visibleFurniture) : nothing}
       </div>
     `;
   }
 
-  private _renderFurnitureOverlay(geo: RoomGeometry): TemplateResult {
+  private _renderFurnitureOverlay(geo: RoomGeometry, items: FurnitureItem[]): TemplateResult {
     const palette = getFurniturePalette(this._config.furniture_color);
     const paletteStyle = `--furn-fill:${palette.fill};--furn-stroke:${palette.stroke};--furn-detail:${palette.detail};--furn-line:${palette.line};`;
     return html`
@@ -467,7 +500,7 @@ export class VacuumCardAdvEditor extends LitElement {
           @pointerdown=${() => (this._selectedFurnitureId = undefined)}
         ></rect>
         <g class="furniture-layer" style=${paletteStyle}>
-          ${this._furniture.map((item) => this._renderEditableFurnitureItem(item))}
+          ${items.map((item) => this._renderEditableFurnitureItem(item))}
         </g>
       </svg>
     `;
@@ -562,10 +595,10 @@ export class VacuumCardAdvEditor extends LitElement {
     `;
   }
 
-  private _renderFurnitureList(): TemplateResult {
+  private _renderFurnitureList(items: FurnitureItem[]): TemplateResult {
     return html`
       <div class="furniture-list">
-        ${this._furniture.map((item) => {
+        ${items.map((item) => {
           const meta = getFurnitureMeta(item.type);
           return html`
             <div
