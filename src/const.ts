@@ -1,4 +1,4 @@
-export const CARD_VERSION = "2.1.0";
+export const CARD_VERSION = "2.2.0";
 
 
 // Dock action buttons — friendly names exactly as TapoVac-ADV's button.py
@@ -21,3 +21,9 @@ export const CLEAN_PASSES_ENTITY_NAME = "Clean Passes";
 export const CLEANING_STATES = ["cleaning"];
 
 export const DEFAULT_MAP_ROTATION = 0;
+
+// Cap on stored trace points (see VacuumCardConfig.show_trace) — the
+// vacuum_point sample rate follows the integration's own map refresh
+// interval (60s while cleaning), so this bounds a long clean's trail to a
+// reasonable memory footprint rather than growing unbounded for hours.
+export const TRACE_MAX_POINTS = 400;

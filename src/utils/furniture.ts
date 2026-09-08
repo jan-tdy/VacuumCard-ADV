@@ -1,5 +1,6 @@
 import { svg, SVGTemplateResult } from "lit";
 import { FurnitureColorScheme, FurnitureItem, FurnitureType, RoomGeometry } from "../types";
+import { currentMapKey } from "./geometry";
 
 export interface FurniturePalette {
   fill: string;
@@ -95,6 +96,8 @@ export function createFurnitureItem(
     width,
     height,
     rotation: 0,
+    // Scopes the item to the floor it was placed on — see FurnitureItem.map.
+    map: currentMapKey(geo),
   };
 }
 

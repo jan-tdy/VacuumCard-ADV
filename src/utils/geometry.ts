@@ -51,6 +51,50 @@ export function displayToNatural(
   return { x: localX * scaleX, y: localY * scaleY };
 }
 
+/** Stable identifier for the floor/map the given room_geometry snapshot
+ *  came from — used to scope saved calibration (room_polygons) and
+ *  furniture per floor, since a multi-map vacuum reuses the same room ids
+ *  and pixel space on every floor.
+ *
+ *  Prefers the integration's own map_id when present (exact, and stable
+ *  even if a room gets renamed) — see RoomGeometry.map_id. No published
+ *  TapoVac-ADV version exposes it yet, so in practice this currently
+ *  always falls back to fingerprinting the floor's own room layout
+ *  (sorted "id:name" pairs): two different floors virtually always have a
+ *  different room set, so this reliably tells them apart even though it
+ *  can't distinguish two floors that happen to share an identical layout,
+ *  and it changes if rooms are renamed/re-added on the device. */
+export function currentMapKey(geometry: RoomGeometry): string {
+  if (geometry.map_id !== undefined && geometry.map_id !== null) {
+    return `map:${geometry.map_id}`;
+  }
+  return geometry.rooms
+    .map((r) => `${r.id}:${r.name}`)
+    .sort()
+    .join("|");
+}
+
+/** This floor's calibrated room polygons, resolved out of the full
+ *  (possibly multi-floor) room_polygons config: a "<mapKey>:<roomId>"
+ *  entry for the *current* floor wins when present, else falls back to a
+ *  legacy plain "<roomId>" entry (saved before floors were distinguished)
+ *  so single-floor configs keep working untouched. Returned keyed by
+ *  plain room id, ready to look up by room.id like the old flat config
+ *  shape was. */
+export function scopedRoomPolygons(
+  roomPolygons: Record<string, RoomPolygon> | undefined,
+  geometry: RoomGeometry
+): Record<string, RoomPolygon> {
+  if (!roomPolygons) return {};
+  const mapKey = currentMapKey(geometry);
+  const result: Record<string, RoomPolygon> = {};
+  for (const room of geometry.rooms) {
+    const polygon = roomPolygons[`${mapKey}:${room.id}`] ?? roomPolygons[String(room.id)];
+    if (polygon) result[String(room.id)] = polygon;
+  }
+  return result;
+}
+
 function pointInBbox(p: Point, bbox: [number, number, number, number]): boolean {
   return p.x >= bbox[0] && p.x <= bbox[2] && p.y >= bbox[1] && p.y <= bbox[3];
 }

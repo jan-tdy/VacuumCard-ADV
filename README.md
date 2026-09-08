@@ -19,7 +19,8 @@ editor's own "Show code editor" toggle.
 
 - Header with name and status
 - Live map (from the integration's map camera entity) with **configurable
-  rotation** — no card-mod needed
+  rotation** — no card-mod needed. Refreshes on its own as the integration
+  re-renders it, no dashboard reload required
 - **Click rooms directly on the map** to select them, then clean just
   those rooms — selected rooms are clearly highlighted against unselected
   ones, each with a numbered badge showing the order they were picked in
@@ -30,6 +31,12 @@ editor's own "Show code editor" toggle.
 - A **room calibration tool** in the visual editor: click points on the
   map to trace a room's actual outline when the automatic rectangle
   doesn't fit an irregular/L-shaped room
+- **Multi-map/multi-floor aware** — furniture and calibrated room outlines
+  are scoped to the floor they were placed/traced on, so a two-floor house
+  doesn't mix a room's calibration or a piece of furniture onto the wrong
+  floor's map
+- **Experimental: a live trace** of the vacuum's path while it's cleaning
+  (`show_trace`, off by default — see [Configuration](#configuration))
 - Start / pause / stop / return-to-dock controls
 - Dock action buttons (Empty Dust Bin / Wash Mop / Dry Mop / Remove
   Hair) — shown only for the actions your specific dock actually has
@@ -96,6 +103,7 @@ show_last_updated: true
 show_furniture: true
 furniture_opacity: 100   # 0-100, how solid furniture looks on the live card's map
 furniture_color: brown   # "brown" (default) or "white"
+show_trace: false        # experimental: live trail behind the vacuum while cleaning
 sensors: []              # override the auto-detected sensor list
 maintenance_sensors: []  # override which sensors show under "Maintenance"
 room_polygons: {}        # written by the editor's calibration tool
@@ -128,6 +136,11 @@ or less prominent against the map instead of hiding it outright. **Furniture
 color** (`furniture_color`) picks between a brown/wood-toned palette
 (default) and a white/light-gray one.
 
+On a multi-map/multi-floor vacuum, each piece of furniture is tied to the
+floor it was placed on and only shows up there — placing furniture while
+viewing floor 1's map won't show it on floor 2. Furniture placed before this
+was added keeps showing on every floor until you delete and re-place it.
+
 ## Room calibration
 
 Rooms work immediately using an automatically-computed rectangle (from
@@ -145,6 +158,24 @@ straight horizontal or vertical line from the last one, so the traced
 outline comes out as clean right-angle walls instead of a rough hand-drawn
 shape — matching how most rooms are actually built. Turn it off for a
 genuinely angled/non-rectilinear room.
+
+On a multi-map/multi-floor vacuum, a saved calibration is tied to the floor
+it was traced on: calibrating "Bedroom" on floor 1 doesn't affect whatever
+room has the same id on floor 2. Calibration saved before this was added
+keeps applying on whichever floor currently has that room id until you
+recalibrate (or delete it) on each floor.
+
+## Cleaning trace (experimental)
+
+Turn on `show_trace` (in the editor: **Map rotation** section → "Show
+cleaning trace") to draw a trail behind the vacuum while it's actively
+cleaning, using the map camera's `vacuum_point`. It resets at the start of
+each new cleaning run.
+
+This is intentionally simple, not a precise path: it only samples as often
+as the integration re-renders the map (currently every 60s while cleaning),
+so straight lines between samples can cut corners a real path wouldn't.
+Off by default.
 
 ## Development
 
