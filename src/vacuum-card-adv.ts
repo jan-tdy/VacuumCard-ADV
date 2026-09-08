@@ -129,7 +129,7 @@ export class VacuumCardAdv extends LitElement {
         this._discovered = discoverEntities(this.hass, this._config.vacuum);
         this._lastDiscoveredFor = this._config.vacuum;
       }
-      if (this._config.show_trace) this._updateTrace();
+      this._updateTrace();
     }
   }
 
@@ -138,7 +138,12 @@ export class VacuumCardAdv extends LitElement {
    *  starts a fresh trail at the beginning of each new cleaning run so it
    *  doesn't stitch onto a previous, unrelated run. Only samples as often
    *  as room_geometry.vacuum_point itself updates (the integration's own
-   *  map refresh interval), so the trail is coarse by nature. */
+   *  map refresh interval), so the trail is coarse by nature.
+   *
+   *  State transitions are tracked unconditionally (not just while
+   *  show_trace is on) so re-enabling it mid-house always starts a fresh
+   *  trail for the *current* run instead of stitching onto whatever was
+   *  last recorded before it was switched off. */
   private _updateTrace(): void {
     const state = this.hass.states[this._config.vacuum]?.state;
     const isCleaning = (s: string | undefined): boolean => s !== undefined && CLEANING_STATES.includes(s);
@@ -147,7 +152,7 @@ export class VacuumCardAdv extends LitElement {
       if (cleaning && !isCleaning(this._lastVacuumStateForTrace)) this._trace = [];
       this._lastVacuumStateForTrace = state;
     }
-    if (!cleaning) return;
+    if (!this._config.show_trace || !cleaning) return;
 
     const point = this._roomGeometry?.vacuum_point;
     if (!point) return;
