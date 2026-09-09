@@ -96,6 +96,11 @@ export function discoverEntities(hass: HomeAssistant, vacuumEntityId: string): D
     const name = friendlyName(hass, id);
     if (name.includes(WATER_LEVEL_ENTITY_NAME)) result.waterLevel = id;
     else if (name.includes(CLEAN_PASSES_ENTITY_NAME)) result.cleanPasses = id;
+    // Anything else (e.g. TapoVac-ADV v2.0.0's Area Unit) isn't a control
+    // this card has dedicated UI for — surface it as a tappable row in
+    // Maintenance (opens HA's own more-info dialog to change it) instead
+    // of dropping it silently.
+    else result.maintenanceSensors.push(id);
   }
 
   for (const id of byDomain(deviceIds, "sensor")) {
@@ -105,7 +110,11 @@ export function discoverEntities(hass: HomeAssistant, vacuumEntityId: string): D
       continue;
     }
     const name = friendlyName(hass, id).toLowerCase();
-    if (name.includes("remaining")) result.maintenanceSensors.push(id);
+    // "remaining" catches consumables (brush/filter/... time left);
+    // "carpet" catches TapoVac-ADV v2.0.0's Carpet Clean Preference — both
+    // are settings/upkeep info, not core cleaning status, so they belong
+    // in the collapsible Maintenance section rather than the main list.
+    if (name.includes("remaining") || name.includes("carpet")) result.maintenanceSensors.push(id);
     // Left out of the *default* list, not hidden entirely: a raw
     // schedules count isn't useful at a glance, and status is already
     // shown in the card's own header — both can still be added back via
@@ -116,7 +125,20 @@ export function discoverEntities(hass: HomeAssistant, vacuumEntityId: string): D
 
   for (const id of byDomain(deviceIds, "binary_sensor")) {
     if (friendlyName(hass, id).toLowerCase().includes("mop")) result.mopAttached = id;
+    // Anything else (e.g. TapoVac-ADV v2.0.0's Do Not Disturb) — same
+    // reasoning as the select loop above: a Maintenance row beats silence.
+    else result.maintenanceSensors.push(id);
   }
+
+  // number/switch entities didn't exist on this device before TapoVac-ADV
+  // v2.0.0 (Volume, Refresh Interval, Child Lock) — no dedicated UI for
+  // them here either, so they go straight to Maintenance like the
+  // unmatched select/binary_sensor cases above. _renderSensorRow() reads
+  // generic state/unit/icon and its tap opens the standard more-info
+  // dialog, which already has the right control (slider/toggle) for
+  // these domains — no per-domain rendering needed on this card's side.
+  for (const id of byDomain(deviceIds, "number")) result.maintenanceSensors.push(id);
+  for (const id of byDomain(deviceIds, "switch")) result.maintenanceSensors.push(id);
 
   for (const id of byDomain(deviceIds, "button")) {
     const name = friendlyName(hass, id);
