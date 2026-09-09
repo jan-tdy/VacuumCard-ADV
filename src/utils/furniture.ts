@@ -1,5 +1,11 @@
 import { svg, SVGTemplateResult } from "lit";
-import { FurnitureColorScheme, FurnitureItem, FurnitureType, RoomGeometry } from "../types";
+import {
+  FurnitureColorScheme,
+  FurnitureItem,
+  FurnitureType,
+  RoomGeometry,
+  RoomGeometryDetectedFurniture,
+} from "../types";
 import { currentMapKey } from "./geometry";
 
 export interface FurniturePalette {
@@ -97,6 +103,37 @@ export function createFurnitureItem(
     height,
     rotation: 0,
     // Scopes the item to the floor it was placed on — see FurnitureItem.map.
+    map: currentMapKey(geo),
+  };
+}
+
+/** New furniture item from one of the vacuum's own detected outlines
+ *  (RoomGeometryDetectedFurniture — see types.ts): position, size, and
+ *  rotation come straight from the device's bbox/angle instead of the
+ *  catalog default + manual drag/resize/rotate createFurnitureItem()
+ *  needs. The caller still picks `type` (the currently selected type in
+ *  the "Add" dropdown) since the device's own type code isn't decoded to
+ *  a FurnitureType yet.
+ *
+ *  detected.angle is passed straight through, unconfirmed against a real
+ *  device beyond the observation that its values are exact multiples of
+ *  90 — same caveat as the raw type code, see types.ts. If it turns out
+ *  to be measured from a different reference/direction than
+ *  FurnitureItem.rotation expects, this is the one place to fix that. */
+export function createFurnitureItemFromDetected(
+  type: FurnitureType,
+  detected: RoomGeometryDetectedFurniture,
+  geo: RoomGeometry
+): FurnitureItem {
+  const [x0, y0, x1, y1] = detected.bbox;
+  return {
+    id: `furn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`,
+    type,
+    x: Math.round((x0 + x1) / 2),
+    y: Math.round((y0 + y1) / 2),
+    width: Math.max(MIN_FURNITURE_SIZE, Math.round(x1 - x0)),
+    height: Math.max(MIN_FURNITURE_SIZE, Math.round(y1 - y0)),
+    rotation: normalizeAngle(detected.angle),
     map: currentMapKey(geo),
   };
 }
