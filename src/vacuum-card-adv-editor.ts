@@ -1,12 +1,21 @@
 import { LitElement, html, svg, css, TemplateResult, SVGTemplateResult, nothing } from "lit";
 import { customElement, property, state, query } from "lit/decorators.js";
-import { HomeAssistant, VacuumCardConfig, RoomGeometry, RoomPolygon, FurnitureItem, FurnitureType } from "./types";
+import {
+  HomeAssistant,
+  VacuumCardConfig,
+  RoomGeometry,
+  RoomGeometryDetectedFurniture,
+  RoomPolygon,
+  FurnitureItem,
+  FurnitureType,
+} from "./types";
 import { cacheBustedPicture, discoverEntities } from "./utils/hass-entities";
 import { currentMapKey, displayToNatural, Point, scopedRoomPolygons } from "./utils/geometry";
 import {
   FURNITURE_CATALOG,
   MIN_FURNITURE_SIZE,
   createFurnitureItem,
+  createFurnitureItemFromDetected,
   furnitureGlyph,
   getFurnitureMeta,
   getFurniturePalette,
@@ -45,6 +54,14 @@ export class VacuumCardAdvEditor extends LitElement {
   @state() private _selectedFurnitureId?: string;
   @state() private _furnitureAddType: FurnitureType = "bed";
   @query("img.furniture-image") private _furnitureImg?: HTMLImageElement;
+
+  // Detected-furniture outlines (see _renderDetectedFurnitureOverlay())
+  // already turned into a placed item this session — hidden afterwards so
+  // clicking the same outline twice doesn't add duplicates. Client-side
+  // only, not persisted: a fresh render of the editor shows every
+  // detected outline again, which is fine since it's keyed by the
+  // device's own furniture id, not by anything this card generated.
+  @state() private _usedDetectedFurnitureIds = new Set<number>();
 
   public setConfig(config: VacuumCardConfig): void {
     this._config = config;
@@ -425,9 +442,10 @@ export class VacuumCardAdvEditor extends LitElement {
       <div class="section">
         <div class="section-title">Furniture</div>
         <div class="hint">
-          Furniture placed in the official Tapo app can't be read into Home Assistant (see the
-          TapoVac-ADV README) — place it here instead: pick a type, click "Add", then drag its
-          body to move it, the top handle to rotate, and the corner handle to resize.
+          Pick a type, click "Add", then drag its body to move it, the top handle to rotate, and
+          the corner handle to resize. ${geo?.furniture?.length
+            ? "The vacuum detected furniture outlines on this map (dashed, below) — click one to place a piece there instead of dragging it into position by hand; you still pick its type since the device doesn't say what it is."
+            : "Furniture placed in the official Tapo app itself isn't readable here yet — this vacuum hasn't reported any detected outlines on this map (see the TapoVac-ADV README's Furniture section)."}
         </div>
         <div class="furniture-add-row">
           ${renderSelectField(
@@ -499,10 +517,41 @@ export class VacuumCardAdvEditor extends LitElement {
           class="furniture-bg-catcher"
           @pointerdown=${() => (this._selectedFurnitureId = undefined)}
         ></rect>
+        <g class="detected-furniture-layer">
+          ${(geo.furniture ?? [])
+            .filter((d) => !this._usedDetectedFurnitureIds.has(d.id))
+            .map((d) => this._renderDetectedFurnitureOutline(d))}
+        </g>
         <g class="furniture-layer" style=${paletteStyle}>
           ${items.map((item) => this._renderEditableFurnitureItem(item))}
         </g>
       </svg>
+    `;
+  }
+
+  /** One vacuum-detected furniture outline, drawn as a plain dashed
+   *  rectangle (not furnitureGlyph() — we don't know what kind of
+   *  furniture this is, only where it is, so drawing a specific shape
+   *  would overclaim). Click anywhere on it to place a real, editable
+   *  FurnitureItem there via _addDetectedFurniture(). */
+  private _renderDetectedFurnitureOutline(detected: RoomGeometryDetectedFurniture): SVGTemplateResult {
+    const [x0, y0, x1, y1] = detected.bbox;
+    return svg`
+      <g
+        class="detected-furniture-outline"
+        @pointerdown=${(e: PointerEvent) => {
+          e.stopPropagation();
+          this._addDetectedFurniture(detected);
+        }}
+      >
+        <rect
+          x=${x0}
+          y=${y0}
+          width=${x1 - x0}
+          height=${y1 - y0}
+          transform="rotate(${detected.angle} ${(x0 + x1) / 2} ${(y0 + y1) / 2})"
+        ></rect>
+      </g>
     `;
   }
 
@@ -629,6 +678,20 @@ export class VacuumCardAdvEditor extends LitElement {
     const item = createFurnitureItem(this._furnitureAddType, geo, this._furniture);
     this._furniture = [...this._furniture, item];
     this._selectedFurnitureId = item.id;
+    this._commitFurniture();
+  }
+
+  /** Place a furniture item at one of the vacuum's own detected outlines
+   *  (see _renderDetectedFurnitureOutline()) instead of the catalog
+   *  default position — same "type" the Add dropdown currently has
+   *  selected, since the device's type code isn't decoded yet. */
+  private _addDetectedFurniture(detected: RoomGeometryDetectedFurniture): void {
+    const geo = this._roomGeometry;
+    if (!geo) return;
+    const item = createFurnitureItemFromDetected(this._furnitureAddType, detected, geo);
+    this._furniture = [...this._furniture, item];
+    this._selectedFurnitureId = item.id;
+    this._usedDetectedFurnitureIds = new Set(this._usedDetectedFurnitureIds).add(detected.id);
     this._commitFurniture();
   }
 
@@ -813,6 +876,18 @@ export class VacuumCardAdvEditor extends LitElement {
     .furniture-item {
       cursor: move;
       touch-action: none;
+    }
+    .detected-furniture-outline {
+      cursor: pointer;
+    }
+    .detected-furniture-outline rect {
+      fill: rgba(var(--rgb-primary-color, 3, 169, 244), 0.08);
+      stroke: var(--primary-color);
+      stroke-width: 1.5;
+      stroke-dasharray: 5 4;
+    }
+    .detected-furniture-outline:hover rect {
+      fill: rgba(var(--rgb-primary-color, 3, 169, 244), 0.22);
     }
     .furniture-item .furn-body {
       fill: var(--furn-fill, #bcaaa4);

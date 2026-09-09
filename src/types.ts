@@ -144,6 +144,22 @@ export interface RoomGeometryRoom {
   bbox: [number, number, number, number]; // x0, y0, x1, y1
 }
 
+// One furniture item the vacuum itself detected on its map (getMapData's
+// furniture_list — see TapoVac-ADV's coordinator._furniture_geometry(),
+// added in v2.0.0), already converted into the same natural-image pixel
+// space as room_geometry.rooms/RoomPolygon. `type` is the device's raw,
+// undecoded type code (no confirmed code → furniture-category table
+// exists yet — see TapoVac-ADV's README "Furniture" section), so this is
+// intentionally *not* a FurnitureType: nothing here guesses what kind of
+// furniture it is, only where it is.
+export interface RoomGeometryDetectedFurniture {
+  id: number;
+  type: number;
+  angle: number;
+  points: [number, number][];
+  bbox: [number, number, number, number]; // x0, y0, x1, y1
+}
+
 export interface RoomGeometry {
   image_width: number;
   image_height: number;
@@ -157,6 +173,9 @@ export interface RoomGeometry {
   // versions keep working unchanged.
   map_id?: number | string;
   map_name?: string;
+  // Device-detected furniture outlines — undefined on integration
+  // versions older than v2.0.0. See RoomGeometryDetectedFurniture above.
+  furniture?: RoomGeometryDetectedFurniture[];
 }
 
 // -- Card picker registration (window.customCards) -----------------------
