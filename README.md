@@ -6,9 +6,12 @@ You can take a look at my issue and pr queue if you are wondering why is somethi
 
 A Home Assistant Lovelace card built for the
 [TapoVac-ADV](https://github.com/jan-tdy/TapoVac-ADV) integration (Tapo
-RV30 / RV50 series). UI-editable through Home Assistant's own card
-editor — not YAML-only, though YAML is always available too via the
-editor's own "Show code editor" toggle.
+RV30 / RV50 series), with additional support for the
+[Dreame Vacuum](https://github.com/Tasshack/dreame-vacuum) integration —
+see [Dreame Vacuum support](#dreame-vacuum-support) below for what that
+covers. UI-editable through Home Assistant's own card editor — not
+YAML-only, though YAML is always available too via the editor's own "Show
+code editor" toggle.
 
 ## Screenshot
 
@@ -58,11 +61,18 @@ up.
 
 ## Requirements
 
-- The [TapoVac-ADV](https://github.com/jan-tdy/TapoVac-ADV) integration —
-  this card is built specifically for its entities (map camera's
-  `room_geometry` attribute for room click-to-select, the
-  `tapo_rv30.clean_rooms` service, its dock action buttons). It won't do
-  anything useful pointed at a different vacuum integration.
+- One of:
+  - The [TapoVac-ADV](https://github.com/jan-tdy/TapoVac-ADV) integration
+    (Tapo RV30/RV50) — the full feature set: map click-to-select rooms
+    (its map camera's `room_geometry` attribute), room calibration,
+    furniture placement, the live trace, and its own dock action buttons.
+  - The [Dreame Vacuum](https://github.com/Tasshack/dreame-vacuum)
+    integration — core controls, fan speed/water level, battery, sensors,
+    dock actions, and room selection from a list (see
+    [Dreame Vacuum support](#dreame-vacuum-support) for what's different).
+  - Any other vacuum entity works for the generic parts (start/pause/stop/
+    dock — gated on what the entity actually supports, fan speed, battery,
+    sensors), just without room selection or a map.
 - [HACS](https://hacs.xyz) installed
 
 ## Installation via HACS
@@ -84,6 +94,7 @@ type: custom:vacuum-card-adv
 vacuum: vacuum.jedalen_rv30_max
 # Everything else is optional — auto-detected from the vacuum entity's
 # device when omitted.
+vacuum_brand: tapo       # "tapo" or "dreame" — auto-detected when omitted
 camera: camera.jedalen_rv30_max_map
 water_level_entity: select.jedalen_rv30_max_water_level
 battery_entity: sensor.jedalen_rv30_max_battery
@@ -176,6 +187,43 @@ This is intentionally simple, not a precise path: it only samples as often
 as the integration re-renders the map (currently every 60s while cleaning),
 so straight lines between samples can cut corners a real path wouldn't.
 Off by default.
+
+## Dreame Vacuum support
+
+This card also works with the
+[Dreame Vacuum](https://github.com/Tasshack/dreame-vacuum) integration.
+`vacuum_brand` is auto-detected from the vacuum entity's own integration
+(the entity registry's platform) — you only need to set it explicitly if
+that detection is unavailable or wrong, e.g.:
+
+```yaml
+type: custom:vacuum-card-adv
+vacuum: vacuum.living_room_l10s_ultra
+vacuum_brand: dreame
+```
+
+What works the same as TapoVac-ADV: start/pause/stop/dock controls (each
+button only shown if the entity actually supports it — Dreame's `vacuum`
+entity has no spot-clean support, for example, so that button doesn't show
+up), fan speed, water level, battery, sensors (including maintenance
+items), and dock action buttons (auto-empty, self-clean, drying — whichever
+your dock actually has).
+
+What's different, because the Dreame Vacuum integration doesn't expose the
+same map data as TapoVac-ADV:
+
+- **No click-to-select rooms on the map.** TapoVac-ADV's map camera exposes
+  a `room_geometry` attribute with each room's pixel outline; Dreame's
+  integration only exposes a flat room list (name + id) on the vacuum
+  entity itself, with no coordinates. Rooms are instead picked from a chip
+  list shown under the map (or on its own, if there's no map camera
+  available) and cleaned via `dreame_vacuum.vacuum_clean_segment`.
+- **No room calibration or furniture placement tool**, and no cleaning
+  trace — all three are built on `room_geometry`, so they only apply to
+  TapoVac-ADV.
+
+The map image itself (if Dreame's cloud-connected camera entity is
+available) still displays and rotates the same way as for TapoVac-ADV.
 
 ## Development
 

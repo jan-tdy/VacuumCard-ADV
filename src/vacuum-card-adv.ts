@@ -4,15 +4,32 @@ import {
   HomeAssistant,
   HassEntity,
   VacuumCardConfig,
+  VacuumBrand,
+  DreameRoom,
   RoomGeometry,
   RoomGeometryRoom,
   RoomPolygon,
 } from "./types";
-import { cacheBustedPicture, discoverEntities, DiscoveredEntities } from "./utils/hass-entities";
+import {
+  cacheBustedPicture,
+  detectVacuumBrand,
+  discoverDreameRooms,
+  discoverEntities,
+  DiscoveredEntities,
+} from "./utils/hass-entities";
 import { currentMapKey, displayToNatural, resolveRoomAtPoint, scopedRoomPolygons } from "./utils/geometry";
 import { furnitureGlyph, getFurniturePalette } from "./utils/furniture";
 import { renderSelectField } from "./utils/ha-form";
-import { CARD_VERSION, CLEANING_STATES, DEFAULT_MAP_ROTATION, TRACE_MAX_POINTS } from "./const";
+import {
+  CARD_VERSION,
+  CLEANING_STATES,
+  DEFAULT_MAP_ROTATION,
+  TRACE_MAX_POINTS,
+  VACUUM_FEATURE_CLEAN_SPOT,
+  VACUUM_FEATURE_PAUSE,
+  VACUUM_FEATURE_RETURN_HOME,
+  VACUUM_FEATURE_STOP,
+} from "./const";
 
 import "./vacuum-card-adv-editor";
 
@@ -47,6 +64,12 @@ export class VacuumCardAdv extends LitElement {
   @state() private _config!: VacuumCardConfig;
   @state() private _discovered: DiscoveredEntities = { dockActions: [], sensors: [], maintenanceSensors: [] };
   @state() private _selectedRoomIds: Set<number> = new Set();
+  // Selected rooms for the Dreame chip-list selector (see
+  // _renderDreameRooms()) — kept separate from _selectedRoomIds above
+  // since the two brands identify rooms differently (TapoVac-ADV room ids
+  // come from room_geometry; Dreame segment ids come from the vacuum
+  // entity's own "rooms" attribute) and are never both in play at once.
+  @state() private _selectedDreameSegmentIds: Set<number> = new Set();
   @state() private _maintenanceOpen = false;
   @state() private _busy = false;
   // Experimental trace trail (see VacuumCardConfig.show_trace) — kept as
@@ -58,6 +81,11 @@ export class VacuumCardAdv extends LitElement {
 
   private _lastDiscoveredFor?: string;
   private _lastVacuumStateForTrace?: string;
+  // Tracks which Dreame map _selectedDreameSegmentIds was picked on (see
+  // willUpdate()) — a plain string, not a boolean, so the very first
+  // update (no prior map to compare against) never wrongly clears a
+  // selection that was just set.
+  private _lastDreameSelectedMapFor?: string;
 
   public static getConfigElement(): HTMLElement {
     return document.createElement("vacuum-card-adv-editor");
@@ -125,12 +153,42 @@ export class VacuumCardAdv extends LitElement {
     // new _discovered object reference, forcing an extra render) on every
     // single one of those was pure waste.
     if (changed.has("hass") && this.hass && this._config?.vacuum) {
-      if (this._lastDiscoveredFor !== this._config.vacuum) {
-        this._discovered = discoverEntities(this.hass, this._config.vacuum);
-        this._lastDiscoveredFor = this._config.vacuum;
+      // Keyed by vacuum *and* brand (not just vacuum) — switching
+      // vacuum_brand in the editor without changing the vacuum entity
+      // must still re-run discovery, or dock actions/water-level naming
+      // from the previous brand would linger in _discovered.
+      const brand = this._brand;
+      const discoveryKey = `${this._config.vacuum}|${brand}`;
+      if (this._lastDiscoveredFor !== discoveryKey) {
+        this._discovered = discoverEntities(this.hass, this._config.vacuum, brand);
+        this._lastDiscoveredFor = discoveryKey;
       }
+
+      // Same idea for Dreame's room-chip selection: a stale segment id
+      // from a map the vacuum has since switched away from (or a
+      // different vacuum entity picked in the editor) would otherwise
+      // still be sent to dreame_vacuum.vacuum_clean_segment, which can
+      // fail instead of cleaning the rooms actually shown as selected.
+      const selectedMap = this.hass.states[this._config.vacuum]?.attributes?.["selected_map"] as
+        | string
+        | undefined;
+      const dreameMapKey = `${this._config.vacuum}|${selectedMap ?? ""}`;
+      if (this._lastDreameSelectedMapFor !== undefined && this._lastDreameSelectedMapFor !== dreameMapKey) {
+        this._selectedDreameSegmentIds = new Set();
+      }
+      this._lastDreameSelectedMapFor = dreameMapKey;
+
       this._updateTrace();
     }
+  }
+
+  /** Which integration the configured vacuum belongs to — explicit
+   *  vacuum_brand config always wins, otherwise auto-detected from the
+   *  entity registry (see detectVacuumBrand()), falling back to "tapo" so
+   *  every config from before multi-brand support kept behaving exactly
+   *  as it did (this card's only brand until now). */
+  private get _brand(): VacuumBrand {
+    return this._config.vacuum_brand ?? detectVacuumBrand(this.hass, this._config.vacuum) ?? "tapo";
   }
 
   /** Experimental (see VacuumCardConfig.show_trace): appends the vacuum's
@@ -262,34 +320,67 @@ export class VacuumCardAdv extends LitElement {
   // -- Controls --------------------------------------------------------------
   private _renderControls(vacuum: HassEntity): TemplateResult {
     const cleaning = vacuum.state === "cleaning";
+    // Not every integration's vacuum entity supports every service — the
+    // Dreame Vacuum integration, for instance, has no CLEAN_SPOT support —
+    // and calling an unsupported one raises an error rather than doing
+    // nothing, so each button is gated on the entity's own
+    // supported_features bitmask instead of assumed. A missing/NaN
+    // attribute (older integrations that don't set it) is treated as "all
+    // supported", matching this card's original behavior before this
+    // check existed.
+    const features = Number(vacuum.attributes["supported_features"]);
+    const supports = (bit: number): boolean => Number.isNaN(features) || (features & bit) !== 0;
+    // A vacuum with no pause support (rare, but not guaranteed by the
+    // vacuum domain) falls back to stop instead — still a working "make it
+    // stop cleaning" action rather than a call to an unsupported service.
+    const pauseService = supports(VACUUM_FEATURE_PAUSE) ? "pause" : "stop";
     return html`
       <div class="section controls">
-        <button class="pill" @click=${() => this._callVacuumService(cleaning ? "pause" : "start")}>
+        <button class="pill" @click=${() => this._callVacuumService(cleaning ? pauseService : "start")}>
           <ha-icon icon=${cleaning ? "mdi:pause" : "mdi:play"}></ha-icon>
           <span>${cleaning ? "Pause" : "Start"}</span>
         </button>
-        <button class="pill" @click=${() => this._callVacuumService("stop")}>
-          <ha-icon icon="mdi:stop"></ha-icon>
-          <span>Stop</span>
-        </button>
-        <button class="pill" @click=${() => this._callVacuumService("clean_spot")}>
-          <ha-icon icon="mdi:target-variant"></ha-icon>
-          <span>Spot</span>
-        </button>
-        <button class="pill accent" @click=${() => this._callVacuumService("return_to_base")}>
-          <ha-icon icon="mdi:home-import-outline"></ha-icon>
-          <span>Dock</span>
-        </button>
+        ${supports(VACUUM_FEATURE_STOP)
+          ? html`<button class="pill" @click=${() => this._callVacuumService("stop")}>
+              <ha-icon icon="mdi:stop"></ha-icon>
+              <span>Stop</span>
+            </button>`
+          : nothing}
+        ${supports(VACUUM_FEATURE_CLEAN_SPOT)
+          ? html`<button class="pill" @click=${() => this._callVacuumService("clean_spot")}>
+              <ha-icon icon="mdi:target-variant"></ha-icon>
+              <span>Spot</span>
+            </button>`
+          : nothing}
+        ${supports(VACUUM_FEATURE_RETURN_HOME)
+          ? html`<button class="pill accent" @click=${() => this._callVacuumService("return_to_base")}>
+              <ha-icon icon="mdi:home-import-outline"></ha-icon>
+              <span>Dock</span>
+            </button>`
+          : nothing}
       </div>
     `;
   }
 
   // -- Map ---------------------------------------------------------------
+  /** Dreame Vacuum has no pixel-space room geometry to click on (see
+   *  types.ts's DreameRoom) — only a flat room list, read straight off the
+   *  vacuum entity each render rather than cached in state, same as any
+   *  other live attribute this card reads on demand. [] for every other
+   *  brand, or a Dreame device with no saved map yet. */
+  private get _dreameRooms(): DreameRoom[] {
+    if (this._brand !== "dreame") return [];
+    return discoverDreameRooms(this.hass, this._config.vacuum);
+  }
+
   private _renderMap(): TemplateResult | typeof nothing {
     const cameraId = this._config.camera ?? this._discovered.camera;
-    if (!cameraId) return nothing;
-    const picture = cacheBustedPicture(this.hass, cameraId);
-    if (!picture) return nothing;
+    const picture = cameraId ? cacheBustedPicture(this.hass, cameraId) : undefined;
+    const dreameRooms = this._dreameRooms;
+    // A Dreame device with no camera picture yet still gets its room-chip
+    // list (it doesn't depend on the map image at all) — only bail out
+    // entirely when there's neither a map nor a room list to show.
+    if (!picture && dreameRooms.length === 0) return nothing;
 
     const rotation = this._config.map_rotation ?? DEFAULT_MAP_ROTATION;
     const geo = this._roomGeometry;
@@ -297,20 +388,91 @@ export class VacuumCardAdv extends LitElement {
 
     return html`
       <div class="section map-section">
-        <div class="map-wrap">
-          <img class="map-image" src=${picture} style=${rotStyle} @click=${this._onMapClick} />
-          ${geo ? this._renderMapOverlay(geo, rotStyle) : nothing}
-        </div>
-        ${!geo
-          ? html`<div class="map-hint">
-              Room click-to-select needs TapoVac-ADV v1.12+ (the map camera's
-              <code>room_geometry</code> attribute) — update the integration via HACS, restart Home
-              Assistant, then hard-refresh this browser tab.
+        ${picture
+          ? html`<div class="map-wrap">
+              <img class="map-image" src=${picture} style=${rotStyle} @click=${this._onMapClick} />
+              ${geo ? this._renderMapOverlay(geo, rotStyle) : nothing}
             </div>`
           : nothing}
+        ${!geo && picture
+          ? html`<div class="map-hint">
+              ${this._brand === "dreame"
+                ? html`The Dreame Vacuum integration doesn't expose per-room map coordinates, so
+                    rooms can't be clicked on the map directly — pick them from the list below
+                    instead.`
+                : html`Room click-to-select needs TapoVac-ADV v1.12+ (the map camera's
+                    <code>room_geometry</code> attribute) — update the integration via HACS,
+                    restart Home Assistant, then hard-refresh this browser tab.`}
+            </div>`
+          : nothing}
+        ${dreameRooms.length > 0 ? this._renderDreameRoomChips(dreameRooms) : nothing}
         ${this._selectedRoomIds.size > 0 ? this._renderSelectedRoomsBar(geo) : nothing}
+        ${this._selectedDreameSegmentIds.size > 0 ? this._renderSelectedDreameRoomsBar(dreameRooms) : nothing}
       </div>
     `;
+  }
+
+  /** Dreame's room-selection UI — a tappable chip per room instead of
+   *  clicking the map (see _dreameRooms above for why). Selection is kept
+   *  in _selectedDreameSegmentIds and cleaned via
+   *  dreame_vacuum.vacuum_clean_segment, same shape as the map-click flow
+   *  for TapoVac-ADV but sourced from a flat list rather than geometry. */
+  private _renderDreameRoomChips(rooms: DreameRoom[]): TemplateResult {
+    return html`
+      <div class="dreame-rooms">
+        ${rooms.map((room) => {
+          const selected = this._selectedDreameSegmentIds.has(room.id);
+          return html`
+            <button
+              class="chip ${selected ? "selected" : ""}"
+              aria-pressed=${selected ? "true" : "false"}
+              @click=${() => this._toggleDreameRoom(room.id)}
+            >
+              ${room.icon ? html`<ha-icon icon=${room.icon}></ha-icon>` : nothing}
+              <span>${room.name}</span>
+            </button>
+          `;
+        })}
+      </div>
+    `;
+  }
+
+  private _toggleDreameRoom(id: number): void {
+    const next = new Set(this._selectedDreameSegmentIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    this._selectedDreameSegmentIds = next;
+  }
+
+  private _renderSelectedDreameRoomsBar(rooms: DreameRoom[]): TemplateResult {
+    const names = [...this._selectedDreameSegmentIds]
+      .map((id) => rooms.find((r) => r.id === id)?.name)
+      .filter((n): n is string => !!n);
+    return html`
+      <div class="selected-rooms-bar">
+        <span>${(this._config.show_room_names ?? true) ? names.join(", ") : `${names.length} room(s)`}</span>
+        <button class="pill accent small" @click=${this._cleanSelectedDreameRooms} ?disabled=${this._busy}>
+          <ha-icon icon="mdi:broom"></ha-icon><span>Clean</span>
+        </button>
+        <button class="pill small" @click=${() => (this._selectedDreameSegmentIds = new Set())}>
+          <ha-icon icon="mdi:close"></ha-icon><span>Clear</span>
+        </button>
+      </div>
+    `;
+  }
+
+  private async _cleanSelectedDreameRooms(): Promise<void> {
+    if (this._selectedDreameSegmentIds.size === 0) return;
+    this._busy = true;
+    try {
+      await this.hass.callService("dreame_vacuum", "vacuum_clean_segment", {
+        entity_id: this._config.vacuum,
+        segments: [...this._selectedDreameSegmentIds],
+      });
+      this._selectedDreameSegmentIds = new Set();
+    } finally {
+      this._busy = false;
+    }
   }
 
   private _renderMapOverlay(geo: RoomGeometry, rotStyle: string): TemplateResult {
@@ -897,6 +1059,36 @@ export class VacuumCardAdv extends LitElement {
       font-size: 0.85em;
       color: var(--secondary-text-color);
       margin-top: 8px;
+    }
+
+    /* Dreame's room chip list — see _renderDreameRoomChips(). */
+    .dreame-rooms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+      background: transparent;
+      color: var(--primary-text-color);
+      font: inherit;
+      font-size: 0.82em;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+    .chip ha-icon {
+      --mdc-icon-size: 16px;
+    }
+    .chip.selected {
+      border-color: var(--vc-accent);
+      background: var(--vc-accent);
+      color: var(--text-primary-color, #fff);
     }
 
     /* Selects */

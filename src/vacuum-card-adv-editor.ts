@@ -2,6 +2,7 @@ import { LitElement, html, svg, css, TemplateResult, SVGTemplateResult, nothing 
 import { customElement, property, state, query } from "lit/decorators.js";
 import {
   HomeAssistant,
+  VacuumBrand,
   VacuumCardConfig,
   RoomGeometry,
   RoomGeometryDetectedFurniture,
@@ -9,7 +10,7 @@ import {
   FurnitureItem,
   FurnitureType,
 } from "./types";
-import { cacheBustedPicture, discoverEntities } from "./utils/hass-entities";
+import { cacheBustedPicture, detectVacuumBrand, discoverEntities } from "./utils/hass-entities";
 import { currentMapKey, displayToNatural, Point, scopedRoomPolygons } from "./utils/geometry";
 import {
   FURNITURE_CATALOG,
@@ -24,6 +25,11 @@ import {
 import { renderSelectField } from "./utils/ha-form";
 
 type FurnitureDragMode = "move" | "resize" | "rotate";
+
+const BRAND_LABELS: Record<VacuumBrand, string> = {
+  tapo: "TapoVac-ADV (Tapo RV30/RV50)",
+  dreame: "Dreame Vacuum",
+};
 
 /** The card's own visual editor — this is what makes the card
  *  UI-configurable rather than YAML-only. In addition to the usual
@@ -111,11 +117,57 @@ export class VacuumCardAdvEditor extends LitElement {
         ></ha-entity-picker>
       </div>
 
+      ${this._config.vacuum ? this._renderBrand() : nothing}
       ${this._config.vacuum ? this._renderToggles() : nothing}
       ${this._config.vacuum && (this._config.show_map ?? true) ? this._renderRotation() : nothing}
       ${this._config.vacuum ? this._renderAdvancedEntities() : nothing}
-      ${this._config.vacuum && (this._config.show_map ?? true) ? this._renderCalibration() : nothing}
-      ${this._config.vacuum && (this._config.show_map ?? true) ? this._renderFurniture() : nothing}
+      ${this._config.vacuum && this._brand === "tapo" && (this._config.show_map ?? true)
+        ? this._renderCalibration()
+        : nothing}
+      ${this._config.vacuum && this._brand === "tapo" && (this._config.show_map ?? true)
+        ? this._renderFurniture()
+        : nothing}
+    `;
+  }
+
+  /** Room calibration and furniture placement are both built on
+   *  TapoVac-ADV's room_geometry attribute (see _roomGeometry above),
+   *  which the Dreame Vacuum integration will never expose (not "not
+   *  loaded yet" — architecturally absent, see discoverDreameRooms()) —
+   *  hidden outright for that brand rather than shown with a permanent
+   *  "map not available" placeholder. Same fallback as the live card's
+   *  own _brand getter: explicit config first, then auto-detected. */
+  private get _brand(): VacuumBrand {
+    return this._config.vacuum_brand ?? detectVacuumBrand(this.hass, this._config.vacuum) ?? "tapo";
+  }
+
+  /** Which integration's vocabulary/services this card uses (see
+   *  VacuumBrand/detectVacuumBrand()) — "Auto" (the default, `undefined`
+   *  in config) trusts the entity registry's own platform; only needs
+   *  overriding when that lookup isn't available (some card preview
+   *  sandboxes) or comes back wrong. */
+  private _renderBrand(): TemplateResult {
+    const detected = detectVacuumBrand(this.hass, this._config.vacuum);
+    const autoLabel = detected ? `Auto (detected: ${BRAND_LABELS[detected]})` : "Auto (auto-detect failed)";
+    return html`
+      <div class="section">
+        ${renderSelectField(
+          this.hass,
+          "Vacuum brand",
+          this._config.vacuum_brand ?? "",
+          [
+            { value: "", label: autoLabel },
+            { value: "tapo", label: BRAND_LABELS.tapo },
+            { value: "dreame", label: BRAND_LABELS.dreame },
+          ],
+          (value) => this._valueChanged("vacuum_brand", value || undefined)
+        )}
+        <div class="hint">
+          Controls which service is called to clean selected rooms, and how dock-action buttons
+          are recognized by name. Only override this if auto-detection above picked the wrong
+          integration.
+        </div>
+      </div>
     `;
   }
 

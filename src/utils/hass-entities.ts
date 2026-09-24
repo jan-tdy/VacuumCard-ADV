@@ -1,5 +1,10 @@
-import { HomeAssistant } from "../types";
-import { WATER_LEVEL_ENTITY_NAME, CLEAN_PASSES_ENTITY_NAME, DOCK_ACTIONS } from "../const";
+import { DreameRoom, HomeAssistant, VacuumBrand } from "../types";
+import {
+  WATER_LEVEL_ENTITY_NAMES,
+  CLEAN_PASSES_ENTITY_NAME,
+  DOCK_ACTIONS,
+  DREAME_DOCK_ACTIONS,
+} from "../const";
 
 // `hass.entities`/`hass.devices` (entity/device registry, keyed by id) are
 // part of the standard modern HA frontend `hass` object. Guarded as
@@ -11,6 +16,28 @@ interface RegistryEntity {
   device_id?: string;
   name?: string | null;
   original_name?: string | null;
+  // The integration (config entry domain) that owns this entity — e.g.
+  // "tapo_rv30" or "dreame_vacuum". Used by detectVacuumBrand() below to
+  // pick the right service calls/naming without the user having to set
+  // vacuum_brand by hand.
+  platform?: string;
+}
+
+// Integration domains this card knows how to auto-detect a brand from.
+const BRAND_PLATFORMS: Record<string, VacuumBrand> = {
+  tapo_rv30: "tapo",
+  dreame_vacuum: "dreame",
+};
+
+/** Best-effort auto-detection of which integration the configured vacuum
+ *  entity belongs to, from the entity registry's own `platform` field.
+ *  Returns undefined (rather than guessing "tapo") when the registry
+ *  isn't available or the platform isn't one this card recognizes — every
+ *  caller then falls back to "tapo" itself, preserving this card's
+ *  original behavior for configs that predate multi-brand support. */
+export function detectVacuumBrand(hass: HomeAssistant, vacuumEntityId: string): VacuumBrand | undefined {
+  const platform = registry(hass)?.[vacuumEntityId]?.platform;
+  return platform ? BRAND_PLATFORMS[platform] : undefined;
 }
 
 // Sensors that exist on every device but aren't worth a row by default:
@@ -84,8 +111,19 @@ export interface DiscoveredEntities {
  *  the configured vacuum entity_id — so the card works with sensible
  *  defaults right after picking a vacuum, no per-sensor configuration
  *  required. Every result here can still be overridden explicitly in
- *  config (see VacuumCardConfig). */
-export function discoverEntities(hass: HomeAssistant, vacuumEntityId: string): DiscoveredEntities {
+ *  config (see VacuumCardConfig).
+ *
+ *  `brand` (see VacuumBrand/detectVacuumBrand()) only changes which
+ *  vocabulary is used to recognize dock-action buttons by name — every
+ *  other entity here (battery, sensors, water level select, mop status)
+ *  is matched by a generic device-class/name heuristic that already works
+ *  across integrations, so it doesn't need to branch on brand. Defaults
+ *  to "tapo" (this card's original, only brand) when omitted. */
+export function discoverEntities(
+  hass: HomeAssistant,
+  vacuumEntityId: string,
+  brand: VacuumBrand = "tapo"
+): DiscoveredEntities {
   const deviceIds = getDeviceEntityIds(hass, vacuumEntityId);
   const result: DiscoveredEntities = { dockActions: [], sensors: [], maintenanceSensors: [] };
   if (deviceIds.length === 0) return result;
@@ -94,7 +132,7 @@ export function discoverEntities(hass: HomeAssistant, vacuumEntityId: string): D
 
   for (const id of byDomain(deviceIds, "select")) {
     const name = friendlyName(hass, id);
-    if (name.includes(WATER_LEVEL_ENTITY_NAME)) result.waterLevel = id;
+    if (WATER_LEVEL_ENTITY_NAMES.some((n) => name.includes(n))) result.waterLevel = id;
     else if (name.includes(CLEAN_PASSES_ENTITY_NAME)) result.cleanPasses = id;
     // Anything else (e.g. TapoVac-ADV v2.0.0's Area Unit) isn't a control
     // this card has dedicated UI for — surface it as a tappable row in
@@ -140,11 +178,29 @@ export function discoverEntities(hass: HomeAssistant, vacuumEntityId: string): D
   for (const id of byDomain(deviceIds, "number")) result.maintenanceSensors.push(id);
   for (const id of byDomain(deviceIds, "switch")) result.maintenanceSensors.push(id);
 
+  const knownDockActions = brand === "dreame" ? DREAME_DOCK_ACTIONS : DOCK_ACTIONS;
   for (const id of byDomain(deviceIds, "button")) {
     const name = friendlyName(hass, id);
-    const known = DOCK_ACTIONS.find((a) => a.name === name);
+    const known = knownDockActions.find((a) => a.name === name);
     if (known) result.dockActions.push({ entityId: id, name: known.name, icon: known.icon });
   }
 
   return result;
+}
+
+/** The Dreame Vacuum integration doesn't expose pixel-space room geometry
+ *  the way TapoVac-ADV's room_geometry does (see types.ts's DreameRoom),
+ *  only a flat per-map room list on the vacuum entity's own "rooms"
+ *  attribute — `{ [mapName]: { id, name, icon }[] }` — plus which map is
+ *  currently selected. Returns the room list for the currently selected
+ *  map (or the first map found, if the integration hasn't reported a
+ *  selection yet), or [] when the attribute isn't present at all (older
+ *  integration versions, or a device with no saved map). */
+export function discoverDreameRooms(hass: HomeAssistant, vacuumEntityId: string): DreameRoom[] {
+  const attrs = hass.states[vacuumEntityId]?.attributes;
+  const rooms = attrs?.["rooms"] as Record<string, DreameRoom[]> | undefined;
+  if (!rooms || typeof rooms !== "object") return [];
+  const selectedMap = attrs?.["selected_map"] as string | undefined;
+  if (selectedMap && rooms[selectedMap]) return rooms[selectedMap];
+  return Object.values(rooms)[0] ?? [];
 }

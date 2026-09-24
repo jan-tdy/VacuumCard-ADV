@@ -79,9 +79,19 @@ export interface FurnitureItem {
   map?: string;
 }
 
+// Which vacuum integration this card is talking to — controls the
+// room-cleaning service call and the vocabulary used for entity discovery
+// (dock action button names, water-level entity naming), since those
+// aren't standardized across integrations. Undefined (the default) means
+// "auto-detect from the vacuum entity's own integration" — see
+// utils/hass-entities.ts's detectVacuumBrand(). Explicit config always
+// wins over auto-detection.
+export type VacuumBrand = "tapo" | "dreame";
+
 export interface VacuumCardConfig extends LovelaceCardConfig {
   type: "custom:vacuum-card-adv";
   vacuum: string;
+  vacuum_brand?: VacuumBrand;
   camera?: string;
   fan_speed_entity?: string;
   water_level_entity?: string;
@@ -176,6 +186,18 @@ export interface RoomGeometry {
   // Device-detected furniture outlines — undefined on integration
   // versions older than v2.0.0. See RoomGeometryDetectedFurniture above.
   furniture?: RoomGeometryDetectedFurniture[];
+}
+
+// -- Room list, as exposed by the Dreame Vacuum integration's vacuum
+// entity (its "rooms" attribute — a dict of map_name -> room list; see
+// utils/hass-entities.ts's discoverDreameRooms()). No pixel geometry is
+// exposed for this brand (unlike TapoVac-ADV's room_geometry above), so
+// there's no click-on-map room selection for Dreame — just this flat
+// list, picked from with the chip selector in _renderDreameRooms(). ---
+export interface DreameRoom {
+  id: number;
+  name: string;
+  icon?: string;
 }
 
 // -- Card picker registration (window.customCards) -----------------------
