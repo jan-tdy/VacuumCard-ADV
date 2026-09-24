@@ -81,6 +81,11 @@ export class VacuumCardAdv extends LitElement {
 
   private _lastDiscoveredFor?: string;
   private _lastVacuumStateForTrace?: string;
+  // Tracks which Dreame map _selectedDreameSegmentIds was picked on (see
+  // willUpdate()) — a plain string, not a boolean, so the very first
+  // update (no prior map to compare against) never wrongly clears a
+  // selection that was just set.
+  private _lastDreameSelectedMapFor?: string;
 
   public static getConfigElement(): HTMLElement {
     return document.createElement("vacuum-card-adv-editor");
@@ -148,10 +153,31 @@ export class VacuumCardAdv extends LitElement {
     // new _discovered object reference, forcing an extra render) on every
     // single one of those was pure waste.
     if (changed.has("hass") && this.hass && this._config?.vacuum) {
-      if (this._lastDiscoveredFor !== this._config.vacuum) {
-        this._discovered = discoverEntities(this.hass, this._config.vacuum, this._brand);
-        this._lastDiscoveredFor = this._config.vacuum;
+      // Keyed by vacuum *and* brand (not just vacuum) — switching
+      // vacuum_brand in the editor without changing the vacuum entity
+      // must still re-run discovery, or dock actions/water-level naming
+      // from the previous brand would linger in _discovered.
+      const brand = this._brand;
+      const discoveryKey = `${this._config.vacuum}|${brand}`;
+      if (this._lastDiscoveredFor !== discoveryKey) {
+        this._discovered = discoverEntities(this.hass, this._config.vacuum, brand);
+        this._lastDiscoveredFor = discoveryKey;
       }
+
+      // Same idea for Dreame's room-chip selection: a stale segment id
+      // from a map the vacuum has since switched away from (or a
+      // different vacuum entity picked in the editor) would otherwise
+      // still be sent to dreame_vacuum.vacuum_clean_segment, which can
+      // fail instead of cleaning the rooms actually shown as selected.
+      const selectedMap = this.hass.states[this._config.vacuum]?.attributes?.["selected_map"] as
+        | string
+        | undefined;
+      const dreameMapKey = `${this._config.vacuum}|${selectedMap ?? ""}`;
+      if (this._lastDreameSelectedMapFor !== undefined && this._lastDreameSelectedMapFor !== dreameMapKey) {
+        this._selectedDreameSegmentIds = new Set();
+      }
+      this._lastDreameSelectedMapFor = dreameMapKey;
+
       this._updateTrace();
     }
   }
@@ -399,6 +425,7 @@ export class VacuumCardAdv extends LitElement {
           return html`
             <button
               class="chip ${selected ? "selected" : ""}"
+              aria-pressed=${selected ? "true" : "false"}
               @click=${() => this._toggleDreameRoom(room.id)}
             >
               ${room.icon ? html`<ha-icon icon=${room.icon}></ha-icon>` : nothing}
