@@ -180,8 +180,11 @@ export function discoverEntities(
 
   const knownDockActions = brand === "dreame" ? DREAME_DOCK_ACTIONS : DOCK_ACTIONS;
   for (const id of byDomain(deviceIds, "button")) {
-    const name = friendlyName(hass, id);
-    const known = knownDockActions.find((a) => a.name === name);
+    const name = friendlyName(hass, id).toLowerCase();
+    // Substring/case-insensitive, like every other entity matched above —
+    // an exact match breaks as soon as the entity is renamed, including
+    // HA's own default "<Device Name> <Thing>" prefixing convention.
+    const known = knownDockActions.find((a) => name.includes(a.name.toLowerCase()));
     if (known) result.dockActions.push({ entityId: id, name: known.name, icon: known.icon });
   }
 
