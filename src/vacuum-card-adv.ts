@@ -243,15 +243,17 @@ export class VacuumCardAdv extends LitElement {
   }
 
   /** Most recent last_changed across every entity the card actually
-   *  displays (vacuum state, battery, mop status, sensors) — a per-entity
-   *  poll timestamp (e.g. just the vacuum entity's) can look fresh while
-   *  the battery or progress data it's showing is actually stale, so this
-   *  takes the max across all of them instead. */
+   *  displays (vacuum state, battery, mop status, map camera, water level,
+   *  sensors) — a per-entity poll timestamp (e.g. just the vacuum entity's)
+   *  can look fresh while the battery, map, or progress data it's showing
+   *  is actually stale, so this takes the max across all of them instead. */
   private _lastUpdated(): Date | undefined {
     const ids = [
       this._config.vacuum,
       this._config.battery_entity ?? this._discovered.battery,
       this._config.mop_attached_entity ?? this._discovered.mopAttached,
+      this._config.camera ?? this._discovered.camera,
+      this._config.water_level_entity ?? this._discovered.waterLevel,
       ...(this._config.sensors ?? this._discovered.sensors),
     ].filter((id): id is string => !!id);
 
