@@ -191,6 +191,17 @@ export class VacuumCardAdv extends LitElement {
     return this._config.vacuum_brand ?? detectVacuumBrand(this.hass, this._config.vacuum) ?? "tapo";
   }
 
+  /** map_rotation, defended the same way furniture_opacity already is:
+   *  hand-typed YAML can hand this a string, a boolean, or NaN (e.g. an
+   *  empty number field), and a raw value like that would otherwise land
+   *  straight in a CSS `transform` string and in the click-to-room trig in
+   *  geometry.ts — silently breaking rotation instead of just falling back
+   *  to the default like every other malformed field does. */
+  private get _mapRotation(): number {
+    const rotation = this._config.map_rotation;
+    return typeof rotation === "number" && Number.isFinite(rotation) ? rotation : DEFAULT_MAP_ROTATION;
+  }
+
   /** Experimental (see VacuumCardConfig.show_trace): appends the vacuum's
    *  current position to the trail while it's actively cleaning, and
    *  starts a fresh trail at the beginning of each new cleaning run so it
@@ -384,7 +395,7 @@ export class VacuumCardAdv extends LitElement {
     // entirely when there's neither a map nor a room list to show.
     if (!picture && dreameRooms.length === 0) return nothing;
 
-    const rotation = this._config.map_rotation ?? DEFAULT_MAP_ROTATION;
+    const rotation = this._mapRotation;
     const geo = this._roomGeometry;
     const rotStyle = rotation % 360 !== 0 ? `transform: rotate(${rotation}deg);` : "";
 
@@ -620,8 +631,7 @@ export class VacuumCardAdv extends LitElement {
       );
       return;
     }
-    const rotation = this._config.map_rotation ?? DEFAULT_MAP_ROTATION;
-    const point = displayToNatural(evt.clientX, evt.clientY, this._mapImg, rotation);
+    const point = displayToNatural(evt.clientX, evt.clientY, this._mapImg, this._mapRotation);
     const roomId = resolveRoomAtPoint(point, geo, scopedRoomPolygons(this._config.room_polygons, geo));
     if (roomId === null) {
       // eslint-disable-next-line no-console
