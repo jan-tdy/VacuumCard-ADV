@@ -796,12 +796,15 @@ export class VacuumCardAdv extends LitElement {
     if (!id) return nothing;
     const s = this.hass.states[id];
     if (!s) return nothing;
+    const unavailable = s.state === "unavailable" || s.state === "unknown";
     return html`
       <div class="section sensors">
         ${this._renderRow({
-          icon: (s.attributes["icon"] as string) ?? (s.state === "on" ? "mdi:water" : "mdi:water-off"),
+          icon:
+            (s.attributes["icon"] as string) ??
+            (unavailable ? "mdi:help-circle-outline" : s.state === "on" ? "mdi:water" : "mdi:water-off"),
           title: this._shortTitle((s.attributes["friendly_name"] as string) ?? "Mop Attached"),
-          value: s.state === "on" ? "Attached" : "Not attached",
+          value: unavailable ? s.state.charAt(0).toUpperCase() + s.state.slice(1) : s.state === "on" ? "Attached" : "Not attached",
           entityId: id,
         })}
       </div>
