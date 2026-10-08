@@ -67,7 +67,11 @@ export class VacuumCardAdvEditor extends LitElement {
   // only, not persisted: a fresh render of the editor shows every
   // detected outline again, which is fine since it's keyed by the
   // device's own furniture id, not by anything this card generated.
-  @state() private _usedDetectedFurnitureIds = new Set<number>();
+  // Keyed as `${mapKey}:${detected.id}` (same scoping as FurnitureItem.map
+  // / scopedRoomPolygons): the device numbers detected furniture per map,
+  // so a bare id collides across floors and would hide an unrelated
+  // outline on another floor.
+  @state() private _usedDetectedFurnitureIds = new Set<string>();
 
   public setConfig(config: VacuumCardConfig): void {
     this._config = config;
@@ -571,7 +575,7 @@ export class VacuumCardAdvEditor extends LitElement {
         ></rect>
         <g class="detected-furniture-layer">
           ${(geo.furniture ?? [])
-            .filter((d) => !this._usedDetectedFurnitureIds.has(d.id))
+            .filter((d) => !this._usedDetectedFurnitureIds.has(`${currentMapKey(geo)}:${d.id}`))
             .map((d) => this._renderDetectedFurnitureOutline(d))}
         </g>
         <g class="furniture-layer" style=${paletteStyle}>
@@ -743,7 +747,9 @@ export class VacuumCardAdvEditor extends LitElement {
     const item = createFurnitureItemFromDetected(this._furnitureAddType, detected, geo);
     this._furniture = [...this._furniture, item];
     this._selectedFurnitureId = item.id;
-    this._usedDetectedFurnitureIds = new Set(this._usedDetectedFurnitureIds).add(detected.id);
+    this._usedDetectedFurnitureIds = new Set(this._usedDetectedFurnitureIds).add(
+      `${currentMapKey(geo)}:${detected.id}`
+    );
     this._commitFurniture();
   }
 
