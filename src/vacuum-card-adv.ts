@@ -86,6 +86,12 @@ export class VacuumCardAdv extends LitElement {
   // update (no prior map to compare against) never wrongly clears a
   // selection that was just set.
   private _lastDreameSelectedMapFor?: string;
+  // Same idea for _selectedRoomIds (the room_geometry-based selector used
+  // by TapoVac-ADV-style integrations): tracks which floor/map (see
+  // currentMapKey() in geometry.ts) the selection was made on, undefined
+  // until room_geometry is first seen so the initial update never clears a
+  // selection that was just set.
+  private _lastRoomMapKeyFor?: string;
 
   public static getConfigElement(): HTMLElement {
     return document.createElement("vacuum-card-adv-editor");
@@ -177,6 +183,22 @@ export class VacuumCardAdv extends LitElement {
         this._selectedDreameSegmentIds = new Set();
       }
       this._lastDreameSelectedMapFor = dreameMapKey;
+
+      // Same bug, same fix, for the room_geometry-based room selector:
+      // room ids are only unique *within* a floor/map, so a stale
+      // selection surviving a floor switch could have Clean target a
+      // different room on the new floor that happens to reuse the same
+      // id. Scoped by vacuum + currentMapKey() rather than just the map
+      // key alone, so switching the configured vacuum entity also clears
+      // a selection that belonged to the previous one.
+      const geo = this._roomGeometry;
+      if (geo) {
+        const roomMapKey = `${this._config.vacuum}|${currentMapKey(geo)}`;
+        if (this._lastRoomMapKeyFor !== undefined && this._lastRoomMapKeyFor !== roomMapKey) {
+          this._selectedRoomIds = new Set();
+        }
+        this._lastRoomMapKeyFor = roomMapKey;
+      }
 
       this._updateTrace();
     }
