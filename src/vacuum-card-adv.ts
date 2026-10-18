@@ -505,6 +505,8 @@ export class VacuumCardAdv extends LitElement {
         segments: [...this._selectedDreameSegmentIds],
       });
       this._selectedDreameSegmentIds = new Set();
+    } catch (err) {
+      this._notifyServiceError("clean selected rooms", err);
     } finally {
       this._busy = false;
     }
@@ -680,6 +682,8 @@ export class VacuumCardAdv extends LitElement {
         rooms: names,
       });
       this._selectedRoomIds = new Set();
+    } catch (err) {
+      this._notifyServiceError("clean selected rooms", err);
     } finally {
       this._busy = false;
     }
@@ -879,24 +883,32 @@ export class VacuumCardAdv extends LitElement {
   }
 
   private _callVacuumService(service: string): void {
-    this.hass.callService("vacuum", service, { entity_id: this._config.vacuum });
+    this.hass
+      .callService("vacuum", service, { entity_id: this._config.vacuum })
+      .catch((err) => this._notifyServiceError(service, err));
   }
 
   private _setFanSpeed(fanSpeed: string): void {
     if (!fanSpeed) return;
-    this.hass.callService("vacuum", "set_fan_speed", {
-      entity_id: this._config.vacuum,
-      fan_speed: fanSpeed,
-    });
+    this.hass
+      .callService("vacuum", "set_fan_speed", {
+        entity_id: this._config.vacuum,
+        fan_speed: fanSpeed,
+      })
+      .catch((err) => this._notifyServiceError("set fan speed", err));
   }
 
   private _selectOption(entityId: string, option: string): void {
     if (!option) return;
-    this.hass.callService("select", "select_option", { entity_id: entityId, option });
+    this.hass
+      .callService("select", "select_option", { entity_id: entityId, option })
+      .catch((err) => this._notifyServiceError("set option", err));
   }
 
   private _pressButton(entityId: string): void {
-    this.hass.callService("button", "press", { entity_id: entityId });
+    this.hass
+      .callService("button", "press", { entity_id: entityId })
+      .catch((err) => this._notifyServiceError("press button", err));
   }
 
   /** Opens Home Assistant's own more-info dialog for an entity — the same
@@ -906,6 +918,20 @@ export class VacuumCardAdv extends LitElement {
   private _fireMoreInfo(entityId: string): void {
     this.dispatchEvent(
       new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true })
+    );
+  }
+
+  /** Surfaces a failed service call the standard Lovelace way (the same
+   *  "hass-notification" toast stock cards use) instead of leaving it as a
+   *  silent unhandled promise rejection in the console. */
+  private _notifyServiceError(action: string, err: unknown): void {
+    const message = err instanceof Error ? err.message : String(err);
+    this.dispatchEvent(
+      new CustomEvent("hass-notification", {
+        detail: { message: `Failed to ${action}: ${message}` },
+        bubbles: true,
+        composed: true,
+      })
     );
   }
 
