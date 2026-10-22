@@ -11,7 +11,7 @@ import {
   FurnitureType,
 } from "./types";
 import { cacheBustedPicture, detectVacuumBrand, discoverEntities } from "./utils/hass-entities";
-import { currentMapKey, displayToNatural, Point, scopedRoomPolygons } from "./utils/geometry";
+import { currentMapKey, displayToNatural, Point, resolveRoomGeometry, scopedRoomPolygons } from "./utils/geometry";
 import {
   FURNITURE_CATALOG,
   MIN_FURNITURE_SIZE,
@@ -102,10 +102,11 @@ export class VacuumCardAdvEditor extends LitElement {
   }
 
   private get _roomGeometry(): RoomGeometry | undefined {
-    const cameraId = this._cameraId;
-    if (!cameraId) return undefined;
-    const geo = this.hass.states[cameraId]?.attributes?.["room_geometry"] as RoomGeometry | undefined;
-    return geo && geo.rooms?.length ? geo : undefined;
+    // Same normalizer as the live card (see utils/geometry.ts) — must
+    // handle TapoVac-ADV v3.0.0+'s list-shaped room_geometry too, or
+    // calibration/furniture placement permanently show "Map not
+    // available yet" (fixed in v3.0.3).
+    return resolveRoomGeometry(this.hass, this._cameraId);
   }
 
   protected render(): TemplateResult | typeof nothing {
