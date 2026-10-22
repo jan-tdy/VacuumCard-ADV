@@ -1,42 +1,42 @@
-function t(t,e,i,r){var s,o=arguments.length,n=o<3?e:null===r?r=Object.getOwnPropertyDescriptor(e,i):r;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)n=Reflect.decorate(t,e,i,r);else for(var a=t.length-1;a>=0;a--)(s=t[a])&&(n=(o<3?s(n):o>3?s(e,i,n):s(e,i))||n);return o>3&&n&&Object.defineProperty(e,i,n),n}"function"==typeof SuppressedError&&SuppressedError;
+function t(t,e,i,s){var r,o=arguments.length,n=o<3?e:null===s?s=Object.getOwnPropertyDescriptor(e,i):s;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)n=Reflect.decorate(t,e,i,s);else for(var a=t.length-1;a>=0;a--)(r=t[a])&&(n=(o<3?r(n):o>3?r(e,i,n):r(e,i))||n);return o>3&&n&&Object.defineProperty(e,i,n),n}"function"==typeof SuppressedError&&SuppressedError;
 /**
  * @license
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const e=globalThis,i=e.ShadowRoot&&(void 0===e.ShadyCSS||e.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,r=Symbol(),s=new WeakMap;let o=class{constructor(t,e,i){if(this._$cssResult$=!0,i!==r)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e}get styleSheet(){let t=this.o;const e=this.t;if(i&&void 0===t){const i=void 0!==e&&1===e.length;i&&(t=s.get(e)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),i&&s.set(e,t))}return t}toString(){return this.cssText}};const n=(t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,r)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[r+1],t[0]);return new o(i,t,r)},a=i?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const i of t.cssRules)e+=i.cssText;return(t=>new o("string"==typeof t?t:t+"",void 0,r))(e)})(t):t,{is:c,defineProperty:l,getOwnPropertyDescriptor:h,getOwnPropertyNames:d,getOwnPropertySymbols:u,getPrototypeOf:p}=Object,m=globalThis,f=m.trustedTypes,_=f?f.emptyScript:"",g=m.reactiveElementPolyfillSupport,v=(t,e)=>t,$={toAttribute(t,e){switch(e){case Boolean:t=t?_:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t)}return t},fromAttribute(t,e){let i=t;switch(e){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t)}catch(t){i=null}}return i}},y=(t,e)=>!c(t,e),b={attribute:!0,type:String,converter:$,reflect:!1,useDefault:!1,hasChanged:y};
+const e=globalThis,i=e.ShadowRoot&&(void 0===e.ShadyCSS||e.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s=Symbol(),r=new WeakMap;let o=class{constructor(t,e,i){if(this._$cssResult$=!0,i!==s)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e}get styleSheet(){let t=this.o;const e=this.t;if(i&&void 0===t){const i=void 0!==e&&1===e.length;i&&(t=r.get(e)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),i&&r.set(e,t))}return t}toString(){return this.cssText}};const n=(t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,i,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+t[s+1],t[0]);return new o(i,t,s)},a=i?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const i of t.cssRules)e+=i.cssText;return(t=>new o("string"==typeof t?t:t+"",void 0,s))(e)})(t):t,{is:c,defineProperty:l,getOwnPropertyDescriptor:h,getOwnPropertyNames:d,getOwnPropertySymbols:u,getPrototypeOf:p}=Object,m=globalThis,_=m.trustedTypes,f=_?_.emptyScript:"",g=m.reactiveElementPolyfillSupport,v=(t,e)=>t,$={toAttribute(t,e){switch(e){case Boolean:t=t?f:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t)}return t},fromAttribute(t,e){let i=t;switch(e){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t)}catch(t){i=null}}return i}},y=(t,e)=>!c(t,e),b={attribute:!0,type:String,converter:$,reflect:!1,useDefault:!1,hasChanged:y};
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */Symbol.metadata??=Symbol("metadata"),m.litPropertyMetadata??=new WeakMap;let w=class extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t)}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,e=b){if(e.state&&(e.attribute=!1),this._$Ei(),this.prototype.hasOwnProperty(t)&&((e=Object.create(e)).wrapped=!0),this.elementProperties.set(t,e),!e.noAccessor){const i=Symbol(),r=this.getPropertyDescriptor(t,i,e);void 0!==r&&l(this.prototype,t,r)}}static getPropertyDescriptor(t,e,i){const{get:r,set:s}=h(this.prototype,t)??{get(){return this[e]},set(t){this[e]=t}};return{get:r,set(e){const o=r?.call(this);s?.call(this,e),this.requestUpdate(t,o,i)},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??b}static _$Ei(){if(this.hasOwnProperty(v("elementProperties")))return;const t=p(this);t.finalize(),void 0!==t.l&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties)}static finalize(){if(this.hasOwnProperty(v("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(v("properties"))){const t=this.properties,e=[...d(t),...u(t)];for(const i of e)this.createProperty(i,t[i])}const t=this[Symbol.metadata];if(null!==t){const e=litPropertyMetadata.get(t);if(void 0!==e)for(const[t,i]of e)this.elementProperties.set(t,i)}this._$Eh=new Map;for(const[t,e]of this.elementProperties){const i=this._$Eu(t,e);void 0!==i&&this._$Eh.set(i,t)}this.elementStyles=this.finalizeStyles(this.styles)}static finalizeStyles(t){const e=[];if(Array.isArray(t)){const i=new Set(t.flat(1/0).reverse());for(const t of i)e.unshift(a(t))}else void 0!==t&&e.push(a(t));return e}static _$Eu(t,e){const i=e.attribute;return!1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev()}_$Ev(){this._$ES=new Promise(t=>this.enableUpdating=t),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach(t=>t(this))}addController(t){(this._$EO??=new Set).add(t),void 0!==this.renderRoot&&this.isConnected&&t.hostConnected?.()}removeController(t){this._$EO?.delete(t)}_$E_(){const t=new Map,e=this.constructor.elementProperties;for(const i of e.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t)}createRenderRoot(){const t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return((t,r)=>{if(i)t.adoptedStyleSheets=r.map(t=>t instanceof CSSStyleSheet?t:t.styleSheet);else for(const i of r){const r=document.createElement("style"),s=e.litNonce;void 0!==s&&r.setAttribute("nonce",s),r.textContent=i.cssText,t.appendChild(r)}})(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach(t=>t.hostConnected?.())}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach(t=>t.hostDisconnected?.())}attributeChangedCallback(t,e,i){this._$AK(t,i)}_$ET(t,e){const i=this.constructor.elementProperties.get(t),r=this.constructor._$Eu(t,i);if(void 0!==r&&!0===i.reflect){const s=(void 0!==i.converter?.toAttribute?i.converter:$).toAttribute(e,i.type);this._$Em=t,null==s?this.removeAttribute(r):this.setAttribute(r,s),this._$Em=null}}_$AK(t,e){const i=this.constructor,r=i._$Eh.get(t);if(void 0!==r&&this._$Em!==r){const t=i.getPropertyOptions(r),s="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==t.converter?.fromAttribute?t.converter:$;this._$Em=r;const o=s.fromAttribute(e,t.type);this[r]=o??this._$Ej?.get(r)??o,this._$Em=null}}requestUpdate(t,e,i,r=!1,s){if(void 0!==t){const o=this.constructor;if(!1===r&&(s=this[t]),i??=o.getPropertyOptions(t),!((i.hasChanged??y)(s,e)||i.useDefault&&i.reflect&&s===this._$Ej?.get(t)&&!this.hasAttribute(o._$Eu(t,i))))return;this.C(t,e,i)}!1===this.isUpdatePending&&(this._$ES=this._$EP())}C(t,e,{useDefault:i,reflect:r,wrapped:s},o){i&&!(this._$Ej??=new Map).has(t)&&(this._$Ej.set(t,o??e??this[t]),!0!==s||void 0!==o)||(this._$AL.has(t)||(this.hasUpdated||i||(e=void 0),this._$AL.set(t,e)),!0===r&&this._$Em!==t&&(this._$Eq??=new Set).add(t))}async _$EP(){this.isUpdatePending=!0;try{await this._$ES}catch(t){Promise.reject(t)}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[t,e]of this._$Ep)this[t]=e;this._$Ep=void 0}const t=this.constructor.elementProperties;if(t.size>0)for(const[e,i]of t){const{wrapped:t}=i,r=this[e];!0!==t||this._$AL.has(e)||void 0===r||this.C(e,void 0,i,r)}}let t=!1;const e=this._$AL;try{t=this.shouldUpdate(e),t?(this.willUpdate(e),this._$EO?.forEach(t=>t.hostUpdate?.()),this.update(e)):this._$EM()}catch(e){throw t=!1,this._$EM(),e}t&&this._$AE(e)}willUpdate(t){}_$AE(t){this._$EO?.forEach(t=>t.hostUpdated?.()),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t)}_$EM(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return!0}update(t){this._$Eq&&=this._$Eq.forEach(t=>this._$ET(t,this[t])),this._$EM()}updated(t){}firstUpdated(t){}};w.elementStyles=[],w.shadowRootOptions={mode:"open"},w[v("elementProperties")]=new Map,w[v("finalized")]=new Map,g?.({ReactiveElement:w}),(m.reactiveElementVersions??=[]).push("2.1.2");
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */
-const x=globalThis,S=t=>t,k=x.trustedTypes,A=k?k.createPolicy("lit-html",{createHTML:t=>t}):void 0,C="$lit$",M=`lit$${Math.random().toFixed(9).slice(2)}$`,E="?"+M,P=`<${E}>`,R=document,I=()=>R.createComment(""),F=t=>null===t||"object"!=typeof t&&"function"!=typeof t,D=Array.isArray,T="[ \t\n\f\r]",O=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,N=/-->/g,U=/>/g,z=RegExp(`>|${T}(?:([^\\s"'>=/]+)(${T}*=${T}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),H=/'/g,V=/"/g,j=/^(?:script|style|textarea|title)$/i,L=t=>(e,...i)=>({_$litType$:t,strings:e,values:i}),B=L(1),W=L(2),q=Symbol.for("lit-noChange"),G=Symbol.for("lit-nothing"),Y=new WeakMap,K=R.createTreeWalker(R,129);function X(t,e){if(!D(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==A?A.createHTML(e):e}const J=(t,e)=>{const i=t.length-1,r=[];let s,o=2===e?"<svg>":3===e?"<math>":"",n=O;for(let e=0;e<i;e++){const i=t[e];let a,c,l=-1,h=0;for(;h<i.length&&(n.lastIndex=h,c=n.exec(i),null!==c);)h=n.lastIndex,n===O?"!--"===c[1]?n=N:void 0!==c[1]?n=U:void 0!==c[2]?(j.test(c[2])&&(s=RegExp("</"+c[2],"g")),n=z):void 0!==c[3]&&(n=z):n===z?">"===c[0]?(n=s??O,l=-1):void 0===c[1]?l=-2:(l=n.lastIndex-c[2].length,a=c[1],n=void 0===c[3]?z:'"'===c[3]?V:H):n===V||n===H?n=z:n===N||n===U?n=O:(n=z,s=void 0);const d=n===z&&t[e+1].startsWith("/>")?" ":"";o+=n===O?i+P:l>=0?(r.push(a),i.slice(0,l)+C+i.slice(l)+M+d):i+M+(-2===l?e:d)}return[X(t,o+(t[i]||"<?>")+(2===e?"</svg>":3===e?"</math>":"")),r]};class Z{constructor({strings:t,_$litType$:e},i){let r;this.parts=[];let s=0,o=0;const n=t.length-1,a=this.parts,[c,l]=J(t,e);if(this.el=Z.createElement(c,i),K.currentNode=this.el.content,2===e||3===e){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes)}for(;null!==(r=K.nextNode())&&a.length<n;){if(1===r.nodeType){if(r.hasAttributes())for(const t of r.getAttributeNames())if(t.endsWith(C)){const e=l[o++],i=r.getAttribute(t).split(M),n=/([.?@])?(.*)/.exec(e);a.push({type:1,index:s,name:n[2],strings:i,ctor:"."===n[1]?rt:"?"===n[1]?st:"@"===n[1]?ot:it}),r.removeAttribute(t)}else t.startsWith(M)&&(a.push({type:6,index:s}),r.removeAttribute(t));if(j.test(r.tagName)){const t=r.textContent.split(M),e=t.length-1;if(e>0){r.textContent=k?k.emptyScript:"";for(let i=0;i<e;i++)r.append(t[i],I()),K.nextNode(),a.push({type:2,index:++s});r.append(t[e],I())}}}else if(8===r.nodeType)if(r.data===E)a.push({type:2,index:s});else{let t=-1;for(;-1!==(t=r.data.indexOf(M,t+1));)a.push({type:7,index:s}),t+=M.length-1}s++}}static createElement(t,e){const i=R.createElement("template");return i.innerHTML=t,i}}function Q(t,e,i=t,r){if(e===q)return e;let s=void 0!==r?i._$Co?.[r]:i._$Cl;const o=F(e)?void 0:e._$litDirective$;return s?.constructor!==o&&(s?._$AO?.(!1),void 0===o?s=void 0:(s=new o(t),s._$AT(t,i,r)),void 0!==r?(i._$Co??=[])[r]=s:i._$Cl=s),void 0!==s&&(e=Q(t,s._$AS(t,e.values),s,r)),e}class tt{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:e},parts:i}=this._$AD,r=(t?.creationScope??R).importNode(e,!0);K.currentNode=r;let s=K.nextNode(),o=0,n=0,a=i[0];for(;void 0!==a;){if(o===a.index){let e;2===a.type?e=new et(s,s.nextSibling,this,t):1===a.type?e=new a.ctor(s,a.name,a.strings,this,t):6===a.type&&(e=new nt(s,this,t)),this._$AV.push(e),a=i[++n]}o!==a?.index&&(s=K.nextNode(),o++)}return K.currentNode=R,r}p(t){let e=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}}class et{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,e,i,r){this.type=2,this._$AH=G,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=r,this._$Cv=r?.isConnected??!0}get parentNode(){let t=this._$AA.parentNode;const e=this._$AM;return void 0!==e&&11===t?.nodeType&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=Q(this,t,e),F(t)?t===G||null==t||""===t?(this._$AH!==G&&this._$AR(),this._$AH=G):t!==this._$AH&&t!==q&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):(t=>D(t)||"function"==typeof t?.[Symbol.iterator])(t)?this.k(t):this._(t)}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t))}_(t){this._$AH!==G&&F(this._$AH)?this._$AA.nextSibling.data=t:this.T(R.createTextNode(t)),this._$AH=t}$(t){const{values:e,_$litType$:i}=t,r="number"==typeof i?this._$AC(t):(void 0===i.el&&(i.el=Z.createElement(X(i.h,i.h[0]),this.options)),i);if(this._$AH?._$AD===r)this._$AH.p(e);else{const t=new tt(r,this),i=t.u(this.options);t.p(e),this.T(i),this._$AH=t}}_$AC(t){let e=Y.get(t.strings);return void 0===e&&Y.set(t.strings,e=new Z(t)),e}k(t){D(this._$AH)||(this._$AH=[],this._$AR());const e=this._$AH;let i,r=0;for(const s of t)r===e.length?e.push(i=new et(this.O(I()),this.O(I()),this,this.options)):i=e[r],i._$AI(s),r++;r<e.length&&(this._$AR(i&&i._$AB.nextSibling,r),e.length=r)}_$AR(t=this._$AA.nextSibling,e){for(this._$AP?.(!1,!0,e);t!==this._$AB;){const e=S(t).nextSibling;S(t).remove(),t=e}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t))}}class it{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,e,i,r,s){this.type=1,this._$AH=G,this._$AN=void 0,this.element=t,this.name=e,this._$AM=r,this.options=s,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=G}_$AI(t,e=this,i,r){const s=this.strings;let o=!1;if(void 0===s)t=Q(this,t,e,0),o=!F(t)||t!==this._$AH&&t!==q,o&&(this._$AH=t);else{const r=t;let n,a;for(t=s[0],n=0;n<s.length-1;n++)a=Q(this,r[i+n],e,n),a===q&&(a=this._$AH[n]),o||=!F(a)||a!==this._$AH[n],a===G?t=G:t!==G&&(t+=(a??"")+s[n+1]),this._$AH[n]=a}o&&!r&&this.j(t)}j(t){t===G?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"")}}class rt extends it{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===G?void 0:t}}class st extends it{constructor(){super(...arguments),this.type=4}j(t){this.element.toggleAttribute(this.name,!!t&&t!==G)}}class ot extends it{constructor(t,e,i,r,s){super(t,e,i,r,s),this.type=5}_$AI(t,e=this){if((t=Q(this,t,e,0)??G)===q)return;const i=this._$AH,r=t===G&&i!==G||t.capture!==i.capture||t.once!==i.once||t.passive!==i.passive,s=t!==G&&(i===G||r);r&&this.element.removeEventListener(this.name,this,i),s&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t)}}class nt{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){Q(this,t)}}const at=x.litHtmlPolyfillSupport;at?.(Z,et),(x.litHtmlVersions??=[]).push("3.3.3");const ct=globalThis;
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */class lt extends w{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const e=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=((t,e,i)=>{const r=i?.renderBefore??e;let s=r._$litPart$;if(void 0===s){const t=i?.renderBefore??null;r._$litPart$=s=new et(e.insertBefore(I(),t),t,void 0,i??{})}return s._$AI(t),s})(e,this.renderRoot,this.renderOptions)}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0)}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1)}render(){return q}}lt._$litElement$=!0,lt.finalized=!0,ct.litElementHydrateSupport?.({LitElement:lt});const ht=ct.litElementPolyfillSupport;ht?.({LitElement:lt}),(ct.litElementVersions??=[]).push("4.2.2");
+ */Symbol.metadata??=Symbol("metadata"),m.litPropertyMetadata??=new WeakMap;let w=class extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t)}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,e=b){if(e.state&&(e.attribute=!1),this._$Ei(),this.prototype.hasOwnProperty(t)&&((e=Object.create(e)).wrapped=!0),this.elementProperties.set(t,e),!e.noAccessor){const i=Symbol(),s=this.getPropertyDescriptor(t,i,e);void 0!==s&&l(this.prototype,t,s)}}static getPropertyDescriptor(t,e,i){const{get:s,set:r}=h(this.prototype,t)??{get(){return this[e]},set(t){this[e]=t}};return{get:s,set(e){const o=s?.call(this);r?.call(this,e),this.requestUpdate(t,o,i)},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??b}static _$Ei(){if(this.hasOwnProperty(v("elementProperties")))return;const t=p(this);t.finalize(),void 0!==t.l&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties)}static finalize(){if(this.hasOwnProperty(v("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(v("properties"))){const t=this.properties,e=[...d(t),...u(t)];for(const i of e)this.createProperty(i,t[i])}const t=this[Symbol.metadata];if(null!==t){const e=litPropertyMetadata.get(t);if(void 0!==e)for(const[t,i]of e)this.elementProperties.set(t,i)}this._$Eh=new Map;for(const[t,e]of this.elementProperties){const i=this._$Eu(t,e);void 0!==i&&this._$Eh.set(i,t)}this.elementStyles=this.finalizeStyles(this.styles)}static finalizeStyles(t){const e=[];if(Array.isArray(t)){const i=new Set(t.flat(1/0).reverse());for(const t of i)e.unshift(a(t))}else void 0!==t&&e.push(a(t));return e}static _$Eu(t,e){const i=e.attribute;return!1===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev()}_$Ev(){this._$ES=new Promise(t=>this.enableUpdating=t),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach(t=>t(this))}addController(t){(this._$EO??=new Set).add(t),void 0!==this.renderRoot&&this.isConnected&&t.hostConnected?.()}removeController(t){this._$EO?.delete(t)}_$E_(){const t=new Map,e=this.constructor.elementProperties;for(const i of e.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t)}createRenderRoot(){const t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return((t,s)=>{if(i)t.adoptedStyleSheets=s.map(t=>t instanceof CSSStyleSheet?t:t.styleSheet);else for(const i of s){const s=document.createElement("style"),r=e.litNonce;void 0!==r&&s.setAttribute("nonce",r),s.textContent=i.cssText,t.appendChild(s)}})(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach(t=>t.hostConnected?.())}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach(t=>t.hostDisconnected?.())}attributeChangedCallback(t,e,i){this._$AK(t,i)}_$ET(t,e){const i=this.constructor.elementProperties.get(t),s=this.constructor._$Eu(t,i);if(void 0!==s&&!0===i.reflect){const r=(void 0!==i.converter?.toAttribute?i.converter:$).toAttribute(e,i.type);this._$Em=t,null==r?this.removeAttribute(s):this.setAttribute(s,r),this._$Em=null}}_$AK(t,e){const i=this.constructor,s=i._$Eh.get(t);if(void 0!==s&&this._$Em!==s){const t=i.getPropertyOptions(s),r="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==t.converter?.fromAttribute?t.converter:$;this._$Em=s;const o=r.fromAttribute(e,t.type);this[s]=o??this._$Ej?.get(s)??o,this._$Em=null}}requestUpdate(t,e,i,s=!1,r){if(void 0!==t){const o=this.constructor;if(!1===s&&(r=this[t]),i??=o.getPropertyOptions(t),!((i.hasChanged??y)(r,e)||i.useDefault&&i.reflect&&r===this._$Ej?.get(t)&&!this.hasAttribute(o._$Eu(t,i))))return;this.C(t,e,i)}!1===this.isUpdatePending&&(this._$ES=this._$EP())}C(t,e,{useDefault:i,reflect:s,wrapped:r},o){i&&!(this._$Ej??=new Map).has(t)&&(this._$Ej.set(t,o??e??this[t]),!0!==r||void 0!==o)||(this._$AL.has(t)||(this.hasUpdated||i||(e=void 0),this._$AL.set(t,e)),!0===s&&this._$Em!==t&&(this._$Eq??=new Set).add(t))}async _$EP(){this.isUpdatePending=!0;try{await this._$ES}catch(t){Promise.reject(t)}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[t,e]of this._$Ep)this[t]=e;this._$Ep=void 0}const t=this.constructor.elementProperties;if(t.size>0)for(const[e,i]of t){const{wrapped:t}=i,s=this[e];!0!==t||this._$AL.has(e)||void 0===s||this.C(e,void 0,i,s)}}let t=!1;const e=this._$AL;try{t=this.shouldUpdate(e),t?(this.willUpdate(e),this._$EO?.forEach(t=>t.hostUpdate?.()),this.update(e)):this._$EM()}catch(e){throw t=!1,this._$EM(),e}t&&this._$AE(e)}willUpdate(t){}_$AE(t){this._$EO?.forEach(t=>t.hostUpdated?.()),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t)}_$EM(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return!0}update(t){this._$Eq&&=this._$Eq.forEach(t=>this._$ET(t,this[t])),this._$EM()}updated(t){}firstUpdated(t){}};w.elementStyles=[],w.shadowRootOptions={mode:"open"},w[v("elementProperties")]=new Map,w[v("finalized")]=new Map,g?.({ReactiveElement:w}),(m.reactiveElementVersions??=[]).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const dt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}):customElements.define(t,e)},ut={attribute:!0,type:String,converter:$,reflect:!1,hasChanged:y},pt=(t=ut,e,i)=>{const{kind:r,metadata:s}=i;let o=globalThis.litPropertyMetadata.get(s);if(void 0===o&&globalThis.litPropertyMetadata.set(s,o=new Map),"setter"===r&&((t=Object.create(t)).wrapped=!0),o.set(i.name,t),"accessor"===r){const{name:r}=i;return{set(i){const s=e.get.call(this);e.set.call(this,i),this.requestUpdate(r,s,t,!0,i)},init(e){return void 0!==e&&this.C(r,void 0,t,e),e}}}if("setter"===r){const{name:r}=i;return function(i){const s=this[r];e.call(this,i),this.requestUpdate(r,s,t,!0,i)}}throw Error("Unsupported decorator location: "+r)};
+const x=globalThis,S=t=>t,k=x.trustedTypes,A=k?k.createPolicy("lit-html",{createHTML:t=>t}):void 0,C="$lit$",M=`lit$${Math.random().toFixed(9).slice(2)}$`,E="?"+M,R=`<${E}>`,P=document,D=()=>P.createComment(""),I=t=>null===t||"object"!=typeof t&&"function"!=typeof t,F=Array.isArray,T="[ \t\n\f\r]",O=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,N=/-->/g,L=/>/g,U=RegExp(`>|${T}(?:([^\\s"'>=/]+)(${T}*=${T}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),z=/'/g,j=/"/g,H=/^(?:script|style|textarea|title)$/i,V=t=>(e,...i)=>({_$litType$:t,strings:e,values:i}),B=V(1),W=V(2),G=Symbol.for("lit-noChange"),q=Symbol.for("lit-nothing"),Y=new WeakMap,X=P.createTreeWalker(P,129);function K(t,e){if(!F(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==A?A.createHTML(e):e}const J=(t,e)=>{const i=t.length-1,s=[];let r,o=2===e?"<svg>":3===e?"<math>":"",n=O;for(let e=0;e<i;e++){const i=t[e];let a,c,l=-1,h=0;for(;h<i.length&&(n.lastIndex=h,c=n.exec(i),null!==c);)h=n.lastIndex,n===O?"!--"===c[1]?n=N:void 0!==c[1]?n=L:void 0!==c[2]?(H.test(c[2])&&(r=RegExp("</"+c[2],"g")),n=U):void 0!==c[3]&&(n=U):n===U?">"===c[0]?(n=r??O,l=-1):void 0===c[1]?l=-2:(l=n.lastIndex-c[2].length,a=c[1],n=void 0===c[3]?U:'"'===c[3]?j:z):n===j||n===z?n=U:n===N||n===L?n=O:(n=U,r=void 0);const d=n===U&&t[e+1].startsWith("/>")?" ":"";o+=n===O?i+R:l>=0?(s.push(a),i.slice(0,l)+C+i.slice(l)+M+d):i+M+(-2===l?e:d)}return[K(t,o+(t[i]||"<?>")+(2===e?"</svg>":3===e?"</math>":"")),s]};class Z{constructor({strings:t,_$litType$:e},i){let s;this.parts=[];let r=0,o=0;const n=t.length-1,a=this.parts,[c,l]=J(t,e);if(this.el=Z.createElement(c,i),X.currentNode=this.el.content,2===e||3===e){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes)}for(;null!==(s=X.nextNode())&&a.length<n;){if(1===s.nodeType){if(s.hasAttributes())for(const t of s.getAttributeNames())if(t.endsWith(C)){const e=l[o++],i=s.getAttribute(t).split(M),n=/([.?@])?(.*)/.exec(e);a.push({type:1,index:r,name:n[2],strings:i,ctor:"."===n[1]?st:"?"===n[1]?rt:"@"===n[1]?ot:it}),s.removeAttribute(t)}else t.startsWith(M)&&(a.push({type:6,index:r}),s.removeAttribute(t));if(H.test(s.tagName)){const t=s.textContent.split(M),e=t.length-1;if(e>0){s.textContent=k?k.emptyScript:"";for(let i=0;i<e;i++)s.append(t[i],D()),X.nextNode(),a.push({type:2,index:++r});s.append(t[e],D())}}}else if(8===s.nodeType)if(s.data===E)a.push({type:2,index:r});else{let t=-1;for(;-1!==(t=s.data.indexOf(M,t+1));)a.push({type:7,index:r}),t+=M.length-1}r++}}static createElement(t,e){const i=P.createElement("template");return i.innerHTML=t,i}}function Q(t,e,i=t,s){if(e===G)return e;let r=void 0!==s?i._$Co?.[s]:i._$Cl;const o=I(e)?void 0:e._$litDirective$;return r?.constructor!==o&&(r?._$AO?.(!1),void 0===o?r=void 0:(r=new o(t),r._$AT(t,i,s)),void 0!==s?(i._$Co??=[])[s]=r:i._$Cl=r),void 0!==r&&(e=Q(t,r._$AS(t,e.values),r,s)),e}class tt{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:e},parts:i}=this._$AD,s=(t?.creationScope??P).importNode(e,!0);X.currentNode=s;let r=X.nextNode(),o=0,n=0,a=i[0];for(;void 0!==a;){if(o===a.index){let e;2===a.type?e=new et(r,r.nextSibling,this,t):1===a.type?e=new a.ctor(r,a.name,a.strings,this,t):6===a.type&&(e=new nt(r,this,t)),this._$AV.push(e),a=i[++n]}o!==a?.index&&(r=X.nextNode(),o++)}return X.currentNode=P,s}p(t){let e=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}}class et{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,e,i,s){this.type=2,this._$AH=q,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=s,this._$Cv=s?.isConnected??!0}get parentNode(){let t=this._$AA.parentNode;const e=this._$AM;return void 0!==e&&11===t?.nodeType&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=Q(this,t,e),I(t)?t===q||null==t||""===t?(this._$AH!==q&&this._$AR(),this._$AH=q):t!==this._$AH&&t!==G&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):(t=>F(t)||"function"==typeof t?.[Symbol.iterator])(t)?this.k(t):this._(t)}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t))}_(t){this._$AH!==q&&I(this._$AH)?this._$AA.nextSibling.data=t:this.T(P.createTextNode(t)),this._$AH=t}$(t){const{values:e,_$litType$:i}=t,s="number"==typeof i?this._$AC(t):(void 0===i.el&&(i.el=Z.createElement(K(i.h,i.h[0]),this.options)),i);if(this._$AH?._$AD===s)this._$AH.p(e);else{const t=new tt(s,this),i=t.u(this.options);t.p(e),this.T(i),this._$AH=t}}_$AC(t){let e=Y.get(t.strings);return void 0===e&&Y.set(t.strings,e=new Z(t)),e}k(t){F(this._$AH)||(this._$AH=[],this._$AR());const e=this._$AH;let i,s=0;for(const r of t)s===e.length?e.push(i=new et(this.O(D()),this.O(D()),this,this.options)):i=e[s],i._$AI(r),s++;s<e.length&&(this._$AR(i&&i._$AB.nextSibling,s),e.length=s)}_$AR(t=this._$AA.nextSibling,e){for(this._$AP?.(!1,!0,e);t!==this._$AB;){const e=S(t).nextSibling;S(t).remove(),t=e}}setConnected(t){void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t))}}class it{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,e,i,s,r){this.type=1,this._$AH=q,this._$AN=void 0,this.element=t,this.name=e,this._$AM=s,this.options=r,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=q}_$AI(t,e=this,i,s){const r=this.strings;let o=!1;if(void 0===r)t=Q(this,t,e,0),o=!I(t)||t!==this._$AH&&t!==G,o&&(this._$AH=t);else{const s=t;let n,a;for(t=r[0],n=0;n<r.length-1;n++)a=Q(this,s[i+n],e,n),a===G&&(a=this._$AH[n]),o||=!I(a)||a!==this._$AH[n],a===q?t=q:t!==q&&(t+=(a??"")+r[n+1]),this._$AH[n]=a}o&&!s&&this.j(t)}j(t){t===q?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"")}}class st extends it{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===q?void 0:t}}class rt extends it{constructor(){super(...arguments),this.type=4}j(t){this.element.toggleAttribute(this.name,!!t&&t!==q)}}class ot extends it{constructor(t,e,i,s,r){super(t,e,i,s,r),this.type=5}_$AI(t,e=this){if((t=Q(this,t,e,0)??q)===G)return;const i=this._$AH,s=t===q&&i!==q||t.capture!==i.capture||t.once!==i.once||t.passive!==i.passive,r=t!==q&&(i===q||s);s&&this.element.removeEventListener(this.name,this,i),r&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t)}}class nt{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){Q(this,t)}}const at=x.litHtmlPolyfillSupport;at?.(Z,et),(x.litHtmlVersions??=[]).push("3.3.3");const ct=globalThis;
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */function mt(t){return(e,i)=>"object"==typeof i?pt(t,e,i):((t,e,i)=>{const r=e.hasOwnProperty(i);return e.constructor.createProperty(i,t),r?Object.getOwnPropertyDescriptor(e,i):void 0})(t,e,i)}
+ */class lt extends w{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const e=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=((t,e,i)=>{const s=i?.renderBefore??e;let r=s._$litPart$;if(void 0===r){const t=i?.renderBefore??null;s._$litPart$=r=new et(e.insertBefore(D(),t),t,void 0,i??{})}return r._$AI(t),r})(e,this.renderRoot,this.renderOptions)}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0)}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1)}render(){return G}}lt._$litElement$=!0,lt.finalized=!0,ct.litElementHydrateSupport?.({LitElement:lt});const ht=ct.litElementPolyfillSupport;ht?.({LitElement:lt}),(ct.litElementVersions??=[]).push("4.2.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */function ft(t){return mt({...t,state:!0,attribute:!1})}
+ */
+const dt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}):customElements.define(t,e)},ut={attribute:!0,type:String,converter:$,reflect:!1,hasChanged:y},pt=(t=ut,e,i)=>{const{kind:s,metadata:r}=i;let o=globalThis.litPropertyMetadata.get(r);if(void 0===o&&globalThis.litPropertyMetadata.set(r,o=new Map),"setter"===s&&((t=Object.create(t)).wrapped=!0),o.set(i.name,t),"accessor"===s){const{name:s}=i;return{set(i){const r=e.get.call(this);e.set.call(this,i),this.requestUpdate(s,r,t,!0,i)},init(e){return void 0!==e&&this.C(s,void 0,t,e),e}}}if("setter"===s){const{name:s}=i;return function(i){const r=this[s];e.call(this,i),this.requestUpdate(s,r,t,!0,i)}}throw Error("Unsupported decorator location: "+s)};
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */function mt(t){return(e,i)=>"object"==typeof i?pt(t,e,i):((t,e,i)=>{const s=e.hasOwnProperty(i);return e.constructor.createProperty(i,t),s?Object.getOwnPropertyDescriptor(e,i):void 0})(t,e,i)}
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */function _t(t){return mt({...t,state:!0,attribute:!1})}
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -47,51 +47,51 @@ const dt=t=>(e,i)=>{void 0!==i?i.addInitializer(()=>{customElements.define(t,e)}
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Reflect.decorate&&"object"!=typeof e&&Object.defineProperty(t,e,i),i))(e,i,{get(){return(e=>e.renderRoot?.querySelector(t)??null)(this)}})}const gt=[{name:"Empty Dust Bin",icon:"mdi:delete-empty"},{name:"Wash Mop",icon:"mdi:water-sync"},{name:"Dry Mop",icon:"mdi:tumble-dryer"},{name:"Remove Hair",icon:"mdi:content-cut"}],vt=[{name:"Start Auto Empty",icon:"mdi:delete-empty"},{name:"Self-Clean",icon:"mdi:water-sync"},{name:"Start Drying",icon:"mdi:tumble-dryer"}],$t=["Water Level","Water Volume"],yt=["cleaning"],bt={tapo_rv30:"tapo",dreame_vacuum:"dreame"};function wt(t,e){const i=St(t)?.[e]?.platform;return i?bt[i]:void 0}const xt=["schedules","status"];function St(t){return t.entities}function kt(t,e){const i=t.states[e],r=i?.attributes?.entity_picture;if(!r)return;if(!i.last_updated)return r;const s=r.includes("?")?"&":"?";return`${r}${s}_hactl=${encodeURIComponent(i.last_updated)}`}function At(t,e){const i=St(t)?.[e];if(i?.name)return i.name;if(i?.original_name)return i.original_name;const r=t.states[e],s=r?.attributes?.friendly_name;return"string"==typeof s?s:e}function Ct(t,e){return t.filter(t=>t.startsWith(`${e}.`))}function Mt(t,e,i="tapo"){const r=function(t,e){const i=St(t);if(!i)return[];const r=i[e]?.device_id;return r?Object.keys(i).filter(t=>i[t]?.device_id===r):[]}(t,e),s={dockActions:[],sensors:[],maintenanceSensors:[]};if(0===r.length)return s;s.camera=Ct(r,"camera")[0];for(const e of Ct(r,"select")){const i=At(t,e);$t.some(t=>i.includes(t))?s.waterLevel=e:i.includes("Clean Passes")?s.cleanPasses=e:s.maintenanceSensors.push(e)}for(const e of Ct(r,"sensor")){const i=t.states[e];if("battery"===i?.attributes?.device_class){s.battery=e;continue}const r=At(t,e).toLowerCase();if(r.includes("remaining")||r.includes("carpet"))s.maintenanceSensors.push(e);else{if(xt.some(t=>r.endsWith(t)))continue;s.sensors.push(e)}}for(const e of Ct(r,"binary_sensor"))At(t,e).toLowerCase().includes("mop")?s.mopAttached=e:s.maintenanceSensors.push(e);for(const t of Ct(r,"number"))s.maintenanceSensors.push(t);for(const t of Ct(r,"switch"))s.maintenanceSensors.push(t);const o="dreame"===i?vt:gt;for(const e of Ct(r,"button")){const i=At(t,e).toLowerCase(),r=o.find(t=>i.includes(t.name.toLowerCase()));r&&s.dockActions.push({entityId:e,name:r.name,icon:r.icon})}return s}function Et(t,e,i,r){const s=i.getBoundingClientRect(),o=s.left+s.width/2,n=s.top+s.height/2,a=i.offsetWidth||s.width,c=i.offsetHeight||s.height;let l=t-o,h=e-n;if(r%360!=0){const t=-r*Math.PI/180,e=Math.cos(t),i=Math.sin(t),s=l*i+h*e;l=l*e-h*i,h=s}const d=h+c/2;return{x:(l+a/2)*(i.naturalWidth/a),y:d*(i.naturalHeight/c)}}function Pt(t){return void 0!==t.map_id&&null!==t.map_id?`map:${t.map_id}`:t.rooms.map(t=>`${t.id}:${t.name}`).sort().join("|")}function Rt(t,e){if(!t)return{};const i=Pt(e),r={};for(const s of e.rooms){const e=t[`${i}:${s.id}`]??t[String(s.id)];e&&(r[String(s.id)]=e)}return r}function It(t,e){return t.x>=e[0]&&t.x<=e[2]&&t.y>=e[1]&&t.y<=e[3]}function Ft(t,e){let i=!1;for(let r=0,s=e.length-1;r<e.length;s=r++){const[o,n]=e[r],[a,c]=e[s];n>t.y!=c>t.y&&t.x<(a-o)*(t.y-n)/(c-n)+o&&(i=!i)}return i}function Dt(t,e,i){const r=t.x-e,s=t.y-i;return r*r+s*s}const Tt={brown:{fill:"#bcaaa4",stroke:"#6d4c41",detail:"#8d6e63",line:"#4e342e"},white:{fill:"#fafafa",stroke:"#9e9e9e",detail:"#e0e0e0",line:"#757575"}};function Ot(t){return Tt[t??"brown"]??Tt.brown}const Nt=[{type:"bed",label:"Bed",icon:"mdi:bed",widthPct:.16,heightPct:.24},{type:"sofa",label:"Sofa",icon:"mdi:sofa",widthPct:.28,heightPct:.11},{type:"table",label:"Table",icon:"mdi:table-furniture",widthPct:.16,heightPct:.1},{type:"desk",label:"Desk",icon:"mdi:desk",widthPct:.16,heightPct:.08},{type:"chair",label:"Chair",icon:"mdi:chair-rolling",widthPct:.07,heightPct:.07},{type:"wardrobe",label:"Wardrobe",icon:"mdi:wardrobe",widthPct:.14,heightPct:.06},{type:"toilet",label:"Toilet",icon:"mdi:toilet",widthPct:.07,heightPct:.09},{type:"sink",label:"Sink",icon:"mdi:sink",widthPct:.07,heightPct:.055},{type:"bathtub",label:"Bathtub",icon:"mdi:bathtub",widthPct:.11,heightPct:.2},{type:"fridge",label:"Fridge",icon:"mdi:fridge-outline",widthPct:.065,heightPct:.065},{type:"washing_machine",label:"Washing Machine",icon:"mdi:washing-machine",widthPct:.065,heightPct:.065},{type:"tv",label:"TV",icon:"mdi:television",widthPct:.14,heightPct:.025},{type:"stairs",label:"Stairs",icon:"mdi:stairs",widthPct:.12,heightPct:.16},{type:"plant",label:"Plant",icon:"mdi:flower",widthPct:.04,heightPct:.04},{type:"custom",label:"Custom",icon:"mdi:shape-outline",widthPct:.09,heightPct:.09}];function Ut(t){return Nt.find(e=>e.type===t)??Nt[Nt.length-1]}function zt(t){return(t%360+360)%360}function Ht(t,e,i){const r=-e/2,s=-i/2,o=Math.min(e,i);switch(t){case"bed":{const t=.22*i;return W`
-        <rect x=${r} y=${s} width=${e} height=${i} rx=${.08*o} class="furn-body"></rect>
-        <rect x=${r+.08*e} y=${s+.06*i} width=${.84*e} height=${t} rx=${.3*t} class="furn-detail"></rect>
-        <line x1=${r} y1=${s+.42*i} x2=${r+e} y2=${s+.42*i} class="furn-line"></line>
+function ft(t,e){return(e,i,s)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Reflect.decorate&&"object"!=typeof e&&Object.defineProperty(t,e,i),i))(e,i,{get(){return(e=>e.renderRoot?.querySelector(t)??null)(this)}})}const gt=[{name:"Empty Dust Bin",icon:"mdi:delete-empty"},{name:"Wash Mop",icon:"mdi:water-sync"},{name:"Dry Mop",icon:"mdi:tumble-dryer"},{name:"Remove Hair",icon:"mdi:content-cut"}],vt=[{name:"Start Auto Empty",icon:"mdi:delete-empty"},{name:"Self-Clean",icon:"mdi:water-sync"},{name:"Start Drying",icon:"mdi:tumble-dryer"}],$t=["Water Level","Water Volume"],yt=["cleaning"],bt={tapo_rv30:"tapo",dreame_vacuum:"dreame"};function wt(t,e){const i=St(t)?.[e]?.platform;return i?bt[i]:void 0}const xt=["schedules","status"];function St(t){return t.entities}function kt(t,e){const i=t.states[e],s=i?.attributes?.entity_picture;if(!s)return;if(!i.last_updated)return s;const r=s.includes("?")?"&":"?";return`${s}${r}_hactl=${encodeURIComponent(i.last_updated)}`}function At(t,e){const i=St(t)?.[e];if(i?.name)return i.name;if(i?.original_name)return i.original_name;const s=t.states[e],r=s?.attributes?.friendly_name;return"string"==typeof r?r:e}function Ct(t,e){return t.filter(t=>t.startsWith(`${e}.`))}function Mt(t,e,i="tapo"){const s=function(t,e){const i=St(t);if(!i)return[];const s=i[e]?.device_id;return s?Object.keys(i).filter(t=>i[t]?.device_id===s):[]}(t,e),r={dockActions:[],sensors:[],maintenanceSensors:[]};if(0===s.length)return r;r.camera=Ct(s,"camera")[0],r.lastClean=Ct(s,"image").find(e=>At(t,e).toLowerCase().includes("last clean")||e.toLowerCase().includes("last_clean")),r.schedules=Ct(s,"sensor").find(e=>At(t,e).toLowerCase().includes("schedules"));for(const e of Ct(s,"select")){const i=At(t,e);$t.some(t=>i.includes(t))?r.waterLevel=e:i.includes("Clean Passes")?r.cleanPasses=e:r.maintenanceSensors.push(e)}for(const e of Ct(s,"sensor")){const i=t.states[e];if("battery"===i?.attributes?.device_class){r.battery=e;continue}const s=At(t,e).toLowerCase();if(s.includes("remaining")||s.includes("carpet"))r.maintenanceSensors.push(e);else{if(xt.some(t=>s.endsWith(t)))continue;r.sensors.push(e)}}for(const e of Ct(s,"binary_sensor"))At(t,e).toLowerCase().includes("mop")?r.mopAttached=e:r.maintenanceSensors.push(e);for(const t of Ct(s,"number"))r.maintenanceSensors.push(t);for(const t of Ct(s,"switch"))r.maintenanceSensors.push(t);const o="dreame"===i?vt:gt;for(const e of Ct(s,"button")){const i=At(t,e).toLowerCase(),s=o.find(t=>i.includes(t.name.toLowerCase()));s&&r.dockActions.push({entityId:e,name:s.name,icon:s.icon})}return r}function Et(t,e,i,s){const r=i.getBoundingClientRect(),o=r.left+r.width/2,n=r.top+r.height/2,a=i.offsetWidth||r.width,c=i.offsetHeight||r.height;let l=t-o,h=e-n;if(s%360!=0){const t=-s*Math.PI/180,e=Math.cos(t),i=Math.sin(t),r=l*i+h*e;l=l*e-h*i,h=r}const d=h+c/2;return{x:(l+a/2)*(i.naturalWidth/a),y:d*(i.naturalHeight/c)}}function Rt(t){return void 0!==t.map_id&&null!==t.map_id?`map:${t.map_id}`:t.rooms.map(t=>`${t.id}:${t.name}`).sort().join("|")}function Pt(t,e){if(!t)return{};const i=Rt(e),s={};for(const r of e.rooms){const e=t[`${i}:${r.id}`]??t[String(r.id)];e&&(s[String(r.id)]=e)}return s}function Dt(t,e){return t.x>=e[0]&&t.x<=e[2]&&t.y>=e[1]&&t.y<=e[3]}function It(t,e){let i=!1;for(let s=0,r=e.length-1;s<e.length;r=s++){const[o,n]=e[s],[a,c]=e[r];n>t.y!=c>t.y&&t.x<(a-o)*(t.y-n)/(c-n)+o&&(i=!i)}return i}function Ft(t,e,i){const s=t.x-e,r=t.y-i;return s*s+r*r}const Tt={brown:{fill:"#bcaaa4",stroke:"#6d4c41",detail:"#8d6e63",line:"#4e342e"},white:{fill:"#fafafa",stroke:"#9e9e9e",detail:"#e0e0e0",line:"#757575"}};function Ot(t){return Tt[t??"brown"]??Tt.brown}const Nt=[{type:"bed",label:"Bed",icon:"mdi:bed",widthPct:.16,heightPct:.24},{type:"sofa",label:"Sofa",icon:"mdi:sofa",widthPct:.28,heightPct:.11},{type:"table",label:"Table",icon:"mdi:table-furniture",widthPct:.16,heightPct:.1},{type:"desk",label:"Desk",icon:"mdi:desk",widthPct:.16,heightPct:.08},{type:"chair",label:"Chair",icon:"mdi:chair-rolling",widthPct:.07,heightPct:.07},{type:"wardrobe",label:"Wardrobe",icon:"mdi:wardrobe",widthPct:.14,heightPct:.06},{type:"toilet",label:"Toilet",icon:"mdi:toilet",widthPct:.07,heightPct:.09},{type:"sink",label:"Sink",icon:"mdi:sink",widthPct:.07,heightPct:.055},{type:"bathtub",label:"Bathtub",icon:"mdi:bathtub",widthPct:.11,heightPct:.2},{type:"fridge",label:"Fridge",icon:"mdi:fridge-outline",widthPct:.065,heightPct:.065},{type:"washing_machine",label:"Washing Machine",icon:"mdi:washing-machine",widthPct:.065,heightPct:.065},{type:"tv",label:"TV",icon:"mdi:television",widthPct:.14,heightPct:.025},{type:"stairs",label:"Stairs",icon:"mdi:stairs",widthPct:.12,heightPct:.16},{type:"plant",label:"Plant",icon:"mdi:flower",widthPct:.04,heightPct:.04},{type:"custom",label:"Custom",icon:"mdi:shape-outline",widthPct:.09,heightPct:.09}];function Lt(t){return Nt.find(e=>e.type===t)??Nt[Nt.length-1]}function Ut(t){return(t%360+360)%360}function zt(t,e,i){const s=-e/2,r=-i/2,o=Math.min(e,i);switch(t){case"bed":{const t=.22*i;return W`
+        <rect x=${s} y=${r} width=${e} height=${i} rx=${.08*o} class="furn-body"></rect>
+        <rect x=${s+.08*e} y=${r+.06*i} width=${.84*e} height=${t} rx=${.3*t} class="furn-detail"></rect>
+        <line x1=${s} y1=${r+.42*i} x2=${s+e} y2=${r+.42*i} class="furn-line"></line>
       `}case"sofa":{const t=.14*e;return W`
-        <rect x=${r} y=${s} width=${e} height=${i} rx=${.25*i} class="furn-body"></rect>
-        <rect x=${r} y=${s} width=${t} height=${i} rx=${.25*i} class="furn-detail"></rect>
-        <rect x=${r+e-t} y=${s} width=${t} height=${i} rx=${.25*i} class="furn-detail"></rect>
-        <rect x=${r+.6*t} y=${s} width=${e-1.2*t} height=${.3*i} rx=${.1*i} class="furn-detail"></rect>
-      `}case"table":return W`<rect x=${r} y=${s} width=${e} height=${i} rx=${.06*o} class="furn-body"></rect>`;case"desk":return W`
-        <rect x=${r} y=${s} width=${e} height=${i} rx=${.06*o} class="furn-body"></rect>
-        <rect x=${r} y=${s} width=${e} height=${.22*i} class="furn-detail"></rect>
+        <rect x=${s} y=${r} width=${e} height=${i} rx=${.25*i} class="furn-body"></rect>
+        <rect x=${s} y=${r} width=${t} height=${i} rx=${.25*i} class="furn-detail"></rect>
+        <rect x=${s+e-t} y=${r} width=${t} height=${i} rx=${.25*i} class="furn-detail"></rect>
+        <rect x=${s+.6*t} y=${r} width=${e-1.2*t} height=${.3*i} rx=${.1*i} class="furn-detail"></rect>
+      `}case"table":return W`<rect x=${s} y=${r} width=${e} height=${i} rx=${.06*o} class="furn-body"></rect>`;case"desk":return W`
+        <rect x=${s} y=${r} width=${e} height=${i} rx=${.06*o} class="furn-body"></rect>
+        <rect x=${s} y=${r} width=${e} height=${.22*i} class="furn-detail"></rect>
       `;case"chair":return W`
-        <rect x=${r} y=${s+.18*i} width=${e} height=${.82*i} rx=${.15*e} class="furn-body"></rect>
-        <rect x=${r} y=${s} width=${e} height=${.28*i} rx=${.15*e} class="furn-detail"></rect>
+        <rect x=${s} y=${r+.18*i} width=${e} height=${.82*i} rx=${.15*e} class="furn-body"></rect>
+        <rect x=${s} y=${r} width=${e} height=${.28*i} rx=${.15*e} class="furn-detail"></rect>
       `;case"wardrobe":return W`
-        <rect x=${r} y=${s} width=${e} height=${i} class="furn-body"></rect>
-        <line x1="0" y1=${s} x2="0" y2=${s+i} class="furn-line"></line>
+        <rect x=${s} y=${r} width=${e} height=${i} class="furn-body"></rect>
+        <line x1="0" y1=${r} x2="0" y2=${r+i} class="furn-line"></line>
       `;case"toilet":{const t=.28*i;return W`
-        <rect x=${r} y=${s} width=${e} height=${t} rx=${.1*e} class="furn-detail"></rect>
-        <ellipse cx="0" cy=${s+t+(i-t)/2} rx=${e/2} ry=${(i-t)/2} class="furn-body"></ellipse>
+        <rect x=${s} y=${r} width=${e} height=${t} rx=${.1*e} class="furn-detail"></rect>
+        <ellipse cx="0" cy=${r+t+(i-t)/2} rx=${e/2} ry=${(i-t)/2} class="furn-body"></ellipse>
       `}case"sink":return W`
-        <rect x=${r} y=${s} width=${e} height=${i} rx=${.2*o} class="furn-body"></rect>
+        <rect x=${s} y=${r} width=${e} height=${i} rx=${.2*o} class="furn-body"></rect>
         <ellipse cx="0" cy="0" rx=${.32*e} ry=${.32*i} class="furn-detail"></ellipse>
       `;case"bathtub":return W`
-        <rect x=${r} y=${s} width=${e} height=${i} rx=${.4*o} class="furn-body"></rect>
-        <rect x=${r+.12*e} y=${s+.12*i} width=${.76*e} height=${.76*i} rx=${.3*o} class="furn-detail"></rect>
+        <rect x=${s} y=${r} width=${e} height=${i} rx=${.4*o} class="furn-body"></rect>
+        <rect x=${s+.12*e} y=${r+.12*i} width=${.76*e} height=${.76*i} rx=${.3*o} class="furn-detail"></rect>
       `;case"fridge":return W`
-        <rect x=${r} y=${s} width=${e} height=${i} rx=${.1*o} class="furn-body"></rect>
-        <line x1=${r} y1=${s+.35*i} x2=${r+e} y2=${s+.35*i} class="furn-line"></line>
+        <rect x=${s} y=${r} width=${e} height=${i} rx=${.1*o} class="furn-body"></rect>
+        <line x1=${s} y1=${r+.35*i} x2=${s+e} y2=${r+.35*i} class="furn-line"></line>
       `;case"washing_machine":return W`
-        <rect x=${r} y=${s} width=${e} height=${i} rx=${.12*o} class="furn-body"></rect>
+        <rect x=${s} y=${r} width=${e} height=${i} rx=${.12*o} class="furn-body"></rect>
         <circle cx="0" cy=${.08*i} r=${.3*o} class="furn-detail"></circle>
-      `;case"tv":return W`<rect x=${r} y=${s} width=${e} height=${i} rx=${.15*i} class="furn-body"></rect>`;case"stairs":{const t=5,o=i/t,n=[];for(let i=1;i<t;i++){const t=s+o*i;n.push(W`<line x1=${r} y1=${t} x2=${r+e} y2=${t} class="furn-line"></line>`)}return W`
-        <rect x=${r} y=${s} width=${e} height=${i} class="furn-body"></rect>
+      `;case"tv":return W`<rect x=${s} y=${r} width=${e} height=${i} rx=${.15*i} class="furn-body"></rect>`;case"stairs":{const t=5,o=i/t,n=[];for(let i=1;i<t;i++){const t=r+o*i;n.push(W`<line x1=${s} y1=${t} x2=${s+e} y2=${t} class="furn-line"></line>`)}return W`
+        <rect x=${s} y=${r} width=${e} height=${i} class="furn-body"></rect>
         ${n}
-      `}case"plant":return W`<circle cx="0" cy="0" r=${o/2} class="furn-body furn-plant"></circle>`;default:return W`<rect x=${r} y=${s} width=${e} height=${i} rx=${.08*o} class="furn-body"></rect>`}}function Vt(t,e,i,r,s){return B`
+      `}case"plant":return W`<circle cx="0" cy="0" r=${o/2} class="furn-body furn-plant"></circle>`;default:return W`<rect x=${s} y=${r} width=${e} height=${i} rx=${.08*o} class="furn-body"></rect>`}}function jt(t,e,i,s,r){return B`
     <ha-form
       .hass=${t}
       .data=${{value:i}}
-      .schema=${[{name:"value",selector:{select:{mode:"dropdown",options:r}}}]}
+      .schema=${[{name:"value",selector:{select:{mode:"dropdown",options:s}}}]}
       .computeLabel=${()=>e}
-      @value-changed=${t=>{t.stopPropagation(),s(t.detail.value.value)}}
+      @value-changed=${t=>{t.stopPropagation(),r(t.detail.value.value)}}
     ></ha-form>
-  `}const jt={tapo:"TapoVac-ADV (Tapo RV30/RV50)",dreame:"Dreame Vacuum"};let Lt=class extends lt{constructor(){super(...arguments),this._calibrationPoints=[],this._calibrationSnap90=!0,this._furniture=[],this._furnitureAddType="bed",this._usedDetectedFurnitureIds=new Set}setConfig(t){this._config=t,this._furniture=t.furniture??[]}_fireConfigChanged(t){this._config=t,this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:t},bubbles:!0,composed:!0}))}_valueChanged(t,e){this._config[t]!==e&&this._fireConfigChanged({...this._config,[t]:e})}get _cameraId(){if(this._config?.vacuum)return this._config.camera??Mt(this.hass,this._config.vacuum).camera}get _roomGeometry(){const t=this._cameraId;if(!t)return;const e=this.hass.states[t]?.attributes?.room_geometry;return e&&e.rooms?.length?e:void 0}render(){return this.hass&&this._config?B`
+  `}const Ht={tapo:"TapoVac-ADV (Tapo RV30/RV50)",dreame:"Dreame Vacuum"};let Vt=class extends lt{constructor(){super(...arguments),this._calibrationPoints=[],this._calibrationSnap90=!0,this._furniture=[],this._furnitureAddType="bed",this._usedDetectedFurnitureIds=new Set}setConfig(t){this._config=t,this._furniture=t.furniture??[]}_fireConfigChanged(t){this._config=t,this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:t},bubbles:!0,composed:!0}))}_valueChanged(t,e){this._config[t]!==e&&this._fireConfigChanged({...this._config,[t]:e})}get _cameraId(){if(this._config?.vacuum)return this._config.camera??Mt(this.hass,this._config.vacuum).camera}get _roomGeometry(){const t=this._cameraId;if(!t)return;const e=this.hass.states[t]?.attributes?.room_geometry;return e&&e.rooms?.length?e:void 0}render(){return this.hass&&this._config?B`
       <div class="section">
         <ha-entity-picker
           .hass=${this.hass}
@@ -102,15 +102,15 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
         ></ha-entity-picker>
       </div>
 
-      ${this._config.vacuum?this._renderBrand():G}
-      ${this._config.vacuum?this._renderToggles():G}
-      ${this._config.vacuum&&(this._config.show_map??!0)?this._renderRotation():G}
-      ${this._config.vacuum?this._renderAdvancedEntities():G}
-      ${this._config.vacuum&&"tapo"===this._brand&&(this._config.show_map??!0)?this._renderCalibration():G}
-      ${this._config.vacuum&&"tapo"===this._brand&&(this._config.show_map??!0)?this._renderFurniture():G}
-    `:G}get _brand(){return this._config.vacuum_brand??wt(this.hass,this._config.vacuum)??"tapo"}_renderBrand(){const t=wt(this.hass,this._config.vacuum),e=t?`Auto (detected: ${jt[t]})`:"Auto (auto-detect failed)";return B`
+      ${this._config.vacuum?this._renderBrand():q}
+      ${this._config.vacuum?this._renderToggles():q}
+      ${this._config.vacuum&&(this._config.show_map??!0)?this._renderRotation():q}
+      ${this._config.vacuum?this._renderAdvancedEntities():q}
+      ${this._config.vacuum&&"tapo"===this._brand&&(this._config.show_map??!0)?this._renderCalibration():q}
+      ${this._config.vacuum&&"tapo"===this._brand&&(this._config.show_map??!0)?this._renderFurniture():q}
+    `:q}get _brand(){return this._config.vacuum_brand??wt(this.hass,this._config.vacuum)??"tapo"}_renderBrand(){const t=wt(this.hass,this._config.vacuum),e=t?`Auto (detected: ${Ht[t]})`:"Auto (auto-detect failed)";return B`
       <div class="section">
-        ${Vt(this.hass,"Vacuum brand",this._config.vacuum_brand??"",[{value:"",label:e},{value:"tapo",label:jt.tapo},{value:"dreame",label:jt.dreame}],t=>this._valueChanged("vacuum_brand",t||void 0))}
+        ${jt(this.hass,"Vacuum brand",this._config.vacuum_brand??"",[{value:"",label:e},{value:"tapo",label:Ht.tapo},{value:"dreame",label:Ht.dreame}],t=>this._valueChanged("vacuum_brand",t||void 0))}
         <div class="hint">
           Controls which service is called to clean selected rooms, and how dock-action buttons
           are recognized by name. Only override this if auto-detection above picked the wrong
@@ -119,7 +119,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       </div>
     `}_renderToggles(){return B`
       <div class="section toggles">
-        ${[["show_map","Show map"],["show_room_names","Show room names when selecting"],["show_controls","Show start/pause/stop/dock controls"],["show_dock_actions","Show dock action buttons (empty bin / wash / dry / hair)"],["show_fan_speed","Show fan speed selector"],["show_water_level","Show water level selector"],["show_battery","Show battery"],["show_mop_status","Show mop attached status"],["show_sensors","Show sensors"],["show_last_updated","Show last updated time"],["show_furniture","Show furniture on map"]].map(([t,e])=>B`
+        ${[["show_map","Show map"],["show_remote_drive","Show Tapo remote drive controls"],["show_last_clean_map","Allow switching to the last clean map"],["show_schedules","Show Tapo schedule controls"],["show_room_names","Show room names when selecting"],["show_controls","Show start/pause/stop/dock controls"],["show_dock_actions","Show dock action buttons (empty bin / wash / dry / hair)"],["show_fan_speed","Show fan speed selector"],["show_water_level","Show water level selector"],["show_battery","Show battery"],["show_mop_status","Show mop attached status"],["show_sensors","Show sensors"],["show_last_updated","Show last updated time"],["show_furniture","Show furniture on map"]].map(([t,e])=>B`
             <ha-formfield .label=${e}>
               <ha-switch
                 .checked=${this._config[t]??!0}
@@ -136,7 +136,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           .value=${String(this._config.map_rotation??0)}
           @change=${t=>this._valueChanged("map_rotation",Number(t.target.value)||0)}
         ></ha-textfield>
-        ${Vt(this.hass,"Map position",this._config.map_position??"top",[{value:"top",label:"Top (after controls)"},{value:"bottom",label:"Bottom (after battery/sensors)"}],t=>this._valueChanged("map_position",t))}
+        ${jt(this.hass,"Map position",this._config.map_position??"top",[{value:"top",label:"Top (after controls)"},{value:"bottom",label:"Bottom (after battery/sensors)"}],t=>this._valueChanged("map_position",t))}
         <ha-formfield label="Show cleaning trace (experimental)">
           <ha-switch
             .checked=${this._config.show_trace??!1}
@@ -159,6 +159,13 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           .includeDomains=${["camera"]}
           label="Map camera"
           @value-changed=${t=>this._valueChanged("camera",t.detail.value||void 0)}
+        ></ha-entity-picker>
+        <ha-entity-picker
+          .hass=${this.hass}
+          .value=${this._config.last_clean_image??""}
+          .includeDomains=${["image"]}
+          label="Last clean map image (auto-detected otherwise)"
+          @value-changed=${t=>this._valueChanged("last_clean_image",t.detail.value||void 0)}
         ></ha-entity-picker>
         <ha-entity-picker
           .hass=${this.hass}
@@ -198,7 +205,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           then finish to save it.
         </div>
         ${t&&i?B`
-              ${Vt(this.hass,"Room to calibrate",void 0!==this._calibrationRoomId?String(this._calibrationRoomId):"",t.rooms.map(t=>({value:String(t.id),label:t.name})),t=>{const e=Number(t),i=Number.isNaN(e)?void 0:e;i!==this._calibrationRoomId&&(this._calibrationRoomId=i,this._calibrationPoints=[])})}
+              ${jt(this.hass,"Room to calibrate",void 0!==this._calibrationRoomId?String(this._calibrationRoomId):"",t.rooms.map(t=>({value:String(t.id),label:t.name})),t=>{const e=Number(t),i=Number.isNaN(e)?void 0:e;i!==this._calibrationRoomId&&(this._calibrationRoomId=i,this._calibrationPoints=[])})}
 
               ${void 0!==this._calibrationRoomId?B`
                     <ha-formfield label="Snap corners to 90°">
@@ -237,15 +244,15 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
                       >
                       <mwc-button @click=${this._deleteCalibration}>Delete saved calibration</mwc-button>
                     </div>
-                  `:G}
+                  `:q}
             `:B`<div class="hint">Map not available yet — open a dashboard with this vacuum first.</div>`}
       </div>
-    `}_renderCalibrationOverlay(t){const e=this._calibrationRoomId,i=t.rooms.find(t=>t.id===e),r=void 0!==e?Rt(this._config.room_polygons,t)[String(e)]:void 0,s=r&&r.length>=3?W`<polygon
-            points=${r.map(([t,e])=>`${t},${e}`).join(" ")}
+    `}_renderCalibrationOverlay(t){const e=this._calibrationRoomId,i=t.rooms.find(t=>t.id===e),s=void 0!==e?Pt(this._config.room_polygons,t)[String(e)]:void 0,r=s&&s.length>=3?W`<polygon
+            points=${s.map(([t,e])=>`${t},${e}`).join(" ")}
             fill="rgba(3,169,244,0.25)"
             stroke="rgb(3,169,244)"
             stroke-width="3"
-          ></polygon>`:G,o=i?W`<rect
+          ></polygon>`:q,o=i?W`<rect
           x=${i.bbox[0]}
           y=${i.bbox[1]}
           width=${i.bbox[2]-i.bbox[0]}
@@ -254,7 +261,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           stroke="rgba(255,255,255,0.6)"
           stroke-dasharray="6,4"
           stroke-width="2"
-        ></rect>`:G,n=this._calibrationPoints.length>0?W`
+        ></rect>`:q,n=this._calibrationPoints.length>0?W`
             <polyline
               points=${this._calibrationPoints.map(([t,e])=>`${t},${e}`).join(" ")}
               fill="none"
@@ -262,7 +269,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
               stroke-width="3"
             ></polyline>
             ${this._calibrationPoints.map(([t,e])=>W`<circle cx=${t} cy=${e} r="5" fill="rgb(255,152,0)"></circle>`)}
-          `:G;return W`${o}${s}${n}`}_onCalibrationClick(t){const e=t.currentTarget,i=Et(t.clientX,t.clientY,e,0);let r=Math.round(i.x),s=Math.round(i.y);if(this._calibrationSnap90&&this._calibrationPoints.length>0){const[t,e]=this._calibrationPoints[this._calibrationPoints.length-1];Math.abs(r-t)>Math.abs(s-e)?s=e:r=t}this._calibrationPoints=[...this._calibrationPoints,[r,s]]}_finishCalibration(){const t=this._roomGeometry;if(void 0===this._calibrationRoomId||this._calibrationPoints.length<3||!t)return;const e={...this._config.room_polygons??{}};e[`${Pt(t)}:${this._calibrationRoomId}`]=this._calibrationPoints,this._calibrationPoints=[],this._valueChanged("room_polygons",e)}_deleteCalibration(){const t=this._roomGeometry;if(void 0===this._calibrationRoomId||!this._config.room_polygons||!t)return;const e={...this._config.room_polygons};delete e[`${Pt(t)}:${this._calibrationRoomId}`],delete e[String(this._calibrationRoomId)],this._calibrationPoints=[],this._valueChanged("room_polygons",e)}_visibleFurniture(t){if(!t)return this._furniture;const e=Pt(t);return this._furniture.filter(t=>!t.map||t.map===e)}_renderFurniture(){const t=this._roomGeometry,e=this._cameraId,i=e?kt(this.hass,e):void 0,r=this._visibleFurniture(t),s=r.find(t=>t.id===this._selectedFurnitureId);return B`
+          `:q;return W`${o}${r}${n}`}_onCalibrationClick(t){const e=t.currentTarget,i=Et(t.clientX,t.clientY,e,0);let s=Math.round(i.x),r=Math.round(i.y);if(this._calibrationSnap90&&this._calibrationPoints.length>0){const[t,e]=this._calibrationPoints[this._calibrationPoints.length-1];Math.abs(s-t)>Math.abs(r-e)?r=e:s=t}this._calibrationPoints=[...this._calibrationPoints,[s,r]]}_finishCalibration(){const t=this._roomGeometry;if(void 0===this._calibrationRoomId||this._calibrationPoints.length<3||!t)return;const e={...this._config.room_polygons??{}};e[`${Rt(t)}:${this._calibrationRoomId}`]=this._calibrationPoints,this._calibrationPoints=[],this._valueChanged("room_polygons",e)}_deleteCalibration(){const t=this._roomGeometry;if(void 0===this._calibrationRoomId||!this._config.room_polygons||!t)return;const e={...this._config.room_polygons};delete e[`${Rt(t)}:${this._calibrationRoomId}`],delete e[String(this._calibrationRoomId)],this._calibrationPoints=[],this._valueChanged("room_polygons",e)}_visibleFurniture(t){if(!t)return this._furniture;const e=Rt(t);return this._furniture.filter(t=>!t.map||t.map===e)}_renderFurniture(){const t=this._roomGeometry,e=this._cameraId,i=e?kt(this.hass,e):void 0,s=this._visibleFurniture(t),r=s.find(t=>t.id===this._selectedFurnitureId);return B`
       <div class="section">
         <div class="section-title">Furniture</div>
         <div class="hint">
@@ -270,7 +277,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           the corner handle to resize. ${t?.furniture?.length?"The vacuum detected furniture outlines on this map (dashed, below) — click one to place a piece there instead of dragging it into position by hand; you still pick its type since the device doesn't say what it is.":"Furniture placed in the official Tapo app itself isn't readable here yet — this vacuum hasn't reported any detected outlines on this map (see the TapoVac-ADV README's Furniture section)."}
         </div>
         <div class="furniture-add-row">
-          ${Vt(this.hass,"Furniture type",this._furnitureAddType,Nt.map(t=>({value:t.type,label:t.label})),t=>this._furnitureAddType=t)}
+          ${jt(this.hass,"Furniture type",this._furnitureAddType,Nt.map(t=>({value:t.type,label:t.label})),t=>this._furnitureAddType=t)}
           <mwc-button raised @click=${this._addFurniture} ?disabled=${!t}>
             <ha-icon icon="mdi:plus"></ha-icon>
             Add
@@ -283,18 +290,18 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           .computeLabel=${()=>"Furniture opacity"}
           @value-changed=${t=>{t.stopPropagation(),this._valueChanged("furniture_opacity",t.detail.value.furniture_opacity)}}
         ></ha-form>
-        ${Vt(this.hass,"Furniture color",this._config.furniture_color??"brown",[{value:"brown",label:"Brown (wood-toned)"},{value:"white",label:"White (light gray)"}],t=>this._valueChanged("furniture_color",t))}
+        ${jt(this.hass,"Furniture color",this._config.furniture_color??"brown",[{value:"brown",label:"Brown (wood-toned)"},{value:"white",label:"White (light gray)"}],t=>this._valueChanged("furniture_color",t))}
 
         ${t&&i?B`
               <div class="map-wrap">
                 <img class="furniture-image" src=${i} />
-                ${this._renderFurnitureOverlay(t,r)}
+                ${this._renderFurnitureOverlay(t,s)}
               </div>
             `:B`<div class="hint">Map not available yet — open a dashboard with this vacuum first.</div>`}
-        ${s?this._renderFurnitureToolbar(s):G}
-        ${r.length>0?this._renderFurnitureList(r):G}
+        ${r?this._renderFurnitureToolbar(r):q}
+        ${s.length>0?this._renderFurnitureList(s):q}
       </div>
-    `}_renderFurnitureOverlay(t,e){const i=Ot(this._config.furniture_color),r=`--furn-fill:${i.fill};--furn-stroke:${i.stroke};--furn-detail:${i.detail};--furn-line:${i.line};`;return B`
+    `}_renderFurnitureOverlay(t,e){const i=Ot(this._config.furniture_color),s=`--furn-fill:${i.fill};--furn-stroke:${i.stroke};--furn-detail:${i.detail};--furn-line:${i.line};`;return B`
       <svg
         class="map-overlay furniture-overlay"
         viewBox="0 0 ${t.image_width} ${t.image_height}"
@@ -309,13 +316,13 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           @pointerdown=${()=>this._selectedFurnitureId=void 0}
         ></rect>
         <g class="detected-furniture-layer">
-          ${(t.furniture??[]).filter(e=>!this._usedDetectedFurnitureIds.has(`${Pt(t)}:${e.id}`)).map(t=>this._renderDetectedFurnitureOutline(t))}
+          ${(t.furniture??[]).filter(e=>!this._usedDetectedFurnitureIds.has(`${Rt(t)}:${e.id}`)).map(t=>this._renderDetectedFurnitureOutline(t))}
         </g>
-        <g class="furniture-layer" style=${r}>
+        <g class="furniture-layer" style=${s}>
           ${e.map(t=>this._renderEditableFurnitureItem(t))}
         </g>
       </svg>
-    `}_renderDetectedFurnitureOutline(t){const[e,i,r,s]=t.bbox;return W`
+    `}_renderDetectedFurnitureOutline(t){const[e,i,s,r]=t.bbox;return W`
       <g
         class="detected-furniture-outline"
         @pointerdown=${e=>{e.stopPropagation(),this._addDetectedFurniture(t)}}
@@ -323,9 +330,9 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
         <rect
           x=${e}
           y=${i}
-          width=${r-e}
-          height=${s-i}
-          transform="rotate(${t.angle} ${(e+r)/2} ${(i+s)/2})"
+          width=${s-e}
+          height=${r-i}
+          transform="rotate(${t.angle} ${(e+s)/2} ${(i+r)/2})"
         ></rect>
       </g>
     `}_renderEditableFurnitureItem(t){const e=this._selectedFurnitureId===t.id,i=Math.max(8,.12*Math.min(t.width,t.height));return W`
@@ -334,7 +341,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
         transform="translate(${t.x} ${t.y}) rotate(${t.rotation})"
         @pointerdown=${e=>this._startFurnitureDrag(e,t.id,"move")}
       >
-        ${Ht(t.type,t.width,t.height)}
+        ${zt(t.type,t.width,t.height)}
         ${e?W`
               <line
                 x1="0"
@@ -357,12 +364,12 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
                 class="handle resize-handle"
                 @pointerdown=${e=>this._startFurnitureDrag(e,t.id,"resize")}
               ></circle>
-            `:G}
+            `:q}
       </g>
     `}_renderFurnitureToolbar(t){return B`
       <div class="furniture-toolbar">
-        <ha-icon icon=${Ut(t.type).icon}></ha-icon>
-        <span>${Ut(t.type).label}</span>
+        <ha-icon icon=${Lt(t.type).icon}></ha-icon>
+        <span>${Lt(t.type).label}</span>
         <mwc-icon-button @click=${()=>this._rotateFurniture(t.id,-15)} title="Rotate left 15°">
           <ha-icon icon="mdi:rotate-left"></ha-icon>
         </mwc-icon-button>
@@ -402,7 +409,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       </div>
     `}_renderFurnitureList(t){return B`
       <div class="furniture-list">
-        ${t.map(t=>{const e=Ut(t.type);return B`
+        ${t.map(t=>{const e=Lt(t.type);return B`
             <div
               class="furniture-list-row ${this._selectedFurnitureId===t.id?"selected":""}"
               @click=${()=>this._selectedFurnitureId=t.id}
@@ -418,7 +425,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
             </div>
           `})}
       </div>
-    `}_addFurniture(){const t=this._roomGeometry;if(!t)return;const e=function(t,e,i){const r=Ut(t),s=Math.min(e.image_width,e.image_height),o=Math.max(12,Math.round(r.widthPct*s)),n=Math.max(12,Math.round(r.heightPct*s)),a=i.length%6*s*.03;return{id:`furn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`,type:t,x:Math.round(e.image_width/2+a),y:Math.round(e.image_height/2+a),width:o,height:n,rotation:0,map:Pt(e)}}(this._furnitureAddType,t,this._furniture);this._furniture=[...this._furniture,e],this._selectedFurnitureId=e.id,this._commitFurniture()}_addDetectedFurniture(t){const e=this._roomGeometry;if(!e)return;const i=function(t,e,i){const[r,s,o,n]=e.bbox;return{id:`furn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`,type:t,x:Math.round((r+o)/2),y:Math.round((s+n)/2),width:Math.max(12,Math.round(o-r)),height:Math.max(12,Math.round(n-s)),rotation:zt(e.angle),map:Pt(i)}}(this._furnitureAddType,t,e);this._furniture=[...this._furniture,i],this._selectedFurnitureId=i.id,this._usedDetectedFurnitureIds=new Set(this._usedDetectedFurnitureIds).add(`${Pt(e)}:${t.id}`),this._commitFurniture()}_removeFurniture(t){this._furniture=this._furniture.filter(e=>e.id!==t),this._selectedFurnitureId===t&&(this._selectedFurnitureId=void 0),this._commitFurniture()}_rotateFurniture(t,e){this._furniture=this._furniture.map(i=>i.id===t?{...i,rotation:zt(i.rotation+e)}:i),this._commitFurniture()}_setFurnitureField(t,e,i){const r=Number(i);if(Number.isNaN(r))return;const s="width"===e||"height"===e?Math.max(12,Math.round(r)):Math.round(r);this._furniture=this._furniture.map(i=>i.id===t?{...i,[e]:s}:i),this._commitFurniture()}_commitFurniture(){this._valueChanged("furniture",this._furniture)}_startFurnitureDrag(t,e,i){t.stopPropagation(),t.preventDefault();const r=this._furnitureImg,s=this._furniture.find(t=>t.id===e);if(!r||!s)return;this._selectedFurnitureId=e;const o=t.currentTarget;o.setPointerCapture(t.pointerId);const n=Et(t.clientX,t.clientY,r,0),a=t=>{const o=Et(t.clientX,t.clientY,r,0);this._applyFurnitureDrag(e,i,s,n,o)},c=()=>{o.removeEventListener("pointermove",a),o.removeEventListener("pointerup",c),o.removeEventListener("pointercancel",c),this._commitFurniture()};o.addEventListener("pointermove",a),o.addEventListener("pointerup",c),o.addEventListener("pointercancel",c)}_applyFurnitureDrag(t,e,i,r,s){this._furniture=this._furniture.map(o=>{if(o.id!==t)return o;if("move"===e)return{...o,x:i.x+(s.x-r.x),y:i.y+(s.y-r.y)};if("rotate"===e){const t=180*Math.atan2(s.y-i.y,s.x-i.x)/Math.PI+90;return{...o,rotation:Math.round(zt(t))}}const n=-i.rotation*Math.PI/180,a=s.x-i.x,c=s.y-i.y,l=a*Math.cos(n)-c*Math.sin(n),h=a*Math.sin(n)+c*Math.cos(n);return{...o,width:Math.max(12,Math.round(2*Math.abs(l))),height:Math.max(12,Math.round(2*Math.abs(h)))}})}};Lt.styles=n`
+    `}_addFurniture(){const t=this._roomGeometry;if(!t)return;const e=function(t,e,i){const s=Lt(t),r=Math.min(e.image_width,e.image_height),o=Math.max(12,Math.round(s.widthPct*r)),n=Math.max(12,Math.round(s.heightPct*r)),a=i.length%6*r*.03;return{id:`furn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`,type:t,x:Math.round(e.image_width/2+a),y:Math.round(e.image_height/2+a),width:o,height:n,rotation:0,map:Rt(e)}}(this._furnitureAddType,t,this._furniture);this._furniture=[...this._furniture,e],this._selectedFurnitureId=e.id,this._commitFurniture()}_addDetectedFurniture(t){const e=this._roomGeometry;if(!e)return;const i=function(t,e,i){const[s,r,o,n]=e.bbox;return{id:`furn_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`,type:t,x:Math.round((s+o)/2),y:Math.round((r+n)/2),width:Math.max(12,Math.round(o-s)),height:Math.max(12,Math.round(n-r)),rotation:Ut(e.angle),map:Rt(i)}}(this._furnitureAddType,t,e);this._furniture=[...this._furniture,i],this._selectedFurnitureId=i.id,this._usedDetectedFurnitureIds=new Set(this._usedDetectedFurnitureIds).add(`${Rt(e)}:${t.id}`),this._commitFurniture()}_removeFurniture(t){this._furniture=this._furniture.filter(e=>e.id!==t),this._selectedFurnitureId===t&&(this._selectedFurnitureId=void 0),this._commitFurniture()}_rotateFurniture(t,e){this._furniture=this._furniture.map(i=>i.id===t?{...i,rotation:Ut(i.rotation+e)}:i),this._commitFurniture()}_setFurnitureField(t,e,i){const s=Number(i);if(Number.isNaN(s))return;const r="width"===e||"height"===e?Math.max(12,Math.round(s)):Math.round(s);this._furniture=this._furniture.map(i=>i.id===t?{...i,[e]:r}:i),this._commitFurniture()}_commitFurniture(){this._valueChanged("furniture",this._furniture)}_startFurnitureDrag(t,e,i){t.stopPropagation(),t.preventDefault();const s=this._furnitureImg,r=this._furniture.find(t=>t.id===e);if(!s||!r)return;this._selectedFurnitureId=e;const o=t.currentTarget;o.setPointerCapture(t.pointerId);const n=Et(t.clientX,t.clientY,s,0),a=t=>{const o=Et(t.clientX,t.clientY,s,0);this._applyFurnitureDrag(e,i,r,n,o)},c=()=>{o.removeEventListener("pointermove",a),o.removeEventListener("pointerup",c),o.removeEventListener("pointercancel",c),this._commitFurniture()};o.addEventListener("pointermove",a),o.addEventListener("pointerup",c),o.addEventListener("pointercancel",c)}_applyFurnitureDrag(t,e,i,s,r){this._furniture=this._furniture.map(o=>{if(o.id!==t)return o;if("move"===e)return{...o,x:i.x+(r.x-s.x),y:i.y+(r.y-s.y)};if("rotate"===e){const t=180*Math.atan2(r.y-i.y,r.x-i.x)/Math.PI+90;return{...o,rotation:Math.round(Ut(t))}}const n=-i.rotation*Math.PI/180,a=r.x-i.x,c=r.y-i.y,l=a*Math.cos(n)-c*Math.sin(n),h=a*Math.sin(n)+c*Math.cos(n);return{...o,width:Math.max(12,Math.round(2*Math.abs(l))),height:Math.max(12,Math.round(2*Math.abs(h)))}})}};Vt.styles=n`
     .section {
       display: flex;
       flex-direction: column;
@@ -594,61 +601,120 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
     .furniture-list-row.selected {
       background: var(--secondary-background-color, rgba(127, 127, 127, 0.15));
     }
-  `,t([mt({attribute:!1})],Lt.prototype,"hass",void 0),t([ft()],Lt.prototype,"_config",void 0),t([ft()],Lt.prototype,"_calibrationRoomId",void 0),t([ft()],Lt.prototype,"_calibrationPoints",void 0),t([ft()],Lt.prototype,"_calibrationSnap90",void 0),t([ft()],Lt.prototype,"_furniture",void 0),t([ft()],Lt.prototype,"_selectedFurnitureId",void 0),t([ft()],Lt.prototype,"_furnitureAddType",void 0),t([_t("img.furniture-image")],Lt.prototype,"_furnitureImg",void 0),t([ft()],Lt.prototype,"_usedDetectedFurnitureIds",void 0),Lt=t([dt("vacuum-card-adv-editor")],Lt),console.info("%c VACUUM-CARD-ADV %c v2.3.0 ","color: #0b0f14; background: #34e0d6; font-weight: 700;","color: #34e0d6; background: #0b0f14; font-weight: 700;"),window.customCards=window.customCards||[],window.customCards.push({type:"vacuum-card-adv",name:"TapoVac ADV Vacuum Card",description:"A card for the TapoVac-ADV integration (Tapo RV30/RV50 series).",preview:!0});let Bt=class extends lt{constructor(){super(...arguments),this._discovered={dockActions:[],sensors:[],maintenanceSensors:[]},this._selectedRoomIds=new Set,this._selectedDreameSegmentIds=new Set,this._maintenanceOpen=!1,this._busy=!1,this._trace=[]}static getConfigElement(){return document.createElement("vacuum-card-adv-editor")}static getStubConfig(t){return{type:"custom:vacuum-card-adv",vacuum:Object.keys(t.states).find(t=>t.startsWith("vacuum."))??"",show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_mop_status:!0,show_room_names:!0,show_last_updated:!0,show_furniture:!0,furniture_opacity:100,furniture_color:"brown"}}setConfig(t){if(!t.vacuum)throw new Error("vacuum entity is required");this._config={show_map:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_mop_status:!0,show_room_names:!0,show_last_updated:!0,show_furniture:!0,furniture_opacity:100,furniture_color:"brown",map_rotation:0,...t},this._maintenanceOpen=!1===t.maintenance_collapsed_default}getCardSize(){let t=2;return(this._config?.show_map??!0)&&(t+=6),(this._config?.show_sensors??!0)&&(t+=2),t}willUpdate(t){if(t.has("hass")&&this.hass&&this._config?.vacuum){const t=this._brand,e=`${this._config.vacuum}|${t}`;this._lastDiscoveredFor!==e&&(this._discovered=Mt(this.hass,this._config.vacuum,t),this._lastDiscoveredFor=e);const i=this.hass.states[this._config.vacuum]?.attributes?.selected_map,r=`${this._config.vacuum}|${i??""}`;void 0!==this._lastDreameSelectedMapFor&&this._lastDreameSelectedMapFor!==r&&(this._selectedDreameSegmentIds=new Set),this._lastDreameSelectedMapFor=r;const s=this._roomGeometry;if(s){const t=`${this._config.vacuum}|${Pt(s)}`;void 0!==this._lastRoomMapKeyFor&&this._lastRoomMapKeyFor!==t&&(this._selectedRoomIds=new Set),this._lastRoomMapKeyFor=t}this._updateTrace()}}get _brand(){return this._config.vacuum_brand??wt(this.hass,this._config.vacuum)??"tapo"}get _mapRotation(){const t=this._config.map_rotation;return"number"==typeof t&&Number.isFinite(t)?t:0}_updateTrace(){const t=this.hass.states[this._config.vacuum]?.state,e=t=>void 0!==t&&yt.includes(t),i=e(t);if(t!==this._lastVacuumStateForTrace&&(i&&!e(this._lastVacuumStateForTrace)&&(this._trace=[]),this._lastVacuumStateForTrace=t),!this._config.show_trace||!i)return;const r=this._roomGeometry?.vacuum_point;if(!r)return;const s=this._trace[this._trace.length-1];if(s&&s[0]===r[0]&&s[1]===r[1])return;const o=[...this._trace,r];this._trace=o.length>400?o.slice(o.length-400):o}get _roomGeometry(){const t=this._config.camera??this._discovered.camera;if(!t)return;const e=this.hass.states[t],i=e?.attributes?.room_geometry;return i&&i.rooms?i:void 0}_shortTitle(t){const e=this.hass.states[this._config.vacuum],i=e?.attributes.friendly_name;return i&&t.startsWith(`${i} `)?t.slice(i.length+1):t}_lastUpdated(){const t=[this._config.vacuum,this._config.battery_entity??this._discovered.battery,this._config.mop_attached_entity??this._discovered.mopAttached,this._config.camera??this._discovered.camera,this._config.water_level_entity??this._discovered.waterLevel,...this._config.sensors??this._discovered.sensors].filter(t=>!!t);let e;for(const i of t){const t=this.hass.states[i]?.last_changed;if(!t)continue;const r=new Date(t);(!e||r>e)&&(e=r)}return e}_relativeTime(t){const e=Math.round((Date.now()-t.getTime())/1e3);if(e<5)return"just now";if(e<60)return`${e}s ago`;const i=Math.round(e/60);if(i<60)return`${i}m ago`;const r=Math.round(i/60);if(r<24)return`${r}h ago`;return`${Math.round(r/24)}d ago`}render(){if(!this._config||!this.hass)return G;const t=this.hass.states[this._config.vacuum];if(!t)return B`<ha-card><div class="warning">Entity not found: ${this._config.vacuum}</div></ha-card>`;const e=this._config.name??t.attributes.friendly_name??"Vacuum",i=this.hass.formatEntityState?.(t)??t.state,r="bottom"===this._config.map_position?"bottom":"top",s=this._config.show_last_updated??!0?this._lastUpdated():void 0;return B`
+  `,t([mt({attribute:!1})],Vt.prototype,"hass",void 0),t([_t()],Vt.prototype,"_config",void 0),t([_t()],Vt.prototype,"_calibrationRoomId",void 0),t([_t()],Vt.prototype,"_calibrationPoints",void 0),t([_t()],Vt.prototype,"_calibrationSnap90",void 0),t([_t()],Vt.prototype,"_furniture",void 0),t([_t()],Vt.prototype,"_selectedFurnitureId",void 0),t([_t()],Vt.prototype,"_furnitureAddType",void 0),t([ft("img.furniture-image")],Vt.prototype,"_furnitureImg",void 0),t([_t()],Vt.prototype,"_usedDetectedFurnitureIds",void 0),Vt=t([dt("vacuum-card-adv-editor")],Vt),console.info("%c VACUUM-CARD-ADV %c v2.4.0 ","color: #0b0f14; background: #34e0d6; font-weight: 700;","color: #34e0d6; background: #0b0f14; font-weight: 700;"),window.customCards=window.customCards||[],window.customCards.push({type:"vacuum-card-adv",name:"TapoVac ADV Vacuum Card",description:"A card for the TapoVac-ADV integration (Tapo RV30/RV50 series).",preview:!0});let Bt=class extends lt{constructor(){super(...arguments),this._discovered={dockActions:[],sensors:[],maintenanceSensors:[]},this._selectedRoomIds=new Set,this._selectedDreameSegmentIds=new Set,this._maintenanceOpen=!1,this._busy=!1,this._trace=[],this._remoteDriving=!1,this._showLastCleanMap=!1,this._mapMode="rooms",this._newScheduleTime="08:00",this._newScheduleDays=new Set(["Mon","Tue","Wed","Thu","Fri","Sat","Sun"])}static getConfigElement(){return document.createElement("vacuum-card-adv-editor")}static getStubConfig(t){return{type:"custom:vacuum-card-adv",vacuum:Object.keys(t.states).find(t=>t.startsWith("vacuum."))??"",show_map:!0,show_remote_drive:!0,show_last_clean_map:!0,show_schedules:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_mop_status:!0,show_room_names:!0,show_last_updated:!0,show_furniture:!0,furniture_opacity:100,furniture_color:"brown"}}setConfig(t){if(!t.vacuum)throw new Error("vacuum entity is required");this._config={show_map:!0,show_remote_drive:!0,show_last_clean_map:!0,show_schedules:!0,show_controls:!0,show_dock_actions:!0,show_fan_speed:!0,show_water_level:!0,show_battery:!0,show_sensors:!0,show_mop_status:!0,show_room_names:!0,show_last_updated:!0,show_furniture:!0,furniture_opacity:100,furniture_color:"brown",map_rotation:0,...t},this._maintenanceOpen=!1===t.maintenance_collapsed_default}getCardSize(){let t=2;return(this._config?.show_map??!0)&&(t+=6),(this._config?.show_sensors??!0)&&(t+=2),t}willUpdate(t){if(t.has("hass")&&this.hass&&this._config?.vacuum){const t=this._brand,e=`${this._config.vacuum}|${t}`;this._lastDiscoveredFor!==e&&(this._discovered=Mt(this.hass,this._config.vacuum,t),this._lastDiscoveredFor=e);const i=this.hass.states[this._config.vacuum]?.attributes?.selected_map,s=`${this._config.vacuum}|${i??""}`;void 0!==this._lastDreameSelectedMapFor&&this._lastDreameSelectedMapFor!==s&&(this._selectedDreameSegmentIds=new Set),this._lastDreameSelectedMapFor=s;const r=this._roomGeometry;if(r){const t=`${this._config.vacuum}|${Rt(r)}`;void 0!==this._lastRoomMapKeyFor&&this._lastRoomMapKeyFor!==t&&(this._selectedRoomIds=new Set),this._lastRoomMapKeyFor=t}this._updateTrace()}}get _brand(){return this._config.vacuum_brand??wt(this.hass,this._config.vacuum)??"tapo"}get _mapRotation(){const t=this._config.map_rotation;return"number"==typeof t&&Number.isFinite(t)?t:0}_updateTrace(){const t=this.hass.states[this._config.vacuum]?.state,e=t=>void 0!==t&&yt.includes(t),i=e(t);if(t!==this._lastVacuumStateForTrace&&(i&&!e(this._lastVacuumStateForTrace)&&(this._trace=[]),this._lastVacuumStateForTrace=t),!this._config.show_trace||!i)return;const s=this._roomGeometry?.vacuum_point;if(!s)return;const r=this._trace[this._trace.length-1];if(r&&r[0]===s[0]&&r[1]===s[1])return;const o=[...this._trace,s];this._trace=o.length>400?o.slice(o.length-400):o}get _roomGeometry(){const t=this._config.camera??this._discovered.camera;if(!t)return;const e=this.hass.states[t],i=e?.attributes?.room_geometry;return i&&i.rooms?i:void 0}_shortTitle(t){const e=this.hass.states[this._config.vacuum],i=e?.attributes.friendly_name;return i&&t.startsWith(`${i} `)?t.slice(i.length+1):t}_lastUpdated(){const t=[this._config.vacuum,this._config.battery_entity??this._discovered.battery,this._config.mop_attached_entity??this._discovered.mopAttached,this._config.camera??this._discovered.camera,this._config.water_level_entity??this._discovered.waterLevel,...this._config.sensors??this._discovered.sensors].filter(t=>!!t);let e;for(const i of t){const t=this.hass.states[i]?.last_changed;if(!t)continue;const s=new Date(t);(!e||s>e)&&(e=s)}return e}_relativeTime(t){const e=Math.round((Date.now()-t.getTime())/1e3);if(e<5)return"just now";if(e<60)return`${e}s ago`;const i=Math.round(e/60);if(i<60)return`${i}m ago`;const s=Math.round(i/60);if(s<24)return`${s}h ago`;return`${Math.round(s/24)}d ago`}render(){if(!this._config||!this.hass)return q;const t=this.hass.states[this._config.vacuum];if(!t)return B`<ha-card><div class="warning">Entity not found: ${this._config.vacuum}</div></ha-card>`;const e=this._config.name??t.attributes.friendly_name??"Vacuum",i=this.hass.formatEntityState?.(t)??t.state,s="bottom"===this._config.map_position?"bottom":"top",r=this._config.show_last_updated??!0?this._lastUpdated():void 0;return B`
       <ha-card>
         <div class="header" @click=${()=>this._fireMoreInfo(this._config.vacuum)}>
           <ha-icon class="header-icon" icon="mdi:robot-vacuum"></ha-icon>
           <div class="header-text">
             <div class="name">${e}</div>
             <div class="status">${i}</div>
-            ${s?B`<div class="last-updated">Updated ${this._relativeTime(s)}</div>`:G}
+            ${r?B`<div class="last-updated">Updated ${this._relativeTime(r)}</div>`:q}
           </div>
         </div>
-        ${this._config.show_controls??!0?this._renderControls(t):G}
-        ${"top"===r&&(this._config.show_map??!0)?this._renderMap():G}
-        ${this._config.show_dock_actions??!0?this._renderDockActions():G}
+        ${this._config.show_controls??!0?this._renderControls(t):q}
+        ${this._renderRemoteDrive(t)}
+        ${"tapo"===this._brand&&!1!==this._config.show_schedules?this._renderSchedules():q}
+        ${"top"===s&&(this._config.show_map??!0)?this._renderMap():q}
+        ${this._config.show_dock_actions??!0?this._renderDockActions():q}
         ${this._renderSelects()}
-        ${this._config.show_battery??!0?this._renderBattery():G}
-        ${this._config.show_mop_status??!0?this._renderMopStatus():G}
-        ${this._config.show_sensors??!0?this._renderSensors():G}
-        ${"bottom"===r&&(this._config.show_map??!0)?this._renderMap():G}
+        ${this._config.show_battery??!0?this._renderBattery():q}
+        ${this._config.show_mop_status??!0?this._renderMopStatus():q}
+        ${this._config.show_sensors??!0?this._renderSensors():q}
+        ${"bottom"===s&&(this._config.show_map??!0)?this._renderMap():q}
         ${this._renderMaintenance()}
       </ha-card>
-    `}_renderControls(t){const e="cleaning"===t.state,i=Number(t.attributes.supported_features),r=t=>Number.isNaN(i)||0!==(i&t),s=r(4)?"pause":"stop";return B`
+    `}_renderControls(t){const e="cleaning"===t.state,i=Number(t.attributes.supported_features),s=t=>Number.isNaN(i)||0!==(i&t),r=s(4)?"pause":"stop";return B`
       <div class="section controls">
-        <button class="pill" @click=${()=>this._callVacuumService(e?s:"start")}>
+        <button class="pill" @click=${()=>this._callVacuumService(e?r:"start")}>
           <ha-icon icon=${e?"mdi:pause":"mdi:play"}></ha-icon>
           <span>${e?"Pause":"Start"}</span>
         </button>
-        ${r(8)?B`<button class="pill" @click=${()=>this._callVacuumService("stop")}>
+        ${s(8)?B`<button class="pill" @click=${()=>this._callVacuumService("stop")}>
               <ha-icon icon="mdi:stop"></ha-icon>
               <span>Stop</span>
-            </button>`:G}
-        ${r(1024)?B`<button class="pill" @click=${()=>this._callVacuumService("clean_spot")}>
+            </button>`:q}
+        ${s(1024)?B`<button class="pill" @click=${()=>this._callVacuumService("clean_spot")}>
               <ha-icon icon="mdi:target-variant"></ha-icon>
               <span>Spot</span>
-            </button>`:G}
-        ${r(16)?B`<button class="pill accent" @click=${()=>this._callVacuumService("return_to_base")}>
+            </button>`:q}
+        ${s(16)?B`<button class="pill accent" @click=${()=>this._callVacuumService("return_to_base")}>
               <ha-icon icon="mdi:home-import-outline"></ha-icon>
               <span>Dock</span>
-            </button>`:G}
+            </button>`:q}
       </div>
-    `}get _dreameRooms(){return"dreame"!==this._brand?[]:function(t,e){const i=t.states[e]?.attributes,r=i?.rooms;if(!r||"object"!=typeof r)return[];const s=i?.selected_map;return s&&r[s]?r[s]:Object.values(r)[0]??[]}(this.hass,this._config.vacuum)}_renderMap(){const t=this._config.camera??this._discovered.camera,e=t?kt(this.hass,t):void 0,i=this._dreameRooms;if(!e&&0===i.length)return G;const r=this._mapRotation,s=this._roomGeometry,o=r%360!=0?`transform: rotate(${r}deg);`:"";return B`
+    `}_renderRemoteDrive(t){if("tapo"!==this._brand||!1===this._config.show_remote_drive||!0!==t.attributes.remote_control)return q;const e=async t=>{try{await this.hass.callService("tapo_rv30","remote_drive",{entity_id:this._config.vacuum,command:t}),this._remoteDriving="enter"===t||"exit"!==t&&this._remoteDriving}catch(t){this._notifyServiceError("remote drive",t)}};return B`
+      <div class="section remote-drive">
+        <div class="section-title">Remote drive</div>
+        ${this._remoteDriving?B`<div class="drive-pad">
+              <button class="pill drive-up" aria-label="Forward" @click=${()=>e("forward")}><ha-icon icon="mdi:arrow-up"></ha-icon></button>
+              <button class="pill drive-left" aria-label="Turn left" @click=${()=>e("left")}><ha-icon icon="mdi:arrow-left"></ha-icon></button>
+              <button class="pill drive-stop" aria-label="Stop" @click=${()=>e("stop")}><ha-icon icon="mdi:stop"></ha-icon></button>
+              <button class="pill drive-right" aria-label="Turn right" @click=${()=>e("right")}><ha-icon icon="mdi:arrow-right"></ha-icon></button>
+              <button class="pill drive-down" aria-label="Backward" @click=${()=>e("backward")}><ha-icon icon="mdi:arrow-down"></ha-icon></button>
+            </div>
+            <button class="pill" @click=${()=>e("exit")}><ha-icon icon="mdi:close"></ha-icon><span>Release control</span></button>`:B`<button class="pill" @click=${()=>e("enter")}>
+              <ha-icon icon="mdi:steering"></ha-icon><span>Take control</span>
+            </button>`}
+      </div>
+    `}_renderSchedules(){const t=this._discovered.schedules,e=t?this.hass.states[t]:void 0;if(!e)return q;const i=e.attributes.schedules??[],s=e.attributes.dnd;return B`
+      <div class="section schedule-section">
+        <div class="section-title">Robot schedules</div>
+        ${s?.enabled?B`<div class="map-hint">Do Not Disturb: ${s.start}–${s.end}. Schedules during this window are blocked.</div>`:q}
+        ${i.map(t=>B`
+          <div class="schedule-row">
+            <div class="schedule-info">
+              <strong>${t.time}</strong>
+              <span>${(t.days??[]).join(", ")||"No repeat days"}${t.rooms?.length?` · ${t.rooms.join(", ")}`:""}</span>
+              ${t.blocked_by_dnd?B`<span class="schedule-warning">Blocked by Do Not Disturb</span>`:q}
+            </div>
+            <button class="pill small" title="Edit time and repeat days" @click=${()=>{this._editingScheduleId=t.id,this._newScheduleTime=t.time,this._newScheduleDays=new Set(t.days??[])}}><ha-icon icon="mdi:pencil"></ha-icon></button>
+            <button class="pill small" title="Run now" @click=${()=>this._scheduleAction("run_schedule",{schedule_id:t.id})}><ha-icon icon="mdi:play"></ha-icon></button>
+            <button class="pill small" title=${t.enabled?"Disable":"Enable"} @click=${()=>this._scheduleAction("set_schedule",{schedule_id:t.id,enabled:!t.enabled})}><ha-icon icon=${t.enabled?"mdi:toggle-switch":"mdi:toggle-switch-off-outline"}></ha-icon></button>
+            <button class="pill small" title="Remove schedule" @click=${()=>this._scheduleAction("remove_schedule",{schedule_id:t.id})}><ha-icon icon="mdi:delete-outline"></ha-icon></button>
+          </div>
+        `)}
+        <div class="schedule-add">
+          <input aria-label="Schedule time" type="time" .value=${this._newScheduleTime}
+            @change=${t=>{this._newScheduleTime=t.target.value}} />
+          <div class="schedule-days">
+            ${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(t=>B`<button class="chip ${this._newScheduleDays.has(t)?"selected":""}"
+              aria-pressed=${this._newScheduleDays.has(t)?"true":"false"}
+              @click=${()=>{const e=new Set(this._newScheduleDays);e.has(t)?e.delete(t):e.add(t),this._newScheduleDays=e}}>${t}</button>`)}
+          </div>
+          <button class="pill accent small" ?disabled=${0===this._newScheduleDays.size} @click=${this._saveSchedule}>
+            <ha-icon icon=${void 0===this._editingScheduleId?"mdi:calendar-plus":"mdi:content-save"}></ha-icon>
+            <span>${void 0===this._editingScheduleId?"Add schedule":"Save schedule"}</span>
+          </button>
+          ${void 0!==this._editingScheduleId?B`<button class="pill small" @click=${()=>{this._editingScheduleId=void 0}}><span>Cancel edit</span></button>`:q}
+        </div>
+      </div>
+    `}async _scheduleAction(t,e){try{await this.hass.callService("tapo_rv30",t,{entity_id:this._config.vacuum,...e})}catch(t){this._notifyServiceError("schedule",t)}}async _saveSchedule(){try{void 0!==this._editingScheduleId?(await this.hass.callService("tapo_rv30","set_schedule",{entity_id:this._config.vacuum,schedule_id:this._editingScheduleId,time:this._newScheduleTime,days:[...this._newScheduleDays]}),this._editingScheduleId=void 0):await this.hass.callService("tapo_rv30","add_schedule",{entity_id:this._config.vacuum,time:this._newScheduleTime,days:[...this._newScheduleDays],enabled:!0})}catch(t){this._notifyServiceError("add schedule",t)}}get _dreameRooms(){return"dreame"!==this._brand?[]:function(t,e){const i=t.states[e]?.attributes,s=i?.rooms;if(!s||"object"!=typeof s)return[];const r=i?.selected_map;return r&&s[r]?s[r]:Object.values(s)[0]??[]}(this.hass,this._config.vacuum)}_renderMap(){const t=this._config.camera??this._discovered.camera,e=this._config.last_clean_image??this._discovered.lastClean,i="tapo"===this._brand&&!1!==this._config.show_last_clean_map&&!!e,s=this._showLastCleanMap&&i?kt(this.hass,e):t?kt(this.hass,t):void 0,r=this._dreameRooms;if(!s&&0===r.length)return q;const o=this._mapRotation,n=this._showLastCleanMap?void 0:this._roomGeometry,a=this.hass.states[this._config.vacuum],c=t?this.hass.states[t]?.attributes?.map_geometry:void 0,l=o%360!=0?`transform: rotate(${o}deg);`:"";return B`
       <div class="section map-section">
-        ${e?B`<div class="map-wrap">
-              <img class="map-image" src=${e} style=${o} @click=${this._onMapClick} />
-              ${s?this._renderMapOverlay(s,o):G}
-            </div>`:G}
-        ${!s&&e?B`<div class="map-hint">
+        ${i||!0===a?.attributes.goto_point?B`<div class="map-tools">
+              ${i?B`<button class="pill small" @click=${()=>{this._showLastCleanMap=!this._showLastCleanMap}}>
+                <ha-icon icon=${this._showLastCleanMap?"mdi:map-clock":"mdi:history"}></ha-icon>
+                <span>${this._showLastCleanMap?"Live map":"Last clean"}</span>
+              </button>`:q}
+              ${!this._showLastCleanMap&&!0===a?.attributes.goto_point&&c?B`<button class="pill small" aria-pressed=${"goto"===this._mapMode?"true":"false"}
+                    @click=${()=>{this._mapMode="goto"===this._mapMode?"rooms":"goto"}}>
+                    <ha-icon icon="mdi:map-marker"></ha-icon><span>${"goto"===this._mapMode?"Cancel go to":"Go to point"}</span>
+                  </button>`:q}
+            </div>`:q}
+        ${s?B`<div class="map-wrap">
+              <img class="map-image" src=${s} style=${l} @click=${t=>this._onMapClick(t,c)} />
+              ${n?this._renderMapOverlay(n,l):q}
+            </div>`:q}
+        ${!n&&s?B`<div class="map-hint">
               ${"dreame"===this._brand?B`The Dreame Vacuum integration doesn't expose per-room map coordinates, so
                     rooms can't be clicked on the map directly — pick them from the list below
                     instead.`:B`Room click-to-select needs TapoVac-ADV v1.12+ (the map camera's
                     <code>room_geometry</code> attribute) — update the integration via HACS,
                     restart Home Assistant, then hard-refresh this browser tab.`}
-            </div>`:G}
-        ${i.length>0?this._renderDreameRoomChips(i):G}
-        ${this._selectedRoomIds.size>0?this._renderSelectedRoomsBar(s):G}
-        ${this._selectedDreameSegmentIds.size>0?this._renderSelectedDreameRoomsBar(i):G}
+            </div>`:q}
+        ${this._showLastCleanMap?B`<div class="map-hint">Map from the most recent completed cleaning run.</div>`:q}
+        ${r.length>0&&!this._showLastCleanMap?this._renderDreameRoomChips(r):q}
+        ${this._selectedRoomIds.size>0?this._renderSelectedRoomsBar(n):q}
+        ${this._selectedDreameSegmentIds.size>0?this._renderSelectedDreameRoomsBar(r):q}
       </div>
     `}_renderDreameRoomChips(t){return B`
       <div class="dreame-rooms">
@@ -658,7 +724,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
               aria-pressed=${e?"true":"false"}
               @click=${()=>this._toggleDreameRoom(t.id)}
             >
-              ${t.icon?B`<ha-icon icon=${t.icon}></ha-icon>`:G}
+              ${t.icon?B`<ha-icon icon=${t.icon}></ha-icon>`:q}
               <span>${t.name}</span>
             </button>
           `})}
@@ -673,7 +739,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           <ha-icon icon="mdi:close"></ha-icon><span>Clear</span>
         </button>
       </div>
-    `}async _cleanSelectedDreameRooms(){if(0!==this._selectedDreameSegmentIds.size){this._busy=!0;try{await this.hass.callService("dreame_vacuum","vacuum_clean_segment",{entity_id:this._config.vacuum,segments:[...this._selectedDreameSegmentIds]}),this._selectedDreameSegmentIds=new Set}catch(t){this._notifyServiceError("clean selected rooms",t)}finally{this._busy=!1}}}_renderMapOverlay(t,e){const i=Rt(this._config.room_polygons,t);return B`
+    `}async _cleanSelectedDreameRooms(){if(0!==this._selectedDreameSegmentIds.size){this._busy=!0;try{await this.hass.callService("dreame_vacuum","vacuum_clean_segment",{entity_id:this._config.vacuum,segments:[...this._selectedDreameSegmentIds]}),this._selectedDreameSegmentIds=new Set}catch(t){this._notifyServiceError("clean selected rooms",t)}finally{this._busy=!1}}}_renderMapOverlay(t,e){const i=Pt(this._config.room_polygons,t);return B`
       <svg
         class="map-overlay"
         style=${e}
@@ -682,44 +748,51 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       >
         ${t.rooms.map(t=>this._renderRoomOverlay(t,i))}
         ${t.rooms.filter(t=>this._selectedRoomIds.has(t.id)).map(t=>this._renderRoomOrderBadge(t))}
-        ${this._config.show_trace?this._renderTrace():G}
-        ${this._config.show_furniture??!0?this._renderFurniture(t):G}
+        ${this._config.show_trace?this._renderTrace():q}
+        ${this._config.show_furniture??!0?this._renderDetectedFurniture(t):q}
+        ${this._config.show_furniture??!0?this._renderFurniture(t):q}
       </svg>
-    `}_renderTrace(){if(this._trace.length<2)return G;const t=this._trace.map(([t,e])=>`${t},${e}`).join(" ");return W`
+    `}_renderDetectedFurniture(t){return t.furniture?.length?W`
+      <g class="detected-furniture-layer">
+        ${t.furniture.map(t=>{const e=t.points.map(([t,e])=>`${t},${e}`).join(" ");return W`<polygon points=${e} class="detected-furniture">
+            <title>Furniture outline from the robot's map</title>
+          </polygon>`})}
+      </g>
+    `:q}_renderTrace(){if(this._trace.length<2)return q;const t=this._trace.map(([t,e])=>`${t},${e}`).join(" ");return W`
       <polyline
         points=${t}
         fill="none"
         class="vacuum-trace"
       ></polyline>
-    `}_renderRoomOverlay(t,e){const i=this._selectedRoomIds.has(t.id),r=e[String(t.id)],[s,o,n]=t.color,a=i?`rgba(${s},${o},${n},0.55)`:`rgba(${s},${o},${n},0.12)`,c=i?`rgb(${s},${o},${n})`:`rgba(${s},${o},${n},0.4)`,l=i?4:1.5,h=i?"room-shape selected":"room-shape";if(r&&r.length>=3){const t=r.map(([t,e])=>`${t},${e}`).join(" ");return W`<polygon
-        points=${t}
+    `}_renderRoomOverlay(t,e){const i=this._selectedRoomIds.has(t.id),s=e[String(t.id)],[r,o,n]=t.color,a=i?`rgba(${r},${o},${n},0.55)`:`rgba(${r},${o},${n},0.12)`,c=i?`rgb(${r},${o},${n})`:`rgba(${r},${o},${n},0.4)`,l=i?4:1.5,h=i?"room-shape selected":"room-shape",d=t.last_cleaned?`Last cleaned ${new Date(1e3*t.last_cleaned).toLocaleString()}${null==t.coverage?"":` · ${Math.round(t.coverage)}% covered`}`:"No recorded clean for this room";if(s&&s.length>=3){const e=s.map(([t,e])=>`${t},${e}`).join(" ");return W`<polygon
+        points=${e}
         fill=${a}
         stroke=${c}
         stroke-width=${l}
         class=${h}
-      ></polygon>`}const[d,u,p,m]=t.bbox;return W`<rect
-      x=${d}
-      y=${u}
-      width=${p-d}
-      height=${m-u}
+      ><title>${t.name}: ${d}</title></polygon>`}const[u,p,m,_]=t.bbox;return W`<rect
+      x=${u}
+      y=${p}
+      width=${m-u}
+      height=${_-p}
       fill=${a}
       stroke=${c}
       stroke-width=${l}
       class=${h}
-    ></rect>`}_renderRoomOrderBadge(t){const e=[...this._selectedRoomIds].indexOf(t.id);return W`
+    ><title>${t.name}: ${d}</title></rect>`}_renderRoomOrderBadge(t){const e=[...this._selectedRoomIds].indexOf(t.id);return W`
       <g class="room-order-badge">
         <circle cx=${t.cx} cy=${t.cy} r="15" class="badge-circle"></circle>
         <text x=${t.cx} y=${t.cy} dy="0.35em" text-anchor="middle" class="badge-text">${e+1}</text>
       </g>
-    `}_renderFurniture(t){const e=this._config.furniture;if(!e||0===e.length)return G;const i=Pt(t),r=e.filter(t=>!t.map||t.map===i);if(0===r.length)return G;const s=Math.max(0,Math.min(100,this._config.furniture_opacity??100))/100,o=Ot(this._config.furniture_color),n=`--furn-fill:${o.fill};--furn-stroke:${o.stroke};--furn-detail:${o.detail};--furn-line:${o.line};`;return W`
-      <g class="furniture-layer" opacity=${s} style=${n}>
-        ${r.map(t=>W`
+    `}_renderFurniture(t){const e=this._config.furniture;if(!e||0===e.length)return q;const i=Rt(t),s=e.filter(t=>!t.map||t.map===i);if(0===s.length)return q;const r=Math.max(0,Math.min(100,this._config.furniture_opacity??100))/100,o=Ot(this._config.furniture_color),n=`--furn-fill:${o.fill};--furn-stroke:${o.stroke};--furn-detail:${o.detail};--furn-line:${o.line};`;return W`
+      <g class="furniture-layer" opacity=${r} style=${n}>
+        ${s.map(t=>W`
             <g transform="translate(${t.x} ${t.y}) rotate(${t.rotation})" class="furniture-item">
-              ${Ht(t.type,t.width,t.height)}
+              ${zt(t.type,t.width,t.height)}
             </g>
           `)}
       </g>
-    `}_renderSelectedRoomsBar(t){const e=[...this._selectedRoomIds].map((e,i)=>{const r=t?.rooms.find(t=>t.id===e)?.name;return r?`${i+1}. ${r}`:void 0}).filter(t=>!!t);return B`
+    `}_renderSelectedRoomsBar(t){const e=[...this._selectedRoomIds].map((e,i)=>{const s=t?.rooms.find(t=>t.id===e)?.name;return s?`${i+1}. ${s}`:void 0}).filter(t=>!!t);return B`
       <div class="selected-rooms-bar">
         <span>${this._config.show_room_names??!0?e.join(", "):`${e.length} room(s)`}</span>
         <button class="pill accent small" @click=${this._cleanSelectedRooms} ?disabled=${this._busy}>
@@ -729,7 +802,7 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
           <ha-icon icon="mdi:close"></ha-icon><span>Clear</span>
         </button>
       </div>
-    `}_onMapClick(t){const e=this._roomGeometry;if(!e||!this._mapImg)return void console.debug("[vacuum-card-adv] map click ignored: room_geometry not available on the camera entity yet");const i=Et(t.clientX,t.clientY,this._mapImg,this._mapRotation),r=function(t,e,i){for(const r of e.rooms){const e=i?.[String(r.id)];if(e&&e.length>=3&&Ft(t,e))return r.id}for(const r of e.rooms)if(!i?.[String(r.id)]&&It(t,r.bbox))return r.id;if(0===e.rooms.length)return null;let r=e.rooms[0],s=Dt(t,r.cx,r.cy);for(const i of e.rooms.slice(1)){const e=Dt(t,i.cx,i.cy);e<s&&(r=i,s=e)}return s<=(.15*Math.max(e.image_width,e.image_height))**2?r.id:null}(i,e,Rt(this._config.room_polygons,e));if(null===r)return void console.debug("[vacuum-card-adv] map click did not land inside any known room",i);const s=new Set(this._selectedRoomIds);s.has(r)?s.delete(r):s.add(r),this._selectedRoomIds=s}async _cleanSelectedRooms(){const t=this._roomGeometry;if(!t||0===this._selectedRoomIds.size)return;const e=[...this._selectedRoomIds].map(e=>t.rooms.find(t=>t.id===e)?.name).filter(t=>!!t);if(0!==e.length){this._busy=!0;try{await this.hass.callService("tapo_rv30","clean_rooms",{entity_id:this._config.vacuum,rooms:e}),this._selectedRoomIds=new Set}catch(t){this._notifyServiceError("clean selected rooms",t)}finally{this._busy=!1}}}_renderDockActions(){return 0===this._discovered.dockActions.length?G:B`
+    `}_onMapClick(t,e){if("goto"===this._mapMode){if(!e||!this._mapImg)return;const i=Et(t.clientX,t.clientY,this._mapImg,this._mapRotation),[,s]=e.grid_size,r=e.resolution_mm||50,[o,n]=e.real_origin_mm,a=Math.round(o+(i.x-e.scale_px_per_cell/2)/e.scale_px_per_cell*r),c=Math.round(n+(s-1-(i.y-e.scale_px_per_cell/2)/e.scale_px_per_cell)*r);return this.hass.callService("tapo_rv30","go_to",{entity_id:this._config.vacuum,x:a,y:c}).catch(t=>this._notifyServiceError("go to point",t)),void(this._mapMode="rooms")}if(this._showLastCleanMap)return;const i=this._roomGeometry;if(!i||!this._mapImg)return void console.debug("[vacuum-card-adv] map click ignored: room_geometry not available on the camera entity yet");const s=Et(t.clientX,t.clientY,this._mapImg,this._mapRotation),r=function(t,e,i){for(const s of e.rooms){const e=i?.[String(s.id)];if(e&&e.length>=3&&It(t,e))return s.id}for(const s of e.rooms)if(!i?.[String(s.id)]&&Dt(t,s.bbox))return s.id;if(0===e.rooms.length)return null;let s=e.rooms[0],r=Ft(t,s.cx,s.cy);for(const i of e.rooms.slice(1)){const e=Ft(t,i.cx,i.cy);e<r&&(s=i,r=e)}return r<=(.15*Math.max(e.image_width,e.image_height))**2?s.id:null}(s,i,Pt(this._config.room_polygons,i));if(null===r)return void console.debug("[vacuum-card-adv] map click did not land inside any known room",s);const o=new Set(this._selectedRoomIds);o.has(r)?o.delete(r):o.add(r),this._selectedRoomIds=o}async _cleanSelectedRooms(){const t=this._roomGeometry;if(!t||0===this._selectedRoomIds.size)return;const e=[...this._selectedRoomIds].map(e=>t.rooms.find(t=>t.id===e)?.name).filter(t=>!!t);if(0!==e.length){this._busy=!0;try{await this.hass.callService("tapo_rv30","clean_rooms",{entity_id:this._config.vacuum,rooms:e}),this._selectedRoomIds=new Set}catch(t){this._notifyServiceError("clean selected rooms",t)}finally{this._busy=!1}}}_renderDockActions(){return 0===this._discovered.dockActions.length?q:B`
       <div class="section dock-actions">
         ${this._discovered.dockActions.map(t=>B`
             <button class="pill" @click=${()=>this._pressButton(t.entityId)}>
@@ -738,12 +811,12 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
             </button>
           `)}
       </div>
-    `}_renderSelects(){const t=this.hass.states[this._config.vacuum],e=this._config.show_fan_speed??!0,i=this._config.show_water_level??!0,r=t.attributes.fan_speed_list??[],s=t.attributes.fan_speed,o=this._config.water_level_entity??this._discovered.waterLevel,n=o?this.hass.states[o]:void 0;return e&&r.length>0||i&&n?B`
+    `}_renderSelects(){const t=this.hass.states[this._config.vacuum],e=this._config.show_fan_speed??!0,i=this._config.show_water_level??!0,s=t.attributes.fan_speed_list??[],r=t.attributes.fan_speed,o=this._config.water_level_entity??this._discovered.waterLevel,n=o?this.hass.states[o]:void 0;return e&&s.length>0||i&&n?B`
       <div class="section selects">
-        ${e&&r.length>0?Vt(this.hass,"Fan speed",s??"",r.map(t=>({value:t,label:t})),t=>{t!==(s??"")&&this._setFanSpeed(t)}):G}
-        ${i&&n?Vt(this.hass,"Water level",n.state,(n.attributes.options??[]).map(t=>({value:t,label:t})),t=>{t!==n.state&&this._selectOption(o,t)}):G}
+        ${e&&s.length>0?jt(this.hass,"Fan speed",r??"",s.map(t=>({value:t,label:t})),t=>{t!==(r??"")&&this._setFanSpeed(t)}):q}
+        ${i&&n?jt(this.hass,"Water level",n.state,(n.attributes.options??[]).map(t=>({value:t,label:t})),t=>{t!==n.state&&this._selectOption(o,t)}):q}
       </div>
-    `:G}_renderRow(t){const e=void 0!==t.percent&&!Number.isNaN(t.percent);return B`
+    `:q}_renderRow(t){const e=void 0!==t.percent&&!Number.isNaN(t.percent);return B`
       <div
         class="info-row ${t.overdue?"overdue":""} ${t.entityId?"clickable":""}"
         @click=${t.entityId?()=>this._fireMoreInfo(t.entityId):void 0}
@@ -753,27 +826,27 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
         ${e?B`<span
               class="info-bar"
               style="--pct:${Math.max(0,Math.min(100,t.percent))}%; --color:${t.gaugeColor??"var(--primary-color)"}"
-            ></span>`:G}
+            ></span>`:q}
         <span class="info-value">${t.value}</span>
       </div>
-    `}_renderBattery(){const t=this._config.battery_entity??this._discovered.battery;if(!t)return G;const e=this.hass.states[t];if(!e)return G;const i=Number(e.state);return B`
+    `}_renderBattery(){const t=this._config.battery_entity??this._discovered.battery;if(!t)return q;const e=this.hass.states[t];if(!e)return q;const i=Number(e.state);return B`
       <div class="section sensors">
         ${this._renderRow({icon:this._batteryIcon(i),title:this._shortTitle(e.attributes.friendly_name??"Battery"),value:`${e.state}%`,percent:i,gaugeColor:this._batteryColor(i),entityId:t})}
       </div>
-    `}_batteryIcon(t){if(Number.isNaN(t))return"mdi:battery-unknown";const e=10*Math.round(t/10);return e>=100?"mdi:battery":e<=0?"mdi:battery-outline":`mdi:battery-${e}`}_batteryColor(t){return Number.isNaN(t)?"var(--disabled-text-color)":t<=20?"var(--error-color)":t<=50?"var(--warning-color)":"var(--success-color)"}_renderMopStatus(){const t=this._config.mop_attached_entity??this._discovered.mopAttached;if(!t)return G;const e=this.hass.states[t];if(!e)return G;const i="unavailable"===e.state||"unknown"===e.state;return B`
+    `}_batteryIcon(t){if(Number.isNaN(t))return"mdi:battery-unknown";const e=10*Math.round(t/10);return e>=100?"mdi:battery":e<=0?"mdi:battery-outline":`mdi:battery-${e}`}_batteryColor(t){return Number.isNaN(t)?"var(--disabled-text-color)":t<=20?"var(--error-color)":t<=50?"var(--warning-color)":"var(--success-color)"}_renderMopStatus(){const t=this._config.mop_attached_entity??this._discovered.mopAttached;if(!t)return q;const e=this.hass.states[t];if(!e)return q;const i="unavailable"===e.state||"unknown"===e.state;return B`
       <div class="section sensors">
         ${this._renderRow({icon:e.attributes.icon??(i?"mdi:help-circle-outline":"on"===e.state?"mdi:water":"mdi:water-off"),title:this._shortTitle(e.attributes.friendly_name??"Mop Attached"),value:i?e.state.charAt(0).toUpperCase()+e.state.slice(1):"on"===e.state?"Attached":"Not attached",entityId:t})}
       </div>
-    `}_renderSensors(){const t=this._config.sensors??this._discovered.sensors;return t&&0!==t.length?B`<div class="section sensors">${t.map(t=>this._renderSensorRow(t))}</div>`:G}_renderSensorRow(t){const e=this.hass.states[t];if(!e)return G;const i=this._shortTitle(e.attributes.friendly_name??e.entity_id);if("error"===i.toLowerCase()&&"ok"===e.state.toLowerCase())return G;const r=e.attributes.unit_of_measurement??"",s=e.attributes.icon??"mdi:information-outline",o="%"===r?Number(e.state):void 0;return this._renderRow({icon:s,title:i,value:`${e.state}${r}`,percent:void 0===o||Number.isNaN(o)?void 0:o,overdue:!!e.attributes.overdue,entityId:t})}_renderMaintenance(){const t=this._config.maintenance_sensors??this._discovered.maintenanceSensors;return t&&0!==t.length?B`
+    `}_renderSensors(){const t=this._config.sensors??this._discovered.sensors;return t&&0!==t.length?B`<div class="section sensors">${t.map(t=>this._renderSensorRow(t))}</div>`:q}_renderSensorRow(t){const e=this.hass.states[t];if(!e)return q;const i=this._shortTitle(e.attributes.friendly_name??e.entity_id);if("error"===i.toLowerCase()&&"ok"===e.state.toLowerCase())return q;const s=e.attributes.unit_of_measurement??"",r=e.attributes.icon??"mdi:information-outline",o="%"===s?Number(e.state):void 0;return this._renderRow({icon:r,title:i,value:`${e.state}${s}`,percent:void 0===o||Number.isNaN(o)?void 0:o,overdue:!!e.attributes.overdue,entityId:t})}_renderMaintenance(){const t=this._config.maintenance_sensors??this._discovered.maintenanceSensors;return t&&0!==t.length?B`
       <div class="section">
         <button class="maintenance-toggle" @click=${()=>this._maintenanceOpen=!this._maintenanceOpen}>
           <ha-icon icon="mdi:wrench"></ha-icon>
           <span>Maintenance</span>
           <ha-icon icon=${this._maintenanceOpen?"mdi:chevron-up":"mdi:chevron-down"}></ha-icon>
         </button>
-        ${this._maintenanceOpen?B`<div class="sensors">${t.map(t=>this._renderSensorRow(t))}</div>`:G}
+        ${this._maintenanceOpen?B`<div class="sensors">${t.map(t=>this._renderSensorRow(t))}</div>`:q}
       </div>
-    `:G}_callVacuumService(t){this.hass.callService("vacuum",t,{entity_id:this._config.vacuum}).catch(e=>this._notifyServiceError(t,e))}_setFanSpeed(t){t&&this.hass.callService("vacuum","set_fan_speed",{entity_id:this._config.vacuum,fan_speed:t}).catch(t=>this._notifyServiceError("set fan speed",t))}_selectOption(t,e){e&&this.hass.callService("select","select_option",{entity_id:t,option:e}).catch(t=>this._notifyServiceError("set option",t))}_pressButton(t){this.hass.callService("button","press",{entity_id:t}).catch(t=>this._notifyServiceError("press button",t))}_fireMoreInfo(t){this.dispatchEvent(new CustomEvent("hass-more-info",{detail:{entityId:t},bubbles:!0,composed:!0}))}_notifyServiceError(t,e){const i=e instanceof Error?e.message:String(e);this.dispatchEvent(new CustomEvent("hass-notification",{detail:{message:`Failed to ${t}: ${i}`},bubbles:!0,composed:!0}))}};Bt.styles=n`
+    `:q}_callVacuumService(t){this.hass.callService("vacuum",t,{entity_id:this._config.vacuum}).catch(e=>this._notifyServiceError(t,e))}_setFanSpeed(t){t&&this.hass.callService("vacuum","set_fan_speed",{entity_id:this._config.vacuum,fan_speed:t}).catch(t=>this._notifyServiceError("set fan speed",t))}_selectOption(t,e){e&&this.hass.callService("select","select_option",{entity_id:t,option:e}).catch(t=>this._notifyServiceError("set option",t))}_pressButton(t){this.hass.callService("button","press",{entity_id:t}).catch(t=>this._notifyServiceError("press button",t))}_fireMoreInfo(t){this.dispatchEvent(new CustomEvent("hass-more-info",{detail:{entityId:t},bubbles:!0,composed:!0}))}_notifyServiceError(t,e){const i=e instanceof Error?e.message:String(e);this.dispatchEvent(new CustomEvent("hass-notification",{detail:{message:`Failed to ${t}: ${i}`},bubbles:!0,composed:!0}))}};Bt.styles=n`
     :host {
       display: block;
       --vc-accent: var(--primary-color);
@@ -876,6 +949,24 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
       overflow: hidden;
       border-radius: 8px;
     }
+    .map-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+    .remote-drive { display: flex; flex-wrap: wrap; gap: 6px; }
+    .section-title { width: 100%; font-size: 0.82em; color: var(--secondary-text-color); }
+    .drive-pad { display: grid; grid-template: repeat(3, 38px) / repeat(3, 1fr); gap: 4px; width: 100%; }
+    .drive-pad .pill { min-width: 0; padding: 4px; }
+    .drive-up { grid-area: 1 / 2; }
+    .drive-left { grid-area: 2 / 1; }
+    .drive-stop { grid-area: 2 / 2; }
+    .drive-right { grid-area: 2 / 3; }
+    .drive-down { grid-area: 3 / 2; }
+    .schedule-section { display: flex; flex-direction: column; gap: 6px; }
+    .schedule-row { display: flex; align-items: center; gap: 4px; }
+    .schedule-info { display: flex; flex: 1; flex-direction: column; min-width: 0; font-size: 0.82em; }
+    .schedule-info span { color: var(--secondary-text-color); overflow-wrap: anywhere; }
+    .schedule-warning { color: var(--error-color, #db4437) !important; }
+    .schedule-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .schedule-add input { color: var(--primary-text-color); background: var(--card-background-color); border: 1px solid var(--divider-color); border-radius: 6px; padding: 6px; font: inherit; }
+    .schedule-days { display: flex; flex-wrap: wrap; gap: 3px; }
     .map-image {
       display: block;
       width: 100%;
@@ -905,6 +996,13 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
     }
     .room-shape.selected {
       filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.45));
+    }
+    .detected-furniture {
+      fill: rgba(255, 255, 255, 0.12);
+      stroke: rgba(255, 255, 255, 0.9);
+      stroke-width: 2;
+      stroke-dasharray: 5 3;
+      pointer-events: none;
     }
     .badge-circle {
       fill: var(--vc-accent);
@@ -1076,4 +1174,4 @@ function _t(t,e){return(e,i,r)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
     .maintenance-toggle ha-icon:last-child {
       margin-left: auto;
     }
-  `,t([mt({attribute:!1})],Bt.prototype,"hass",void 0),t([ft()],Bt.prototype,"_config",void 0),t([ft()],Bt.prototype,"_discovered",void 0),t([ft()],Bt.prototype,"_selectedRoomIds",void 0),t([ft()],Bt.prototype,"_selectedDreameSegmentIds",void 0),t([ft()],Bt.prototype,"_maintenanceOpen",void 0),t([ft()],Bt.prototype,"_busy",void 0),t([ft()],Bt.prototype,"_trace",void 0),t([_t("img.map-image")],Bt.prototype,"_mapImg",void 0),Bt=t([dt("vacuum-card-adv")],Bt);export{Bt as VacuumCardAdv};
+  `,t([mt({attribute:!1})],Bt.prototype,"hass",void 0),t([_t()],Bt.prototype,"_config",void 0),t([_t()],Bt.prototype,"_discovered",void 0),t([_t()],Bt.prototype,"_selectedRoomIds",void 0),t([_t()],Bt.prototype,"_selectedDreameSegmentIds",void 0),t([_t()],Bt.prototype,"_maintenanceOpen",void 0),t([_t()],Bt.prototype,"_busy",void 0),t([_t()],Bt.prototype,"_trace",void 0),t([_t()],Bt.prototype,"_remoteDriving",void 0),t([_t()],Bt.prototype,"_showLastCleanMap",void 0),t([_t()],Bt.prototype,"_mapMode",void 0),t([_t()],Bt.prototype,"_newScheduleTime",void 0),t([_t()],Bt.prototype,"_newScheduleDays",void 0),t([_t()],Bt.prototype,"_editingScheduleId",void 0),t([ft("img.map-image")],Bt.prototype,"_mapImg",void 0),Bt=t([dt("vacuum-card-adv")],Bt);export{Bt as VacuumCardAdv};

@@ -9,6 +9,7 @@ import {
   RoomGeometry,
   RoomGeometryRoom,
   RoomPolygon,
+  TapoMapGeometry,
 } from "./types";
 import {
   cacheBustedPicture,
@@ -76,6 +77,12 @@ export class VacuumCardAdv extends LitElement {
   // in-memory-only render state, never persisted into config: it's a live
   // view of the current/last cleaning run, not something to save/restore.
   @state() private _trace: [number, number][] = [];
+  @state() private _remoteDriving = false;
+  @state() private _showLastCleanMap = false;
+  @state() private _mapMode: "rooms" | "goto" = "rooms";
+  @state() private _newScheduleTime = "08:00";
+  @state() private _newScheduleDays = new Set(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
+  @state() private _editingScheduleId?: string | number;
 
   @query("img.map-image") private _mapImg?: HTMLImageElement;
 
@@ -103,6 +110,9 @@ export class VacuumCardAdv extends LitElement {
       type: "custom:vacuum-card-adv",
       vacuum: firstVacuum ?? "",
       show_map: true,
+      show_remote_drive: true,
+      show_last_clean_map: true,
+      show_schedules: true,
       show_controls: true,
       show_dock_actions: true,
       show_fan_speed: true,
@@ -124,6 +134,9 @@ export class VacuumCardAdv extends LitElement {
     }
     this._config = {
       show_map: true,
+      show_remote_drive: true,
+      show_last_clean_map: true,
+      show_schedules: true,
       show_controls: true,
       show_dock_actions: true,
       show_fan_speed: true,
@@ -340,6 +353,8 @@ export class VacuumCardAdv extends LitElement {
           </div>
         </div>
         ${(this._config.show_controls ?? true) ? this._renderControls(vacuum) : nothing}
+        ${this._renderRemoteDrive(vacuum)}
+        ${this._brand === "tapo" && this._config.show_schedules !== false ? this._renderSchedules() : nothing}
         ${mapPosition === "top" && (this._config.show_map ?? true) ? this._renderMap() : nothing}
         ${(this._config.show_dock_actions ?? true) ? this._renderDockActions() : nothing}
         ${this._renderSelects()}
@@ -397,6 +412,119 @@ export class VacuumCardAdv extends LitElement {
     `;
   }
 
+  private _renderRemoteDrive(vacuum: HassEntity): TemplateResult | typeof nothing {
+    if (this._brand !== "tapo" || this._config.show_remote_drive === false ||
+        vacuum.attributes["remote_control"] !== true) return nothing;
+    const send = async (command: string) => {
+      try {
+        await this.hass.callService("tapo_rv30", "remote_drive", {
+          entity_id: this._config.vacuum,
+          command,
+        });
+        this._remoteDriving = command === "enter" ? true : command === "exit" ? false : this._remoteDriving;
+      } catch (err) {
+        this._notifyServiceError("remote drive", err);
+      }
+    };
+    return html`
+      <div class="section remote-drive">
+        <div class="section-title">Remote drive</div>
+        ${!this._remoteDriving
+          ? html`<button class="pill" @click=${() => send("enter")}>
+              <ha-icon icon="mdi:steering"></ha-icon><span>Take control</span>
+            </button>`
+          : html`<div class="drive-pad">
+              <button class="pill drive-up" aria-label="Forward" @click=${() => send("forward")}><ha-icon icon="mdi:arrow-up"></ha-icon></button>
+              <button class="pill drive-left" aria-label="Turn left" @click=${() => send("left")}><ha-icon icon="mdi:arrow-left"></ha-icon></button>
+              <button class="pill drive-stop" aria-label="Stop" @click=${() => send("stop")}><ha-icon icon="mdi:stop"></ha-icon></button>
+              <button class="pill drive-right" aria-label="Turn right" @click=${() => send("right")}><ha-icon icon="mdi:arrow-right"></ha-icon></button>
+              <button class="pill drive-down" aria-label="Backward" @click=${() => send("backward")}><ha-icon icon="mdi:arrow-down"></ha-icon></button>
+            </div>
+            <button class="pill" @click=${() => send("exit")}><ha-icon icon="mdi:close"></ha-icon><span>Release control</span></button>`}
+      </div>
+    `;
+  }
+
+  private _renderSchedules(): TemplateResult | typeof nothing {
+    const entityId = this._discovered.schedules;
+    const state = entityId ? this.hass.states[entityId] : undefined;
+    if (!state) return nothing;
+    const schedules = (state.attributes["schedules"] ?? []) as Array<{
+      id: string | number; time: string; days: string[]; enabled: boolean;
+      blocked_by_dnd?: boolean; rooms?: string[];
+    }>;
+    const dnd = state.attributes["dnd"] as { enabled?: boolean; start?: string; end?: string } | undefined;
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    return html`
+      <div class="section schedule-section">
+        <div class="section-title">Robot schedules</div>
+        ${dnd?.enabled ? html`<div class="map-hint">Do Not Disturb: ${dnd.start}–${dnd.end}. Schedules during this window are blocked.</div>` : nothing}
+        ${schedules.map((schedule) => html`
+          <div class="schedule-row">
+            <div class="schedule-info">
+              <strong>${schedule.time}</strong>
+              <span>${(schedule.days ?? []).join(", ") || "No repeat days"}${schedule.rooms?.length ? ` · ${schedule.rooms.join(", ")}` : ""}</span>
+              ${schedule.blocked_by_dnd ? html`<span class="schedule-warning">Blocked by Do Not Disturb</span>` : nothing}
+            </div>
+            <button class="pill small" title="Edit time and repeat days" @click=${() => {
+              this._editingScheduleId = schedule.id;
+              this._newScheduleTime = schedule.time;
+              this._newScheduleDays = new Set(schedule.days ?? []);
+            }}><ha-icon icon="mdi:pencil"></ha-icon></button>
+            <button class="pill small" title="Run now" @click=${() => this._scheduleAction("run_schedule", { schedule_id: schedule.id })}><ha-icon icon="mdi:play"></ha-icon></button>
+            <button class="pill small" title=${schedule.enabled ? "Disable" : "Enable"} @click=${() => this._scheduleAction("set_schedule", { schedule_id: schedule.id, enabled: !schedule.enabled })}><ha-icon icon=${schedule.enabled ? "mdi:toggle-switch" : "mdi:toggle-switch-off-outline"}></ha-icon></button>
+            <button class="pill small" title="Remove schedule" @click=${() => this._scheduleAction("remove_schedule", { schedule_id: schedule.id })}><ha-icon icon="mdi:delete-outline"></ha-icon></button>
+          </div>
+        `)}
+        <div class="schedule-add">
+          <input aria-label="Schedule time" type="time" .value=${this._newScheduleTime}
+            @change=${(e: Event) => { this._newScheduleTime = (e.target as HTMLInputElement).value; }} />
+          <div class="schedule-days">
+            ${days.map((day) => html`<button class="chip ${this._newScheduleDays.has(day) ? "selected" : ""}"
+              aria-pressed=${this._newScheduleDays.has(day) ? "true" : "false"}
+              @click=${() => { const selected = new Set(this._newScheduleDays); selected.has(day) ? selected.delete(day) : selected.add(day); this._newScheduleDays = selected; }}>${day}</button>`)}
+          </div>
+          <button class="pill accent small" ?disabled=${this._newScheduleDays.size === 0} @click=${this._saveSchedule}>
+            <ha-icon icon=${this._editingScheduleId === undefined ? "mdi:calendar-plus" : "mdi:content-save"}></ha-icon>
+            <span>${this._editingScheduleId === undefined ? "Add schedule" : "Save schedule"}</span>
+          </button>
+          ${this._editingScheduleId !== undefined ? html`<button class="pill small" @click=${() => { this._editingScheduleId = undefined; }}><span>Cancel edit</span></button>` : nothing}
+        </div>
+      </div>
+    `;
+  }
+
+  private async _scheduleAction(service: string, data: Record<string, unknown>): Promise<void> {
+    try {
+      await this.hass.callService("tapo_rv30", service, { entity_id: this._config.vacuum, ...data });
+    } catch (err) {
+      this._notifyServiceError("schedule", err);
+    }
+  }
+
+  private async _saveSchedule(): Promise<void> {
+    try {
+      if (this._editingScheduleId !== undefined) {
+        await this.hass.callService("tapo_rv30", "set_schedule", {
+          entity_id: this._config.vacuum,
+          schedule_id: this._editingScheduleId,
+          time: this._newScheduleTime,
+          days: [...this._newScheduleDays],
+        });
+        this._editingScheduleId = undefined;
+      } else {
+        await this.hass.callService("tapo_rv30", "add_schedule", {
+          entity_id: this._config.vacuum,
+          time: this._newScheduleTime,
+          days: [...this._newScheduleDays],
+          enabled: true,
+        });
+      }
+    } catch (err) {
+      this._notifyServiceError("add schedule", err);
+    }
+  }
+
   // -- Map ---------------------------------------------------------------
   /** Dreame Vacuum has no pixel-space room geometry to click on (see
    *  types.ts's DreameRoom) — only a flat room list, read straight off the
@@ -410,7 +538,11 @@ export class VacuumCardAdv extends LitElement {
 
   private _renderMap(): TemplateResult | typeof nothing {
     const cameraId = this._config.camera ?? this._discovered.camera;
-    const picture = cameraId ? cacheBustedPicture(this.hass, cameraId) : undefined;
+    const lastCleanId = this._config.last_clean_image ?? this._discovered.lastClean;
+    const canShowLastClean = this._brand === "tapo" && this._config.show_last_clean_map !== false && !!lastCleanId;
+    const picture = this._showLastCleanMap && canShowLastClean
+      ? cacheBustedPicture(this.hass, lastCleanId!)
+      : cameraId ? cacheBustedPicture(this.hass, cameraId) : undefined;
     const dreameRooms = this._dreameRooms;
     // A Dreame device with no camera picture yet still gets its room-chip
     // list (it doesn't depend on the map image at all) — only bail out
@@ -418,14 +550,30 @@ export class VacuumCardAdv extends LitElement {
     if (!picture && dreameRooms.length === 0) return nothing;
 
     const rotation = this._mapRotation;
-    const geo = this._roomGeometry;
+    const geo = this._showLastCleanMap ? undefined : this._roomGeometry;
+    const vacuum = this.hass.states[this._config.vacuum];
+    const mapGeometry = cameraId
+      ? this.hass.states[cameraId]?.attributes?.["map_geometry"] as TapoMapGeometry | undefined
+      : undefined;
     const rotStyle = rotation % 360 !== 0 ? `transform: rotate(${rotation}deg);` : "";
 
     return html`
       <div class="section map-section">
+        ${canShowLastClean || vacuum?.attributes["goto_point"] === true
+          ? html`<div class="map-tools">
+              ${canShowLastClean ? html`<button class="pill small" @click=${() => { this._showLastCleanMap = !this._showLastCleanMap; }}>
+                <ha-icon icon=${this._showLastCleanMap ? "mdi:map-clock" : "mdi:history"}></ha-icon>
+                <span>${this._showLastCleanMap ? "Live map" : "Last clean"}</span>
+              </button>` : nothing}
+              ${!this._showLastCleanMap && vacuum?.attributes["goto_point"] === true && mapGeometry
+                ? html`<button class="pill small" aria-pressed=${this._mapMode === "goto" ? "true" : "false"}
+                    @click=${() => { this._mapMode = this._mapMode === "goto" ? "rooms" : "goto"; }}>
+                    <ha-icon icon="mdi:map-marker"></ha-icon><span>${this._mapMode === "goto" ? "Cancel go to" : "Go to point"}</span>
+                  </button>` : nothing}
+            </div>` : nothing}
         ${picture
           ? html`<div class="map-wrap">
-              <img class="map-image" src=${picture} style=${rotStyle} @click=${this._onMapClick} />
+              <img class="map-image" src=${picture} style=${rotStyle} @click=${(e: MouseEvent) => this._onMapClick(e, mapGeometry)} />
               ${geo ? this._renderMapOverlay(geo, rotStyle) : nothing}
             </div>`
           : nothing}
@@ -440,7 +588,8 @@ export class VacuumCardAdv extends LitElement {
                     restart Home Assistant, then hard-refresh this browser tab.`}
             </div>`
           : nothing}
-        ${dreameRooms.length > 0 ? this._renderDreameRoomChips(dreameRooms) : nothing}
+        ${this._showLastCleanMap ? html`<div class="map-hint">Map from the most recent completed cleaning run.</div>` : nothing}
+        ${dreameRooms.length > 0 && !this._showLastCleanMap ? this._renderDreameRoomChips(dreameRooms) : nothing}
         ${this._selectedRoomIds.size > 0 ? this._renderSelectedRoomsBar(geo) : nothing}
         ${this._selectedDreameSegmentIds.size > 0 ? this._renderSelectedDreameRoomsBar(dreameRooms) : nothing}
       </div>
@@ -526,8 +675,23 @@ export class VacuumCardAdv extends LitElement {
           .filter((room) => this._selectedRoomIds.has(room.id))
           .map((room) => this._renderRoomOrderBadge(room))}
         ${this._config.show_trace ? this._renderTrace() : nothing}
+        ${(this._config.show_furniture ?? true) ? this._renderDetectedFurniture(geo) : nothing}
         ${(this._config.show_furniture ?? true) ? this._renderFurniture(geo) : nothing}
       </svg>
+    `;
+  }
+
+  private _renderDetectedFurniture(geo: RoomGeometry): SVGTemplateResult | typeof nothing {
+    if (!geo.furniture?.length) return nothing;
+    return svg`
+      <g class="detected-furniture-layer">
+        ${geo.furniture.map((item) => {
+          const points = item.points.map(([x, y]) => `${x},${y}`).join(" ");
+          return svg`<polygon points=${points} class="detected-furniture">
+            <title>Furniture outline from the robot's map</title>
+          </polygon>`;
+        })}
+      </g>
     `;
   }
 
@@ -562,6 +726,9 @@ export class VacuumCardAdv extends LitElement {
     const stroke = selected ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},0.4)`;
     const strokeWidth = selected ? 4 : 1.5;
     const cls = selected ? "room-shape selected" : "room-shape";
+    const freshness = room.last_cleaned
+      ? `Last cleaned ${new Date(room.last_cleaned * 1000).toLocaleString()}${room.coverage == null ? "" : ` · ${Math.round(room.coverage)}% covered`}`
+      : "No recorded clean for this room";
     if (polygon && polygon.length >= 3) {
       const points = polygon.map(([x, y]) => `${x},${y}`).join(" ");
       return svg`<polygon
@@ -570,7 +737,7 @@ export class VacuumCardAdv extends LitElement {
         stroke=${stroke}
         stroke-width=${strokeWidth}
         class=${cls}
-      ></polygon>`;
+      ><title>${room.name}: ${freshness}</title></polygon>`;
     }
     const [x0, y0, x1, y1] = room.bbox;
     return svg`<rect
@@ -582,7 +749,7 @@ export class VacuumCardAdv extends LitElement {
       stroke=${stroke}
       stroke-width=${strokeWidth}
       class=${cls}
-    ></rect>`;
+    ><title>${room.name}: ${freshness}</title></rect>`;
   }
 
   /** Numbered badge at a selected room's centroid showing the order it was
@@ -646,7 +813,21 @@ export class VacuumCardAdv extends LitElement {
     `;
   }
 
-  private _onMapClick(evt: MouseEvent): void {
+  private _onMapClick(evt: MouseEvent, mapGeometry?: TapoMapGeometry): void {
+    if (this._mapMode === "goto") {
+      if (!mapGeometry || !this._mapImg) return;
+      const point = displayToNatural(evt.clientX, evt.clientY, this._mapImg, this._mapRotation);
+      const [, gridH] = mapGeometry.grid_size;
+      const resolution = mapGeometry.resolution_mm || 50;
+      const [originX, originY] = mapGeometry.real_origin_mm;
+      const x = Math.round(originX + ((point.x - mapGeometry.scale_px_per_cell / 2) / mapGeometry.scale_px_per_cell) * resolution);
+      const y = Math.round(originY + (gridH - 1 - (point.y - mapGeometry.scale_px_per_cell / 2) / mapGeometry.scale_px_per_cell) * resolution);
+      void this.hass.callService("tapo_rv30", "go_to", { entity_id: this._config.vacuum, x, y })
+        .catch((err) => this._notifyServiceError("go to point", err));
+      this._mapMode = "rooms";
+      return;
+    }
+    if (this._showLastCleanMap) return;
     const geo = this._roomGeometry;
     if (!geo || !this._mapImg) {
       // eslint-disable-next-line no-console
@@ -1038,6 +1219,24 @@ export class VacuumCardAdv extends LitElement {
       overflow: hidden;
       border-radius: 8px;
     }
+    .map-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+    .remote-drive { display: flex; flex-wrap: wrap; gap: 6px; }
+    .section-title { width: 100%; font-size: 0.82em; color: var(--secondary-text-color); }
+    .drive-pad { display: grid; grid-template: repeat(3, 38px) / repeat(3, 1fr); gap: 4px; width: 100%; }
+    .drive-pad .pill { min-width: 0; padding: 4px; }
+    .drive-up { grid-area: 1 / 2; }
+    .drive-left { grid-area: 2 / 1; }
+    .drive-stop { grid-area: 2 / 2; }
+    .drive-right { grid-area: 2 / 3; }
+    .drive-down { grid-area: 3 / 2; }
+    .schedule-section { display: flex; flex-direction: column; gap: 6px; }
+    .schedule-row { display: flex; align-items: center; gap: 4px; }
+    .schedule-info { display: flex; flex: 1; flex-direction: column; min-width: 0; font-size: 0.82em; }
+    .schedule-info span { color: var(--secondary-text-color); overflow-wrap: anywhere; }
+    .schedule-warning { color: var(--error-color, #db4437) !important; }
+    .schedule-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .schedule-add input { color: var(--primary-text-color); background: var(--card-background-color); border: 1px solid var(--divider-color); border-radius: 6px; padding: 6px; font: inherit; }
+    .schedule-days { display: flex; flex-wrap: wrap; gap: 3px; }
     .map-image {
       display: block;
       width: 100%;
@@ -1067,6 +1266,13 @@ export class VacuumCardAdv extends LitElement {
     }
     .room-shape.selected {
       filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.45));
+    }
+    .detected-furniture {
+      fill: rgba(255, 255, 255, 0.12);
+      stroke: rgba(255, 255, 255, 0.9);
+      stroke-width: 2;
+      stroke-dasharray: 5 3;
+      pointer-events: none;
     }
     .badge-circle {
       fill: var(--vc-accent);

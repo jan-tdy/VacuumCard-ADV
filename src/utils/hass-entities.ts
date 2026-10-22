@@ -98,6 +98,8 @@ function byDomain(ids: string[], domain: string): string[] {
 
 export interface DiscoveredEntities {
   camera?: string;
+  lastClean?: string;
+  schedules?: string;
   waterLevel?: string;
   cleanPasses?: string;
   battery?: string;
@@ -129,6 +131,12 @@ export function discoverEntities(
   if (deviceIds.length === 0) return result;
 
   result.camera = byDomain(deviceIds, "camera")[0];
+  result.lastClean = byDomain(deviceIds, "image").find((id) =>
+    friendlyName(hass, id).toLowerCase().includes("last clean") || id.toLowerCase().includes("last_clean")
+  );
+  result.schedules = byDomain(deviceIds, "sensor").find((id) =>
+    friendlyName(hass, id).toLowerCase().includes("schedules")
+  );
 
   for (const id of byDomain(deviceIds, "select")) {
     const name = friendlyName(hass, id);
