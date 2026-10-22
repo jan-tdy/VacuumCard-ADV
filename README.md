@@ -30,7 +30,8 @@ code editor" toggle.
 - **Furniture on the map** — place beds, sofas, tables, chairs, desks,
   toilets, and more directly on the map from the card's own editor: drag
   to move, a top handle to rotate, a corner handle to resize (see
-  [Furniture placement](#furniture-placement) below)
+  [Furniture placement](#furniture-placement) below); device-detected
+  furniture outlines from TapoVac-ADV are also shown on the live map
 - A **room calibration tool** in the visual editor: click points on the
   map to trace a room's actual outline when the automatic rectangle
   doesn't fit an irregular/L-shaped room
@@ -40,6 +41,17 @@ code editor" toggle.
   floor's map
 - **Experimental: a live trace** of the vacuum's path while it's cleaning
   (`show_trace`, off by default — see [Configuration](#configuration))
+- TapoVac-ADV v2.6 map controls: tap **Go to point**, then tap a map location
+  to send the robot there; the card converts the image position into the
+  millimetre coordinate frame expected by tapo_rv30.go_to
+- **Remote drive** controls for robots that report remote-control support:
+  enter control mode, send directional steps, stop, and release control
+- Robot schedule controls: view schedules, add one, change its time/repeat
+  days, enable/disable it, run it now, or remove it; the integration warns
+  when a schedule falls inside the robot's Do Not Disturb window
+- Switch between the live map and the image entity for the **most recent
+  completed clean**; per-room map overlays expose last-clean time and
+  coverage in their hover tooltips
 - Start / pause / stop / return-to-dock controls
 - Dock action buttons (Empty Dust Bin / Wash Mop / Dry Mop / Remove
   Hair) — shown only for the actions your specific dock actually has
@@ -102,6 +114,9 @@ mop_attached_entity: binary_sensor.jedalen_rv30_max_mop_attached
 map_rotation: 180
 map_position: top        # "top" (default) or "bottom"
 show_map: true
+show_remote_drive: true
+show_last_clean_map: true
+show_schedules: true
 show_room_names: true
 show_controls: true
 show_dock_actions: true
@@ -187,6 +202,29 @@ This is intentionally simple, not a precise path: it only samples as often
 as the integration re-renders the map (currently every 60s while cleaning),
 so straight lines between samples can cut corners a real path wouldn't.
 Off by default.
+
+## TapoVac-ADV v2.6 map controls
+
+When the selected robot exposes goto_point and a map camera exposes
+map_geometry, toggle **Go to point** and tap the desired position on the
+live map. The card converts the displayed map pixel back to the vacuum's
+millimetre coordinate frame and calls tapo_rv30.go_to. Remote drive appears
+only when the robot reports remote_control; **Take control** enters the
+robot's drive mode, directional buttons send one-step commands, **Stop**
+halts movement, and **Release control** exits the mode.
+
+If the integration exposes its **Last Clean Map** image entity, **Last clean**
+switches from the live camera image to the most recent completed run. Hover a
+room shape to see when it was last cleaned and the reported coverage. The
+live map image already includes the robot-reported cleaning path; the card's
+optional show_trace remains a separate, coarse trail sampled from position
+updates.
+
+The **Robot schedules** section uses the integration's schedules sensor and
+schedule services. It supports adding and editing the time and repeat days,
+enabling or disabling schedules, running a schedule immediately, and
+removing it. The integration enforces the robot's Do Not Disturb window and
+returns an error if an enabled schedule would be ignored by the robot.
 
 ## Dreame Vacuum support
 

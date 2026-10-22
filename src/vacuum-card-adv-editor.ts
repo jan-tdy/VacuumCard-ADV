@@ -178,6 +178,9 @@ export class VacuumCardAdvEditor extends LitElement {
   private _renderToggles(): TemplateResult {
     const toggles: [keyof VacuumCardConfig, string][] = [
       ["show_map", "Show map"],
+      ["show_remote_drive", "Show Tapo remote drive controls"],
+      ["show_last_clean_map", "Allow switching to the last clean map"],
+      ["show_schedules", "Show Tapo schedule controls"],
       ["show_room_names", "Show room names when selecting"],
       ["show_controls", "Show start/pause/stop/dock controls"],
       ["show_dock_actions", "Show dock action buttons (empty bin / wash / dry / hair)"],
@@ -252,6 +255,13 @@ export class VacuumCardAdvEditor extends LitElement {
           .includeDomains=${["camera"]}
           label="Map camera"
           @value-changed=${(e: CustomEvent) => this._valueChanged("camera", e.detail.value || undefined)}
+        ></ha-entity-picker>
+        <ha-entity-picker
+          .hass=${this.hass}
+          .value=${this._config.last_clean_image ?? ""}
+          .includeDomains=${["image"]}
+          label="Last clean map image (auto-detected otherwise)"
+          @value-changed=${(e: CustomEvent) => this._valueChanged("last_clean_image", e.detail.value || undefined)}
         ></ha-entity-picker>
         <ha-entity-picker
           .hass=${this.hass}

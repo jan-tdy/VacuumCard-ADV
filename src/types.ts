@@ -93,6 +93,7 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   vacuum: string;
   vacuum_brand?: VacuumBrand;
   camera?: string;
+  last_clean_image?: string;
   fan_speed_entity?: string;
   water_level_entity?: string;
   battery_entity?: string;
@@ -101,6 +102,9 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   maintenance_sensors?: string[];
   name?: string;
   show_map?: boolean;
+  show_remote_drive?: boolean;
+  show_last_clean_map?: boolean;
+  show_schedules?: boolean;
   map_rotation?: number; // degrees, 0/90/180/270 (or arbitrary)
   // Where the map sits relative to the rest of the card: "top" (default,
   // right after the controls) or "bottom" (after battery/sensors, before
@@ -152,6 +156,15 @@ export interface RoomGeometryRoom {
   cx: number;
   cy: number;
   bbox: [number, number, number, number]; // x0, y0, x1, y1
+  last_cleaned?: number;
+  coverage?: number;
+}
+
+export interface TapoMapGeometry {
+  grid_size: [number, number];
+  scale_px_per_cell: number;
+  resolution_mm?: number | null;
+  real_origin_mm: [number, number];
 }
 
 // One furniture item the vacuum itself detected on its map (getMapData's
@@ -186,6 +199,7 @@ export interface RoomGeometry {
   // Device-detected furniture outlines — undefined on integration
   // versions older than v2.0.0. See RoomGeometryDetectedFurniture above.
   furniture?: RoomGeometryDetectedFurniture[];
+  map_geometry?: TapoMapGeometry;
 }
 
 // -- Room list, as exposed by the Dreame Vacuum integration's vacuum
