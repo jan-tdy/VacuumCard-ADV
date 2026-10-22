@@ -72,6 +72,7 @@ export class VacuumCardAdv extends LitElement {
   // entity's own "rooms" attribute) and are never both in play at once.
   @state() private _selectedDreameSegmentIds: Set<number> = new Set();
   @state() private _maintenanceOpen = false;
+  @state() private _schedulesOpen = false;
   @state() private _busy = false;
   // Experimental trace trail (see VacuumCardConfig.show_trace) — kept as
   // in-memory-only render state, never persisted into config: it's a live
@@ -271,8 +272,52 @@ export class VacuumCardAdv extends LitElement {
     const cameraId = this._config.camera ?? this._discovered.camera;
     if (!cameraId) return undefined;
     const state = this.hass.states[cameraId];
-    const geo = state?.attributes?.["room_geometry"] as RoomGeometry | undefined;
-    return geo && geo.rooms ? geo : undefined;
+    const raw = state?.attributes?.["room_geometry"] as RoomGeometry | RoomGeometryRoom[] | undefined;
+    if (raw && !Array.isArray(raw) && raw.rooms) return raw;
+    if (!Array.isArray(raw) || raw.length === 0) return undefined;
+
+    // TapoVac-ADV publishes room_geometry as a room list and puts the image
+    // dimensions/map furniture in map_geometry. Normalize that public shape
+    // to the card's geometry model so map taps and overlays use the same
+    // natural-image pixel coordinates as the camera image.
+    const map = state?.attributes?.["map_geometry"] as TapoMapGeometry | undefined;
+    const [image_width, image_height] = map?.image_size ?? [0, 0];
+    if (!image_width || !image_height || !map) return undefined;
+    const rooms = raw.map((entry) => {
+      const item = entry as RoomGeometryRoom & { centre?: [number, number] };
+      const [x0, y0, x1, y1] = item.bbox;
+      return {
+        id: item.id,
+        name: item.name,
+        color: item.color ?? ([74, 144, 226] as [number, number, number]),
+        cx: item.cx ?? item.centre?.[0] ?? (x0 + x1) / 2,
+        cy: item.cy ?? item.centre?.[1] ?? (y0 + y1) / 2,
+        bbox: item.bbox,
+        last_cleaned: (item as RoomGeometryRoom & { last_cleaned?: number }).last_cleaned,
+        coverage: (item as RoomGeometryRoom & { coverage?: number }).coverage,
+      };
+    });
+    const furniture = (map.furniture ?? []).map((item) => {
+      const xs = item.px.map(([x]) => x);
+      const ys = item.px.map(([, y]) => y);
+      return {
+        id: item.id,
+        type: item.type,
+        angle: item.angle,
+        points: item.px,
+        bbox: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] as [number, number, number, number],
+      };
+    });
+    return {
+      image_width,
+      image_height,
+      rooms,
+      charge_point: map.dock_px ?? null,
+      vacuum_point: null,
+      map_id: map.map_id ?? undefined,
+      map_name: map.map_name,
+      furniture,
+    };
   }
 
   /** Every entity on this device gets "<Device Name> <Thing>" as its
@@ -457,39 +502,47 @@ export class VacuumCardAdv extends LitElement {
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     return html`
       <div class="section schedule-section">
-        <div class="section-title">Robot schedules</div>
-        ${dnd?.enabled ? html`<div class="map-hint">Do Not Disturb: ${dnd.start}–${dnd.end}. Schedules during this window are blocked.</div>` : nothing}
-        ${schedules.map((schedule) => html`
-          <div class="schedule-row">
-            <div class="schedule-info">
-              <strong>${schedule.time}</strong>
-              <span>${(schedule.days ?? []).join(", ") || "No repeat days"}${schedule.rooms?.length ? ` · ${schedule.rooms.join(", ")}` : ""}</span>
-              ${schedule.blocked_by_dnd ? html`<span class="schedule-warning">Blocked by Do Not Disturb</span>` : nothing}
+        <button class="maintenance-toggle schedule-toggle" aria-expanded=${this._schedulesOpen ? "true" : "false"}
+          @click=${() => (this._schedulesOpen = !this._schedulesOpen)}>
+          <ha-icon icon="mdi:calendar-clock"></ha-icon>
+          <span>Schedules${schedules.length ? ` · ${schedules.length}` : ""}</span>
+          ${dnd?.enabled ? html`<span class="schedule-dnd">DND</span>` : nothing}
+          <ha-icon icon=${this._schedulesOpen ? "mdi:chevron-up" : "mdi:chevron-down"}></ha-icon>
+        </button>
+        ${this._schedulesOpen ? html`<div class="schedule-content">
+          ${dnd?.enabled ? html`<div class="map-hint">Do Not Disturb: ${dnd.start}–${dnd.end}. Schedules during this window are blocked.</div>` : nothing}
+          ${schedules.map((schedule) => html`
+            <div class="schedule-row">
+              <div class="schedule-info">
+                <strong>${schedule.time}</strong>
+                <span>${(schedule.days ?? []).join(", ") || "No repeat days"}${schedule.rooms?.length ? ` · ${schedule.rooms.join(", ")}` : ""}</span>
+                ${schedule.blocked_by_dnd ? html`<span class="schedule-warning">Blocked by Do Not Disturb</span>` : nothing}
+              </div>
+              <button class="pill small" title="Edit time and repeat days" @click=${() => {
+                this._editingScheduleId = schedule.id;
+                this._newScheduleTime = schedule.time;
+                this._newScheduleDays = new Set(schedule.days ?? []);
+              }}><ha-icon icon="mdi:pencil"></ha-icon></button>
+              <button class="pill small" title="Run now" @click=${() => this._scheduleAction("run_schedule", { schedule_id: schedule.id })}><ha-icon icon="mdi:play"></ha-icon></button>
+              <button class="pill small" title=${schedule.enabled ? "Disable" : "Enable"} @click=${() => this._scheduleAction("set_schedule", { schedule_id: schedule.id, enabled: !schedule.enabled })}><ha-icon icon=${schedule.enabled ? "mdi:toggle-switch" : "mdi:toggle-switch-off-outline"}></ha-icon></button>
+              <button class="pill small" title="Remove schedule" @click=${() => this._scheduleAction("remove_schedule", { schedule_id: schedule.id })}><ha-icon icon="mdi:delete-outline"></ha-icon></button>
             </div>
-            <button class="pill small" title="Edit time and repeat days" @click=${() => {
-              this._editingScheduleId = schedule.id;
-              this._newScheduleTime = schedule.time;
-              this._newScheduleDays = new Set(schedule.days ?? []);
-            }}><ha-icon icon="mdi:pencil"></ha-icon></button>
-            <button class="pill small" title="Run now" @click=${() => this._scheduleAction("run_schedule", { schedule_id: schedule.id })}><ha-icon icon="mdi:play"></ha-icon></button>
-            <button class="pill small" title=${schedule.enabled ? "Disable" : "Enable"} @click=${() => this._scheduleAction("set_schedule", { schedule_id: schedule.id, enabled: !schedule.enabled })}><ha-icon icon=${schedule.enabled ? "mdi:toggle-switch" : "mdi:toggle-switch-off-outline"}></ha-icon></button>
-            <button class="pill small" title="Remove schedule" @click=${() => this._scheduleAction("remove_schedule", { schedule_id: schedule.id })}><ha-icon icon="mdi:delete-outline"></ha-icon></button>
+          `)}
+          <div class="schedule-add">
+            <input aria-label="Schedule time" type="time" .value=${this._newScheduleTime}
+              @change=${(e: Event) => { this._newScheduleTime = (e.target as HTMLInputElement).value; }} />
+            <div class="schedule-days">
+              ${days.map((day) => html`<button class="chip ${this._newScheduleDays.has(day) ? "selected" : ""}"
+                aria-pressed=${this._newScheduleDays.has(day) ? "true" : "false"}
+                @click=${() => { const selected = new Set(this._newScheduleDays); selected.has(day) ? selected.delete(day) : selected.add(day); this._newScheduleDays = selected; }}>${day}</button>`)}
+            </div>
+            <button class="pill accent small" ?disabled=${this._newScheduleDays.size === 0} @click=${this._saveSchedule}>
+              <ha-icon icon=${this._editingScheduleId === undefined ? "mdi:calendar-plus" : "mdi:content-save"}></ha-icon>
+              <span>${this._editingScheduleId === undefined ? "Add schedule" : "Save schedule"}</span>
+            </button>
+            ${this._editingScheduleId !== undefined ? html`<button class="pill small" @click=${() => { this._editingScheduleId = undefined; }}><span>Cancel edit</span></button>` : nothing}
           </div>
-        `)}
-        <div class="schedule-add">
-          <input aria-label="Schedule time" type="time" .value=${this._newScheduleTime}
-            @change=${(e: Event) => { this._newScheduleTime = (e.target as HTMLInputElement).value; }} />
-          <div class="schedule-days">
-            ${days.map((day) => html`<button class="chip ${this._newScheduleDays.has(day) ? "selected" : ""}"
-              aria-pressed=${this._newScheduleDays.has(day) ? "true" : "false"}
-              @click=${() => { const selected = new Set(this._newScheduleDays); selected.has(day) ? selected.delete(day) : selected.add(day); this._newScheduleDays = selected; }}>${day}</button>`)}
-          </div>
-          <button class="pill accent small" ?disabled=${this._newScheduleDays.size === 0} @click=${this._saveSchedule}>
-            <ha-icon icon=${this._editingScheduleId === undefined ? "mdi:calendar-plus" : "mdi:content-save"}></ha-icon>
-            <span>${this._editingScheduleId === undefined ? "Add schedule" : "Save schedule"}</span>
-          </button>
-          ${this._editingScheduleId !== undefined ? html`<button class="pill small" @click=${() => { this._editingScheduleId = undefined; }}><span>Cancel edit</span></button>` : nothing}
-        </div>
+        </div>` : nothing}
       </div>
     `;
   }
@@ -583,7 +636,7 @@ export class VacuumCardAdv extends LitElement {
                 ? html`The Dreame Vacuum integration doesn't expose per-room map coordinates, so
                     rooms can't be clicked on the map directly — pick them from the list below
                     instead.`
-                : html`Room click-to-select needs TapoVac-ADV v1.12+ (the map camera's
+                : html`Room click-to-select needs TapoVac-ADV v2.6.0+ (the map camera's
                     <code>room_geometry</code> attribute) — update the integration via HACS,
                     restart Home Assistant, then hard-refresh this browser tab.`}
             </div>`
@@ -675,23 +728,8 @@ export class VacuumCardAdv extends LitElement {
           .filter((room) => this._selectedRoomIds.has(room.id))
           .map((room) => this._renderRoomOrderBadge(room))}
         ${this._config.show_trace ? this._renderTrace() : nothing}
-        ${(this._config.show_furniture ?? true) ? this._renderDetectedFurniture(geo) : nothing}
         ${(this._config.show_furniture ?? true) ? this._renderFurniture(geo) : nothing}
       </svg>
-    `;
-  }
-
-  private _renderDetectedFurniture(geo: RoomGeometry): SVGTemplateResult | typeof nothing {
-    if (!geo.furniture?.length) return nothing;
-    return svg`
-      <g class="detected-furniture-layer">
-        ${geo.furniture.map((item) => {
-          const points = item.points.map(([x, y]) => `${x},${y}`).join(" ");
-          return svg`<polygon points=${points} class="detected-furniture">
-            <title>Furniture outline from the robot's map</title>
-          </polygon>`;
-        })}
-      </g>
     `;
   }
 
@@ -1230,6 +1268,9 @@ export class VacuumCardAdv extends LitElement {
     .drive-right { grid-area: 2 / 3; }
     .drive-down { grid-area: 3 / 2; }
     .schedule-section { display: flex; flex-direction: column; gap: 6px; }
+    .schedule-section .schedule-toggle { padding: 0; }
+    .schedule-content { display: flex; flex-direction: column; gap: 6px; }
+    .schedule-dnd { margin-left: auto; color: var(--warning-color); font-size: 0.78em; }
     .schedule-row { display: flex; align-items: center; gap: 4px; }
     .schedule-info { display: flex; flex: 1; flex-direction: column; min-width: 0; font-size: 0.82em; }
     .schedule-info span { color: var(--secondary-text-color); overflow-wrap: anywhere; }
@@ -1266,13 +1307,6 @@ export class VacuumCardAdv extends LitElement {
     }
     .room-shape.selected {
       filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.45));
-    }
-    .detected-furniture {
-      fill: rgba(255, 255, 255, 0.12);
-      stroke: rgba(255, 255, 255, 0.9);
-      stroke-width: 2;
-      stroke-dasharray: 5 3;
-      pointer-events: none;
     }
     .badge-circle {
       fill: var(--vc-accent);

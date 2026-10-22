@@ -156,11 +156,11 @@ export function discoverEntities(
       continue;
     }
     const name = friendlyName(hass, id).toLowerCase();
-    // "remaining" catches consumables (brush/filter/... time left);
-    // "carpet" catches TapoVac-ADV v2.0.0's Carpet Clean Preference — both
-    // are settings/upkeep info, not core cleaning status, so they belong
-    // in the collapsible Maintenance section rather than the main list.
-    if (name.includes("remaining") || name.includes("carpet")) result.maintenanceSensors.push(id);
+    // Consumable lifetime/usage counters (brush/filter hours remaining or
+    // used) and carpet preferences are upkeep details, not cleaning status.
+    if (name.includes("remaining") || name.includes("used") || name.includes("consumable") || name.includes("carpet")) {
+      result.maintenanceSensors.push(id);
+    }
     // Left out of the *default* list, not hidden entirely: a raw
     // schedules count isn't useful at a glance, and status is already
     // shown in the card's own header — both can still be added back via
