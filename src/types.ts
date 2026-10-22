@@ -161,10 +161,20 @@ export interface RoomGeometryRoom {
 }
 
 export interface TapoMapGeometry {
+  map_id?: number | string | null;
+  map_name?: string;
+  image_size?: [number, number];
   grid_size: [number, number];
   scale_px_per_cell: number;
   resolution_mm?: number | null;
   real_origin_mm: [number, number];
+  dock_px?: [number, number] | null;
+  furniture?: Array<{
+    id: number;
+    type: number;
+    angle: number;
+    px: [number, number][];
+  }>;
 }
 
 // One furniture item the vacuum itself detected on its map (getMapData's

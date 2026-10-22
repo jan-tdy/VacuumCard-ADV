@@ -30,8 +30,8 @@ code editor" toggle.
 - **Furniture on the map** — place beds, sofas, tables, chairs, desks,
   toilets, and more directly on the map from the card's own editor: drag
   to move, a top handle to rotate, a corner handle to resize (see
-  [Furniture placement](#furniture-placement) below); device-detected
-  furniture outlines from TapoVac-ADV are also shown on the live map
+  [Furniture placement](#furniture-placement) below); robot-reported
+  furniture is drawn directly into the TapoVac-ADV map image
 - A **room calibration tool** in the visual editor: click points on the
   map to trace a room's actual outline when the automatic rectangle
   doesn't fit an irregular/L-shaped room
@@ -156,7 +156,7 @@ drop it in the middle of the map, then:
 
 Furniture is stored in the same pixel space as calibrated room polygons, so
 it holds its position and size across map refreshes. Toggle `show_furniture`
-off to hide it on the live card without deleting it, or use the **Furniture
+off to hide card-placed pieces without deleting them, or use the **Furniture
 opacity** slider in the editor (`furniture_opacity`, 0-100) to make it more
 or less prominent against the map instead of hiding it outright. **Furniture
 color** (`furniture_color`) picks between a brown/wood-toned palette
@@ -220,8 +220,8 @@ live map image already includes the robot-reported cleaning path; the card's
 optional show_trace remains a separate, coarse trail sampled from position
 updates.
 
-The **Robot schedules** section uses the integration's schedules sensor and
-schedule services. It supports adding and editing the time and repeat days,
+The collapsed **Schedules** control uses the integration's schedules sensor
+and schedule services. Expand it to add and edit the time and repeat days,
 enabling or disabling schedules, running a schedule immediately, and
 removing it. The integration enforces the robot's Do Not Disturb window and
 returns an error if an enabled schedule would be ignored by the robot.
