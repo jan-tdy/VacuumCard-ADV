@@ -18,7 +18,7 @@ import {
   discoverEntities,
   DiscoveredEntities,
 } from "./utils/hass-entities";
-import { currentMapKey, displayToNatural, resolveRoomAtPoint, scopedRoomPolygons } from "./utils/geometry";
+import { currentMapKey, displayToNatural, resolveRoomAtPoint, resolveRoomGeometry, scopedRoomPolygons } from "./utils/geometry";
 import { furnitureGlyph, getFurniturePalette } from "./utils/furniture";
 import { renderSelectField } from "./utils/ha-form";
 import {
@@ -269,55 +269,10 @@ export class VacuumCardAdv extends LitElement {
   }
 
   private get _roomGeometry(): RoomGeometry | undefined {
-    const cameraId = this._config.camera ?? this._discovered.camera;
-    if (!cameraId) return undefined;
-    const state = this.hass.states[cameraId];
-    const raw = state?.attributes?.["room_geometry"] as RoomGeometry | RoomGeometryRoom[] | undefined;
-    if (raw && !Array.isArray(raw) && raw.rooms) return raw;
-    if (!Array.isArray(raw) || raw.length === 0) return undefined;
-
-    // TapoVac-ADV publishes room_geometry as a room list and puts the image
-    // dimensions/map furniture in map_geometry. Normalize that public shape
-    // to the card's geometry model so map taps and overlays use the same
-    // natural-image pixel coordinates as the camera image.
-    const map = state?.attributes?.["map_geometry"] as TapoMapGeometry | undefined;
-    const [image_width, image_height] = map?.image_size ?? [0, 0];
-    if (!image_width || !image_height || !map) return undefined;
-    const rooms = raw.map((entry) => {
-      const item = entry as RoomGeometryRoom & { centre?: [number, number] };
-      const [x0, y0, x1, y1] = item.bbox;
-      return {
-        id: item.id,
-        name: item.name,
-        color: item.color ?? ([74, 144, 226] as [number, number, number]),
-        cx: item.cx ?? item.centre?.[0] ?? (x0 + x1) / 2,
-        cy: item.cy ?? item.centre?.[1] ?? (y0 + y1) / 2,
-        bbox: item.bbox,
-        last_cleaned: (item as RoomGeometryRoom & { last_cleaned?: number }).last_cleaned,
-        coverage: (item as RoomGeometryRoom & { coverage?: number }).coverage,
-      };
-    });
-    const furniture = (map.furniture ?? []).map((item) => {
-      const xs = item.px.map(([x]) => x);
-      const ys = item.px.map(([, y]) => y);
-      return {
-        id: item.id,
-        type: item.type,
-        angle: item.angle,
-        points: item.px,
-        bbox: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] as [number, number, number, number],
-      };
-    });
-    return {
-      image_width,
-      image_height,
-      rooms,
-      charge_point: map.dock_px ?? null,
-      vacuum_point: null,
-      map_id: map.map_id ?? undefined,
-      map_name: map.map_name,
-      furniture,
-    };
+    // Shared with the editor (utils/geometry.ts's resolveRoomGeometry) —
+    // normalizes both the old object shape and TapoVac-ADV v3.0.0+'s
+    // list + map_geometry shape.
+    return resolveRoomGeometry(this.hass, this._config.camera ?? this._discovered.camera);
   }
 
   /** Every entity on this device gets "<Device Name> <Thing>" as its

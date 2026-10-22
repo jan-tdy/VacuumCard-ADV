@@ -1,4 +1,76 @@
-import { RoomGeometry, RoomPolygon } from "../types";
+import {
+  HomeAssistant,
+  RoomGeometry,
+  RoomGeometryRoom,
+  RoomPolygon,
+  TapoMapGeometry,
+} from "../types";
+
+/** Resolve the map camera's room geometry from its state attributes,
+ *  accepting both shapes TapoVac-ADV has shipped:
+ *  - older versions exposed `room_geometry` as one whole RoomGeometry
+ *    object (rooms + image size together);
+ *  - v3.0.0+ publishes `room_geometry` as a bare room list and moves the
+ *    image size/dock/furniture into a separate `map_geometry` attribute,
+ *    so the list is normalized back into the card's RoomGeometry model
+ *    here (image dimensions come from map_geometry.image_size, per-room
+ *    centre from `centre`, default room color from the fallback below).
+ *  Returns undefined when the camera entity is missing, the attribute
+ *  isn't populated yet, or the map image size is unknown.
+ *
+ *  Shared by the live card AND the editor: the editor used to read
+ *  `room_geometry.rooms` directly, which is undefined on the v3.0.0+
+ *  list shape — breaking room calibration and furniture placement with
+ *  a permanent "Map not available yet" hint (v3.0.3 fixes that). */
+export function resolveRoomGeometry(
+  hass: HomeAssistant,
+  cameraId: string | undefined
+): RoomGeometry | undefined {
+  if (!cameraId) return undefined;
+  const state = hass.states[cameraId];
+  const raw = state?.attributes?.["room_geometry"] as RoomGeometry | RoomGeometryRoom[] | undefined;
+  if (raw && !Array.isArray(raw) && raw.rooms) return raw;
+  if (!Array.isArray(raw) || raw.length === 0) return undefined;
+
+  const map = state?.attributes?.["map_geometry"] as TapoMapGeometry | undefined;
+  const [image_width, image_height] = map?.image_size ?? [0, 0];
+  if (!image_width || !image_height || !map) return undefined;
+  const rooms = raw.map((entry) => {
+    const item = entry as RoomGeometryRoom & { centre?: [number, number] };
+    const [x0, y0, x1, y1] = item.bbox;
+    return {
+      id: item.id,
+      name: item.name,
+      color: item.color ?? ([74, 144, 226] as [number, number, number]),
+      cx: item.cx ?? item.centre?.[0] ?? (x0 + x1) / 2,
+      cy: item.cy ?? item.centre?.[1] ?? (y0 + y1) / 2,
+      bbox: item.bbox,
+      last_cleaned: (item as RoomGeometryRoom & { last_cleaned?: number }).last_cleaned,
+      coverage: (item as RoomGeometryRoom & { coverage?: number }).coverage,
+    };
+  });
+  const furniture = (map.furniture ?? []).map((item) => {
+    const xs = item.px.map(([x]) => x);
+    const ys = item.px.map(([, y]) => y);
+    return {
+      id: item.id,
+      type: item.type,
+      angle: item.angle,
+      points: item.px,
+      bbox: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] as [number, number, number, number],
+    };
+  });
+  return {
+    image_width,
+    image_height,
+    rooms,
+    charge_point: map.dock_px ?? null,
+    vacuum_point: null,
+    map_id: map.map_id ?? undefined,
+    map_name: map.map_name,
+    furniture,
+  };
+}
 
 export interface Point {
   x: number;
