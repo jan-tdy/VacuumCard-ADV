@@ -1059,7 +1059,15 @@ export class VacuumCardAdv extends LitElement {
   private _renderSensors(): TemplateResult | typeof nothing {
     const ids = this._config.sensors ?? this._discovered.sensors;
     if (!ids || ids.length === 0) return nothing;
-    return html`<div class="section sensors">${ids.map((id) => this._renderSensorRow(id))}</div>`;
+    // v3.0.2: an entity that also appears under Maintenance (e.g. a
+    // hand-written `sensors:` list including "Clean Time Remaining", which
+    // auto-discovery classifies as a maintenance sensor) renders only
+    // under Maintenance — the maintenance list wins so no row is ever
+    // duplicated on the card.
+    const maintenanceIds = new Set(this._config.maintenance_sensors ?? this._discovered.maintenanceSensors);
+    const visible = ids.filter((id) => !maintenanceIds.has(id));
+    if (visible.length === 0) return nothing;
+    return html`<div class="section sensors">${visible.map((id) => this._renderSensorRow(id))}</div>`;
   }
 
   private _renderSensorRow(id: string): TemplateResult | typeof nothing {
@@ -1085,7 +1093,10 @@ export class VacuumCardAdv extends LitElement {
   }
 
   private _renderMaintenance(): TemplateResult | typeof nothing {
-    const ids = this._config.maintenance_sensors ?? this._discovered.maintenanceSensors;
+    // Deduplicated (a hand-written maintenance_sensors list can repeat an
+    // id) and rendered as-is — this list is the single owner of lifetime/
+    // wear stats since v3.0.2, see _renderSensors().
+    const ids = [...new Set(this._config.maintenance_sensors ?? this._discovered.maintenanceSensors)];
     if (!ids || ids.length === 0) return nothing;
     return html`
       <div class="section">

@@ -57,7 +57,10 @@ code editor" toggle.
   Hair) — shown only for the actions your specific dock actually has
 - Fan speed and water level selectors
 - Battery
-- Sensors, with a collapsible maintenance section (brush/filter/etc. wear)
+- Sensors, with a collapsible maintenance section — since v3.0.2 it also
+  holds the lifetime stats (Total Cleans, Total Cleaning Time, Total Area
+  Cleaned, Clean Time Remaining, …), which no longer duplicate the main
+  sensor list
 - "Last updated" time in the header — the freshest of the battery,
   mop-status and sensor entities' own update times, so you can spot a
   vacuum whose data has gone stale (e.g. Wi-Fi dropped)
