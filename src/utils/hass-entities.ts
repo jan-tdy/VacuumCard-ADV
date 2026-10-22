@@ -158,7 +158,14 @@ export function discoverEntities(
     const name = friendlyName(hass, id).toLowerCase();
     // Consumable lifetime/usage counters (brush/filter hours remaining or
     // used) and carpet preferences are upkeep details, not cleaning status.
-    if (name.includes("remaining") || name.includes("used") || name.includes("consumable") || name.includes("carpet")) {
+    // Lifetime totals (Total Cleans, Total Cleaning Time, Total Area
+    // Cleaned) and clean-time history are upkeep/history stats too — as of
+    // v3.0.2 they live in the Maintenance dropdown only, not the main
+    // sensor list, so the card's default view stays about live status.
+    if (
+      name.includes("remaining") || name.includes("used") || name.includes("consumable") || name.includes("carpet") ||
+      name.includes("total") || name.includes("area cleaned") || name.includes("clean time")
+    ) {
       result.maintenanceSensors.push(id);
     }
     // Left out of the *default* list, not hidden entirely: a raw
