@@ -1,4 +1,4 @@
-export const CARD_VERSION = "2.4.1";
+export const CARD_VERSION = "3.0.1";
 
 
 // Dock action buttons — friendly names exactly as TapoVac-ADV's button.py
