@@ -88,6 +88,7 @@ export class VacuumCardAdv extends LitElement {
   @query("img.map-image") private _mapImg?: HTMLImageElement;
 
   private _lastDiscoveredFor?: string;
+  private _lastDiscoveredRegistrySize?: number;
   private _lastVacuumStateForTrace?: string;
   // Tracks which Dreame map _selectedDreameSegmentIds was picked on (see
   // willUpdate()) — a plain string, not a boolean, so the very first
@@ -179,9 +180,19 @@ export class VacuumCardAdv extends LitElement {
       // from the previous brand would linger in _discovered.
       const brand = this._brand;
       const discoveryKey = `${this._config.vacuum}|${brand}`;
-      if (this._lastDiscoveredFor !== discoveryKey) {
+      // The entity registry may be populated after the card's first hass
+      // update, or gain entities when an integration reloads. Retry discovery
+      // when its size changes so an initial empty result doesn't stay cached.
+      const registrySize = Object.keys(
+        (this.hass as unknown as { entities?: Record<string, unknown> }).entities ?? {}
+      ).length;
+      if (
+        this._lastDiscoveredFor !== discoveryKey ||
+        this._lastDiscoveredRegistrySize !== registrySize
+      ) {
         this._discovered = discoverEntities(this.hass, this._config.vacuum, brand);
         this._lastDiscoveredFor = discoveryKey;
+        this._lastDiscoveredRegistrySize = registrySize;
       }
 
       // Same idea for Dreame's room-chip selection: a stale segment id
