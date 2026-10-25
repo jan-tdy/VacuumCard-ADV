@@ -16,6 +16,7 @@ import {
   detectVacuumBrand,
   discoverDreameRooms,
   discoverEntities,
+  getDeviceEntityIds,
   DiscoveredEntities,
 } from "./utils/hass-entities";
 import { currentMapKey, displayToNatural, resolveRoomAtPoint, resolveRoomGeometry, scopedRoomPolygons } from "./utils/geometry";
@@ -88,7 +89,7 @@ export class VacuumCardAdv extends LitElement {
   @query("img.map-image") private _mapImg?: HTMLImageElement;
 
   private _lastDiscoveredFor?: string;
-  private _lastDiscoveredRegistrySize?: number;
+  private _lastDiscoveredEntityIds?: string;
   private _lastVacuumStateForTrace?: string;
   // Tracks which Dreame map _selectedDreameSegmentIds was picked on (see
   // willUpdate()) — a plain string, not a boolean, so the very first
@@ -181,18 +182,16 @@ export class VacuumCardAdv extends LitElement {
       const brand = this._brand;
       const discoveryKey = `${this._config.vacuum}|${brand}`;
       // The entity registry may be populated after the card's first hass
-      // update, or gain entities when an integration reloads. Retry discovery
-      // when its size changes so an initial empty result doesn't stay cached.
-      const registrySize = Object.keys(
-        (this.hass as unknown as { entities?: Record<string, unknown> }).entities ?? {}
-      ).length;
+      // update, or change after an integration reload or entity rename. Track
+      // this vacuum's actual registry IDs so same-size replacements are seen.
+      const discoveryEntityIds = getDeviceEntityIds(this.hass, this._config.vacuum).sort().join("|");
       if (
         this._lastDiscoveredFor !== discoveryKey ||
-        this._lastDiscoveredRegistrySize !== registrySize
+        this._lastDiscoveredEntityIds !== discoveryEntityIds
       ) {
         this._discovered = discoverEntities(this.hass, this._config.vacuum, brand);
         this._lastDiscoveredFor = discoveryKey;
-        this._lastDiscoveredRegistrySize = registrySize;
+        this._lastDiscoveredEntityIds = discoveryEntityIds;
       }
 
       // Same idea for Dreame's room-chip selection: a stale segment id
