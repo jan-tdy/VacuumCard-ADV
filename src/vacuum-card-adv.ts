@@ -985,7 +985,7 @@ export class VacuumCardAdv extends LitElement {
   }
 
   private _batteryIcon(value: number): string {
-    if (Number.isNaN(value)) return "mdi:battery-unknown";
+    if (!Number.isFinite(value)) return "mdi:battery-unknown";
     const step = Math.round(value / 10) * 10;
     if (step >= 100) return "mdi:battery";
     if (step <= 0) return "mdi:battery-outline";
@@ -993,7 +993,7 @@ export class VacuumCardAdv extends LitElement {
   }
 
   private _batteryColor(value: number): string {
-    if (Number.isNaN(value)) return "var(--disabled-text-color)";
+    if (!Number.isFinite(value)) return "var(--disabled-text-color)";
     if (value <= 20) return "var(--error-color)";
     if (value <= 50) return "var(--warning-color)";
     return "var(--success-color)";
