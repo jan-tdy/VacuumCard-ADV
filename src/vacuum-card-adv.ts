@@ -88,6 +88,7 @@ export class VacuumCardAdv extends LitElement {
   @query("img.map-image") private _mapImg?: HTMLImageElement;
 
   private _lastDiscoveredFor?: string;
+  private _freshnessTimer?: ReturnType<typeof setInterval>;
   private _lastVacuumStateForTrace?: string;
   // Tracks which Dreame map _selectedDreameSegmentIds was picked on (see
   // willUpdate()) — a plain string, not a boolean, so the very first
@@ -100,6 +101,17 @@ export class VacuumCardAdv extends LitElement {
   // until room_geometry is first seen so the initial update never clears a
   // selection that was just set.
   private _lastRoomMapKeyFor?: string;
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this._freshnessTimer = setInterval(() => this.requestUpdate(), 30_000);
+  }
+
+  disconnectedCallback(): void {
+    if (this._freshnessTimer !== undefined) clearInterval(this._freshnessTimer);
+    this._freshnessTimer = undefined;
+    super.disconnectedCallback();
+  }
 
   public static getConfigElement(): HTMLElement {
     return document.createElement("vacuum-card-adv-editor");
@@ -845,15 +857,15 @@ export class VacuumCardAdv extends LitElement {
   private async _cleanSelectedRooms(): Promise<void> {
     const geo = this._roomGeometry;
     if (!geo || this._selectedRoomIds.size === 0) return;
-    const names = [...this._selectedRoomIds]
-      .map((id) => geo.rooms.find((r) => r.id === id)?.name)
-      .filter((n): n is string => !!n);
-    if (names.length === 0) return;
+    const roomIds = [...this._selectedRoomIds].filter((id) => geo.rooms.some((room) => room.id === id));
+    if (roomIds.length === 0) return;
+    const mapId = geo.map_id == null ? undefined : Number(geo.map_id);
     this._busy = true;
     try {
       await this.hass.callService("tapo_rv30", "clean_rooms", {
         entity_id: this._config.vacuum,
-        rooms: names,
+        room_ids: roomIds,
+        ...(mapId !== undefined && Number.isInteger(mapId) ? { map_id: mapId } : {}),
       });
       this._selectedRoomIds = new Set();
     } catch (err) {
@@ -957,13 +969,14 @@ export class VacuumCardAdv extends LitElement {
     const battery = this.hass.states[batteryId];
     if (!battery) return nothing;
     const value = Number(battery.state);
+    const hasNumericValue = battery.state.trim() !== "" && Number.isFinite(value);
     return html`
       <div class="section sensors">
         ${this._renderRow({
           icon: this._batteryIcon(value),
           title: this._shortTitle((battery.attributes["friendly_name"] as string) ?? "Battery"),
-          value: `${battery.state}%`,
-          percent: value,
+          value: hasNumericValue ? `${value}%` : battery.state,
+          percent: hasNumericValue ? value : undefined,
           gaugeColor: this._batteryColor(value),
           entityId: batteryId,
         })}
