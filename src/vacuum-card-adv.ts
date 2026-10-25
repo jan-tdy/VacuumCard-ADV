@@ -16,6 +16,7 @@ import {
   detectVacuumBrand,
   discoverDreameRooms,
   discoverEntities,
+  getDeviceEntityIds,
   DiscoveredEntities,
 } from "./utils/hass-entities";
 import { currentMapKey, displayToNatural, resolveRoomAtPoint, resolveRoomGeometry, scopedRoomPolygons } from "./utils/geometry";
@@ -89,6 +90,7 @@ export class VacuumCardAdv extends LitElement {
 
   private _lastDiscoveredFor?: string;
   private _freshnessTimer?: ReturnType<typeof setInterval>;
+  private _lastDiscoveredEntityIds?: string;
   private _lastVacuumStateForTrace?: string;
   // Tracks which Dreame map _selectedDreameSegmentIds was picked on (see
   // willUpdate()) — a plain string, not a boolean, so the very first
@@ -191,9 +193,17 @@ export class VacuumCardAdv extends LitElement {
       // from the previous brand would linger in _discovered.
       const brand = this._brand;
       const discoveryKey = `${this._config.vacuum}|${brand}`;
-      if (this._lastDiscoveredFor !== discoveryKey) {
+      // The entity registry may be populated after the card's first hass
+      // update, or change after an integration reload or entity rename. Track
+      // this vacuum's actual registry IDs so same-size replacements are seen.
+      const discoveryEntityIds = getDeviceEntityIds(this.hass, this._config.vacuum).sort().join("|");
+      if (
+        this._lastDiscoveredFor !== discoveryKey ||
+        this._lastDiscoveredEntityIds !== discoveryEntityIds
+      ) {
         this._discovered = discoverEntities(this.hass, this._config.vacuum, brand);
         this._lastDiscoveredFor = discoveryKey;
+        this._lastDiscoveredEntityIds = discoveryEntityIds;
       }
 
       // Same idea for Dreame's room-chip selection: a stale segment id
