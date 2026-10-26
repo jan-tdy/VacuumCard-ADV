@@ -187,6 +187,7 @@ export class VacuumCardAdvEditor extends LitElement {
       ["show_dock_actions", "Show dock action buttons (empty bin / wash / dry / hair)"],
       ["show_fan_speed", "Show fan speed selector"],
       ["show_water_level", "Show water level selector"],
+      ["show_clean_passes", "Show clean passes selector"],
       ["show_battery", "Show battery"],
       ["show_mop_status", "Show mop attached status"],
       ["show_sensors", "Show sensors"],
