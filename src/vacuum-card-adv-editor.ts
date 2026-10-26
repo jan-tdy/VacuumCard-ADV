@@ -274,6 +274,14 @@ export class VacuumCardAdvEditor extends LitElement {
         ></ha-entity-picker>
         <ha-entity-picker
           .hass=${this.hass}
+          .value=${this._config.clean_passes_entity ?? ""}
+          .includeDomains=${["select"]}
+          label="Clean passes select"
+          @value-changed=${(e: CustomEvent) =>
+            this._valueChanged("clean_passes_entity", e.detail.value || undefined)}
+        ></ha-entity-picker>
+        <ha-entity-picker
+          .hass=${this.hass}
           .value=${this._config.battery_entity ?? ""}
           .includeDomains=${["sensor"]}
           label="Battery sensor"
