@@ -34,6 +34,13 @@ export interface LovelaceCardConfig {
 // _render_map_image() for why that space was chosen.
 export type RoomPolygon = [number, number][];
 
+export interface RoomPreset {
+  name: string;
+  rooms: number[];
+  // Must match currentMapKey(room_geometry), e.g. "map:123".
+  map: string;
+}
+
 // -- Furniture placed on the map (this card's own overlay — see
 // TapoVac-ADV's README "Missing Furniture" section for why furniture
 // placed in the Tapo app itself can't be read back into Home Assistant) --
@@ -96,6 +103,7 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   last_clean_image?: string;
   fan_speed_entity?: string;
   water_level_entity?: string;
+  clean_passes_entity?: string;
   battery_entity?: string;
   mop_attached_entity?: string;
   sensors?: string[];
@@ -121,6 +129,7 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   show_dock_actions?: boolean;
   show_fan_speed?: boolean;
   show_water_level?: boolean;
+  show_clean_passes?: boolean;
   show_battery?: boolean;
   show_sensors?: boolean;
   show_mop_status?: boolean;
@@ -138,6 +147,8 @@ export interface VacuumCardConfig extends LovelaceCardConfig {
   // still read as a fallback so calibration saved before floors were
   // distinguished keeps working.
   room_polygons?: Record<string, RoomPolygon>;
+  // Room IDs in click order, scoped to currentMapKey(room_geometry).
+  room_presets?: RoomPreset[];
   // Furniture placed on the map via this card's own editor — see
   // FurnitureItem above.
   furniture?: FurnitureItem[];
