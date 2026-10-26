@@ -100,9 +100,9 @@ up.
 
 ## Configuration
 
-Everything below is editable through the card's own UI editor (entity
-picker, toggles, rotation field, calibration tool) — this is just the
-YAML it produces, for reference or hand-editing:
+Most settings are editable through the card's own UI editor (entity picker,
+toggles, rotation field, calibration tool). Room presets are configured in YAML
+with the current map key, as shown here:
 
 ```yaml
 type: custom:vacuum-card-adv
@@ -112,6 +112,7 @@ vacuum: vacuum.jedalen_rv30_max
 vacuum_brand: tapo       # "tapo" or "dreame" — auto-detected when omitted
 camera: camera.jedalen_rv30_max_map
 water_level_entity: select.jedalen_rv30_max_water_level
+clean_passes_entity: select.jedalen_rv30_max_clean_passes
 battery_entity: sensor.jedalen_rv30_max_battery
 mop_attached_entity: binary_sensor.jedalen_rv30_max_mop_attached
 map_rotation: 180
@@ -125,6 +126,7 @@ show_controls: true
 show_dock_actions: true
 show_fan_speed: true
 show_water_level: true
+show_clean_passes: true
 show_battery: true
 show_mop_status: true
 show_sensors: true
@@ -136,6 +138,10 @@ show_trace: false        # experimental: live trail behind the vacuum while clea
 sensors: []              # override the auto-detected sensor list
 maintenance_sensors: []  # override which sensors show under "Maintenance"
 room_polygons: {}        # written by the editor's calibration tool
+room_presets:
+  - name: Kitchen + Hall
+    map: "map:123"        # currentMapKey(room_geometry); use your map's map_id
+    rooms: [1, 3]          # order becomes the numbered clean order
 furniture: []            # written by the editor's furniture placement tool
 ```
 

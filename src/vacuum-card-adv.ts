@@ -9,6 +9,7 @@ import {
   RoomGeometry,
   RoomGeometryRoom,
   RoomPolygon,
+  RoomPreset,
   TapoMapGeometry,
 } from "./types";
 import {
@@ -322,6 +323,7 @@ export class VacuumCardAdv extends LitElement {
       this._config.mop_attached_entity ?? this._discovered.mopAttached,
       this._config.camera ?? this._discovered.camera,
       this._config.water_level_entity ?? this._discovered.waterLevel,
+      this._config.clean_passes_entity ?? this._discovered.cleanPasses,
       ...(this._config.sensors ?? this._discovered.sensors),
     ].filter((id): id is string => !!id);
 
@@ -620,6 +622,7 @@ export class VacuumCardAdv extends LitElement {
           : nothing}
         ${this._showLastCleanMap ? html`<div class="map-hint">Map from the most recent completed cleaning run.</div>` : nothing}
         ${dreameRooms.length > 0 && !this._showLastCleanMap ? this._renderDreameRoomChips(dreameRooms) : nothing}
+        ${geo && !this._showLastCleanMap ? this._renderRoomPresetChips(geo) : nothing}
         ${this._selectedRoomIds.size > 0 ? this._renderSelectedRoomsBar(geo) : nothing}
         ${this._selectedDreameSegmentIds.size > 0 ? this._renderSelectedDreameRoomsBar(dreameRooms) : nothing}
       </div>
@@ -808,6 +811,26 @@ export class VacuumCardAdv extends LitElement {
     `;
   }
 
+  private _renderRoomPresetChips(geo: RoomGeometry): TemplateResult | typeof nothing {
+    const mapKey = currentMapKey(geo);
+    const presets = (this._config.room_presets ?? []).filter((preset) => preset.map === mapKey);
+    if (presets.length === 0) return nothing;
+    return html`
+      <div class="room-presets" aria-label="Saved room presets">
+        ${presets.map((preset) => html`
+          <button class="chip" @click=${() => this._selectRoomPreset(preset, geo)}>
+            <ha-icon icon="mdi:bookmark"></ha-icon><span>${preset.name}</span>
+          </button>
+        `)}
+      </div>
+    `;
+  }
+
+  private _selectRoomPreset(preset: RoomPreset, geo: RoomGeometry): void {
+    const available = new Set(geo.rooms.map((room) => room.id));
+    this._selectedRoomIds = new Set(preset.rooms.filter((id) => available.has(id)));
+  }
+
   private _renderSelectedRoomsBar(geo?: RoomGeometry): TemplateResult {
     const names = [...this._selectedRoomIds]
       .map((id, i) => {
@@ -907,12 +930,16 @@ export class VacuumCardAdv extends LitElement {
     const vacuum = this.hass.states[this._config.vacuum];
     const showFan = this._config.show_fan_speed ?? true;
     const showWater = this._config.show_water_level ?? true;
+    const showCleanPasses = this._config.show_clean_passes ?? true;
     const fanSpeedList = (vacuum.attributes["fan_speed_list"] as string[] | undefined) ?? [];
     const fanSpeed = vacuum.attributes["fan_speed"] as string | undefined;
     const waterEntityId = this._config.water_level_entity ?? this._discovered.waterLevel;
     const waterEntity = waterEntityId ? this.hass.states[waterEntityId] : undefined;
+    const cleanPassesEntityId = this._config.clean_passes_entity ?? this._discovered.cleanPasses;
+    const cleanPassesEntity = cleanPassesEntityId ? this.hass.states[cleanPassesEntityId] : undefined;
 
-    if (!(showFan && fanSpeedList.length > 0) && !(showWater && waterEntity)) return nothing;
+    if (!(showFan && fanSpeedList.length > 0) && !(showWater && waterEntity)
+      && !(showCleanPasses && cleanPassesEntity)) return nothing;
 
     return html`
       <div class="section selects">
@@ -944,6 +971,21 @@ export class VacuumCardAdv extends LitElement {
               (next) => {
                 if (next === waterEntity.state) return;
                 this._selectOption(waterEntityId as string, next);
+              }
+            )
+          : nothing}
+        ${showCleanPasses && cleanPassesEntity
+          ? renderSelectField(
+              this.hass,
+              "Clean passes",
+              cleanPassesEntity.state,
+              ((cleanPassesEntity.attributes["options"] as string[] | undefined) ?? []).map((opt) => ({
+                value: opt,
+                label: opt,
+              })),
+              (next) => {
+                if (next === cleanPassesEntity.state) return;
+                this._selectOption(cleanPassesEntityId as string, next);
               }
             )
           : nothing}
@@ -1354,6 +1396,7 @@ export class VacuumCardAdv extends LitElement {
     }
 
     /* Dreame's room chip list — see _renderDreameRoomChips(). */
+    .room-presets,
     .dreame-rooms {
       display: flex;
       flex-wrap: wrap;
@@ -1374,6 +1417,7 @@ export class VacuumCardAdv extends LitElement {
       cursor: pointer;
       transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
     }
+    .room-presets { margin-top: 8px; }
     .chip ha-icon {
       --mdc-icon-size: 16px;
     }
